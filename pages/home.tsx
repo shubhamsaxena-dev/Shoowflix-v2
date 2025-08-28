@@ -1,274 +1,163 @@
 import { useState } from "react";
-import { Link } from "wouter";
-import { Filter, User } from "lucide-react";
+import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import SearchBar from "@/components/search-bar";
-import HeroSection from "@/components/hero-section";
-import MovieSection from "@/components/movie-section";
-import FilterPanel from "@/components/filter-panel";
-import VideoPlayer from "@/components/video-player";
-import MoviesList from "@/components/movies-list";
-import SearchOverlay from "@/components/search-overlay";
+import { InfiniteScrollMovies } from "@/components/infinite-scroll-movies";
 import { 
   useTrendingMovies, 
   useActionMovies, 
   useHighRatedMovies, 
-  useRecentMovies,
-  useMovies,
-  generateMagnetLink
+  useRecentMovies
 } from "@/hooks/use-movies";
 import type { YTSMovie, Torrent } from "@shared/schema";
 import type { MovieFilters } from "@/lib/types";
 
-const genres = [
-  'Sci-Fi',
-  'Comedy',
-  'Adventure',
-  'Crime',
-  'Fantasy',
-  'Mystery',
-  'Drama',
-  'Horror',
-  'Romance',
-  'War',
-  'Thriller',
-  'Animation'
-];
-
 export default function Home() {
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchFilters, setSearchFilters] = useState<MovieFilters>({});
   const [showFilters, setShowFilters] = useState(false);
-  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
-  const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
-  const [magnetLink, setMagnetLink] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string>("trending");
 
-  // Data fetching
-  const { data: trendingData, isLoading: trendingLoading, error: trendingError } = useTrendingMovies();
-  const { data: actionData, isLoading: actionLoading, error: actionError } = useActionMovies();
-  const { data: highRatedData, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
-  const { data: recentData, isLoading: recentLoading, error: recentError } = useRecentMovies();
-  const { data: searchData, isLoading: searchLoading, error: searchError } = useMovies(searchFilters);
+  // Data fetching with SWR
+  const { movies: trendingMovies, isLoading: trendingLoading, error: trendingError } = useTrendingMovies();
+  const { movies: actionMovies, isLoading: actionLoading, error: actionError } = useActionMovies();
+  const { movies: highRatedMovies, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
+  const { movies: recentMovies, isLoading: recentLoading, error: recentError } = useRecentMovies();
 
   // Get featured movies for slideshow (first 5 trending movies)
-  const featuredMovies = trendingData?.data?.movies?.slice(0, 5);
+  const featuredMovies = trendingMovies?.slice(0, 5);
 
   const handleSearch = (query: string) => {
+    setSearchQuery(query);
     if (query.trim()) {
-      setShowSearchOverlay(true);
-    }
-  };
-  
-  const handleSearchClick = () => {
-    setShowSearchOverlay(true);
-  };
-
-  const handleApplyFilters = (filters: MovieFilters) => {
-    setSearchFilters(filters);
-    setShowFilters(false);
-  };
-
-  const handleMovieClick = (movie: YTSMovie) => {
-    // Navigate to movie detail page
-    window.location.href = `/movie/${movie.id}`;
-  };
-
-  const handlePlayMovie = async (movie: YTSMovie) => {
-    try {
-      if (!movie.torrents || movie.torrents.length === 0) {
-        toast({
-          title: "No streams available",
-          description: "This movie doesn't have any available torrents for streaming.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Select the best quality torrent
-      const bestTorrent = movie.torrents.find(t => t.quality === '1080p') || 
-                         movie.torrents.find(t => t.quality === '720p') || 
-                         movie.torrents[0];
-
-      setSelectedMovie(movie);
-      setSelectedTorrent(bestTorrent);
-
-      // Generate magnet link
-      const magnet = await generateMagnetLink(bestTorrent.hash, movie.title);
-      setMagnetLink(magnet);
-      setShowVideoPlayer(true);
-
-      toast({
-        title: "Starting stream",
-        description: `Loading ${movie.title} in ${bestTorrent.quality}`,
-      });
-
-    } catch (error) {
-      console.error('Error starting stream:', error);
-      toast({
-        title: "Stream failed",
-        description: "Unable to start streaming. Please try again.",
-        variant: "destructive"
-      });
+      setActiveSection("search");
+    } else {
+      setActiveSection("trending");
     }
   };
 
-  const handleCloseVideoPlayer = () => {
-    setShowVideoPlayer(false);
-    setSelectedMovie(null);
-    setSelectedTorrent(null);
-    setMagnetLink(null);
-  };
+  const sections = [
+    { id: "trending", label: "Trending", movies: trendingMovies, loading: trendingLoading },
+    { id: "action", label: "Action", movies: actionMovies, loading: actionLoading },
+    { id: "high-rated", label: "High Rated", movies: highRatedMovies, loading: highRatedLoading },
+    { id: "recent", label: "Recent", movies: recentMovies, loading: recentLoading },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-2 sm:px-4 py-3">
+      <header className="bg-black/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-8">
-              <Link href="/">
-                <h1 className="text-xl sm:text-2xl font-bold text-primary cursor-pointer" data-testid="app-logo">
-                  Shoowflix
-                </h1>
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link href="/" className="text-foreground hover:text-primary transition-colors" data-testid="nav-home">
-                  Home
-                </Link>
-                <a href="#trending" className="text-muted-foreground hover:text-primary transition-colors" data-testid="nav-movies">
-                  Movies
-                </a>
-                <a href="#genres" className="text-muted-foreground hover:text-primary transition-colors" data-testid="nav-genres">
-                  Genres
-                </a>
-                <a href="#top-rated" className="text-muted-foreground hover:text-primary transition-colors" data-testid="nav-top-rated">
-                  Top Rated
-                </a>
-              </nav>
-            </div>
+            <h1 className="text-2xl font-bold text-red-600">Shoowflix</h1>
             
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="hidden sm:block">
-                <div onClick={handleSearchClick} className="cursor-pointer">
-                  <SearchBar onSearch={handleSearch} />
-                </div>
-              </div>
-              <div className="sm:hidden">
-                <div onClick={handleSearchClick} className="cursor-pointer">
-                  <SearchBar onSearch={handleSearch} placeholder="Search..." className="w-32" />
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="p-2 hover:bg-secondary rounded-full"
-                data-testid="profile-button"
-              >
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-              </Button>
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md mx-8">
+              <input
+                type="text"
+                placeholder="Search movies..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500"
+                data-testid="input-search"
+              />
             </div>
+
+            {/* Filter Button */}
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="border-gray-700 text-white hover:bg-gray-800"
+              data-testid="button-filters"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filters
+            </Button>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <HeroSection
-        movies={featuredMovies}
-        isLoading={trendingLoading}
-        onPlay={handlePlayMovie}
-        onMoreInfo={handleMovieClick}
-      />
+      {/* Hero Section with Featured Movies */}
+      {featuredMovies && featuredMovies.length > 0 && activeSection === "trending" && (
+        <section className="relative h-96 overflow-hidden">
+          <div 
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${featuredMovies[0]?.large_cover_image})`,
+              backgroundPosition: 'center',
+            }}
+          >
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute bottom-8 left-8 z-10">
+              <h2 className="text-4xl font-bold mb-2">{featuredMovies[0]?.title}</h2>
+              <p className="text-lg text-gray-200 mb-4 max-w-2xl">
+                {featuredMovies[0]?.summary?.slice(0, 200)}...
+              </p>
+              <div className="flex gap-4">
+                <Button className="bg-red-600 hover:bg-red-700" data-testid="button-watch-now">
+                  Watch Now
+                </Button>
+                <Button variant="outline" className="border-white text-white hover:bg-white/10" data-testid="button-more-info">
+                  More Info
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* Movie Sections */}
-      <main className="py-8 space-y-12">
-        {/* Search Results */}
-        {searchFilters.query_term && (
-          <MovieSection
-            title={`Search Results for "${searchFilters.query_term}"`}
-            movies={searchData?.data?.movies}
-            isLoading={searchLoading}
-            onMovieClick={handleMovieClick}
-            error={searchError?.message}
-          />
+      {/* Navigation Tabs */}
+      <nav className="border-b border-gray-800 bg-black/20">
+        <div className="container mx-auto px-4">
+          <div className="flex space-x-8">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+                  activeSection === section.id
+                    ? "border-red-600 text-red-600"
+                    : "border-transparent text-gray-400 hover:text-white"
+                }`}
+                data-testid={`tab-${section.id}`}
+              >
+                {section.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {activeSection === "search" && searchQuery ? (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Search Results for "{searchQuery}"</h2>
+            <InfiniteScrollMovies 
+              filters={{ query_term: searchQuery, ...searchFilters }}
+            />
+          </div>
+        ) : (
+          <div>
+            {sections.map((section) => (
+              <div
+                key={section.id}
+                className={activeSection === section.id ? "block" : "hidden"}
+              >
+                <h2 className="text-2xl font-bold mb-6 capitalize">{section.label} Movies</h2>
+                <InfiniteScrollMovies 
+                  filters={
+                    section.id === "trending" ? { sort_by: 'download_count', order_by: 'desc' } :
+                    section.id === "action" ? { genre: 'action', sort_by: 'rating', order_by: 'desc' } :
+                    section.id === "high-rated" ? { minimum_rating: 8, sort_by: 'rating', order_by: 'desc' } :
+                    section.id === "recent" ? { sort_by: 'date_added', order_by: 'desc' } :
+                    {}
+                  }
+                />
+              </div>
+            ))}
+          </div>
         )}
-
-        {/* Trending Movies */}
-        <MovieSection
-          title="Trending Now"
-          movies={trendingData?.data?.movies}
-          isLoading={trendingLoading}
-          onMovieClick={handleMovieClick}
-          error={trendingError?.message}
-        />
-
-        {/* Action Movies */}
-        <MovieSection
-          title="Action Movies"
-          movies={actionData?.data?.movies}
-          isLoading={actionLoading}
-          onMovieClick={handleMovieClick}
-          error={actionError?.message}
-        />
-
-        {/* High Rated Movies */}
-        <MovieSection
-          title="Highest Rated"
-          movies={highRatedData?.data?.movies}
-          isLoading={highRatedLoading}
-          onMovieClick={handleMovieClick}
-          error={highRatedError?.message}
-        />
-
-        {/* Recent Movies */}
-        <MovieSection
-          title="Recently Added"
-          movies={recentData?.data?.movies}
-          isLoading={recentLoading}
-          onMovieClick={handleMovieClick}
-          error={recentError?.message}
-        />
-
-        {/* Genre Sections */}
-        {genres.map((genre) => {
-          return <MoviesList key={genre} genre={genre} onMovieClick={handleMovieClick} />
-        })}
       </main>
-
-      {/* Filter Toggle Button */}
-      <Button 
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-primary hover:bg-primary/90 text-primary-foreground p-3 sm:p-4 rounded-full shadow-lg z-40"
-        onClick={() => setShowFilters(true)}
-        data-testid="filter-toggle-button"
-      >
-        <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
-      </Button>
-
-      {/* Search Overlay */}
-      <SearchOverlay 
-        isOpen={showSearchOverlay}
-        onClose={() => setShowSearchOverlay(false)}
-        onMovieClick={handleMovieClick}
-      />
-      
-      {/* Filter Panel */}
-      <FilterPanel
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={searchFilters}
-      />
-
-      {/* Video Player */}
-      <VideoPlayer
-        isOpen={showVideoPlayer}
-        movie={selectedMovie}
-        selectedTorrent={selectedTorrent}
-        magnetLink={magnetLink}
-        onClose={handleCloseVideoPlayer}
-      />
     </div>
   );
 }

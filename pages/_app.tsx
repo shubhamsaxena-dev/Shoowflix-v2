@@ -1,26 +1,20 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Toaster } from '@/components/ui/toaster'
+import { SWRConfig } from 'swr'
 import type { AppProps } from 'next/app'
-import '@/index.css'
+import '../index.css'
+
+// SWR configuration
+const swrConfig = {
+  fetcher: (resource: string, init?: RequestInit) => 
+    fetch(resource, init).then(res => res.json()),
+  revalidateOnFocus: false,
+  revalidateOnReconnect: true,
+  dedupingInterval: 5 * 60 * 1000, // 5 minutes
+}
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        refetchOnWindowFocus: false,
-      },
-    },
-  }))
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Component {...pageProps} />
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <SWRConfig value={swrConfig}>
+      <Component {...pageProps} />
+    </SWRConfig>
   )
 }
