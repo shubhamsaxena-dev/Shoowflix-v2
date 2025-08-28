@@ -13,8 +13,19 @@ interface FilterPanelProps {
 }
 
 const GENRES = [
-  'action', 'comedy', 'drama', 'horror', 'thriller', 'sci-fi', 
-  'romance', 'animation', 'adventure', 'crime', 'fantasy', 'mystery'
+  'Sci-Fi',
+  'Comedy',
+  'Action',
+  'Adventure',
+  'Crime',
+  'Fantasy',
+  'Mystery',
+  'Drama',
+  'Horror',
+  'Romance',
+  'War',
+  'Thriller',
+  'Animation'
 ];
 
 const QUALITIES = ['720p', '1080p', '2160p', '3D'];
