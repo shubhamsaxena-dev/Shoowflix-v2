@@ -88,6 +88,64 @@ export function useRecentMovies() {
   });
 }
 
+// Genre-specific hooks
+export function useMoviesByGenre(genre: string) {
+  return useMovies({
+    genre: genre,
+    sort_by: 'rating',
+    order_by: 'desc',
+    limit: 20
+  });
+}
+
+export function useSciFiMovies() {
+  return useMoviesByGenre('Sci-Fi');
+}
+
+export function useComedyMovies() {
+  return useMoviesByGenre('Comedy');
+}
+
+export function useAdventureMovies() {
+  return useMoviesByGenre('Adventure');
+}
+
+export function useCrimeMovies() {
+  return useMoviesByGenre('Crime');
+}
+
+export function useFantasyMovies() {
+  return useMoviesByGenre('Fantasy');
+}
+
+export function useMysteryMovies() {
+  return useMoviesByGenre('Mystery');
+}
+
+export function useDramaMovies() {
+  return useMoviesByGenre('Drama');
+}
+
+export function useHorrorMovies() {
+  return useMoviesByGenre('Horror');
+}
+
+export function useRomanceMovies() {
+  return useMoviesByGenre('Romance');
+}
+
+export function useWarMovies() {
+  return useMoviesByGenre('War');
+}
+
+export function useThrillerMovies() {
+  return useMoviesByGenre('Thriller');
+}
+
+export function useAnimationMovies() {
+  return useMoviesByGenre('Animation');
+}
+
 export async function generateMagnetLink(hash: string, title: string): Promise<string> {
   const response = await fetch('/api/magnet', {
     method: 'POST',

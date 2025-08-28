@@ -14,7 +14,19 @@ import {
   useHighRatedMovies, 
   useRecentMovies,
   useMovies,
-  generateMagnetLink 
+  generateMagnetLink,
+  useSciFiMovies,
+  useComedyMovies,
+  useAdventureMovies,
+  useCrimeMovies,
+  useFantasyMovies,
+  useMysteryMovies,
+  useDramaMovies,
+  useHorrorMovies,
+  useRomanceMovies,
+  useWarMovies,
+  useThrillerMovies,
+  useAnimationMovies
 } from "@/hooks/use-movies";
 import type { YTSMovie, Torrent } from "@shared/schema";
 import type { MovieFilters } from "@/lib/types";
@@ -34,6 +46,20 @@ export default function Home() {
   const { data: highRatedData, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
   const { data: recentData, isLoading: recentLoading, error: recentError } = useRecentMovies();
   const { data: searchData, isLoading: searchLoading, error: searchError } = useMovies(searchFilters);
+  
+  // Genre-specific data fetching
+  const { data: sciFiData, isLoading: sciFiLoading, error: sciFiError } = useSciFiMovies();
+  const { data: comedyData, isLoading: comedyLoading, error: comedyError } = useComedyMovies();
+  const { data: adventureData, isLoading: adventureLoading, error: adventureError } = useAdventureMovies();
+  const { data: crimeData, isLoading: crimeLoading, error: crimeError } = useCrimeMovies();
+  const { data: fantasyData, isLoading: fantasyLoading, error: fantasyError } = useFantasyMovies();
+  const { data: mysteryData, isLoading: mysteryLoading, error: mysteryError } = useMysteryMovies();
+  const { data: dramaData, isLoading: dramaLoading, error: dramaError } = useDramaMovies();
+  const { data: horrorData, isLoading: horrorLoading, error: horrorError } = useHorrorMovies();
+  const { data: romanceData, isLoading: romanceLoading, error: romanceError } = useRomanceMovies();
+  const { data: warData, isLoading: warLoading, error: warError } = useWarMovies();
+  const { data: thrillerData, isLoading: thrillerLoading, error: thrillerError } = useThrillerMovies();
+  const { data: animationData, isLoading: animationLoading, error: animationError } = useAnimationMovies();
 
   // Get featured movies for slideshow (first 5 trending movies)
   const featuredMovies = trendingData?.data?.movies?.slice(0, 5);
@@ -205,6 +231,103 @@ export default function Home() {
           isLoading={recentLoading}
           onMovieClick={handleMovieClick}
           error={recentError?.message}
+        />
+
+        {/* Genre Sections */}
+        <MovieSection
+          title="Sci-Fi Movies"
+          movies={sciFiData?.data?.movies}
+          isLoading={sciFiLoading}
+          onMovieClick={handleMovieClick}
+          error={sciFiError?.message}
+        />
+
+        <MovieSection
+          title="Comedy Movies"
+          movies={comedyData?.data?.movies}
+          isLoading={comedyLoading}
+          onMovieClick={handleMovieClick}
+          error={comedyError?.message}
+        />
+
+        <MovieSection
+          title="Adventure Movies"
+          movies={adventureData?.data?.movies}
+          isLoading={adventureLoading}
+          onMovieClick={handleMovieClick}
+          error={adventureError?.message}
+        />
+
+        <MovieSection
+          title="Crime Movies"
+          movies={crimeData?.data?.movies}
+          isLoading={crimeLoading}
+          onMovieClick={handleMovieClick}
+          error={crimeError?.message}
+        />
+
+        <MovieSection
+          title="Fantasy Movies"
+          movies={fantasyData?.data?.movies}
+          isLoading={fantasyLoading}
+          onMovieClick={handleMovieClick}
+          error={fantasyError?.message}
+        />
+
+        <MovieSection
+          title="Mystery Movies"
+          movies={mysteryData?.data?.movies}
+          isLoading={mysteryLoading}
+          onMovieClick={handleMovieClick}
+          error={mysteryError?.message}
+        />
+
+        <MovieSection
+          title="Drama Movies"
+          movies={dramaData?.data?.movies}
+          isLoading={dramaLoading}
+          onMovieClick={handleMovieClick}
+          error={dramaError?.message}
+        />
+
+        <MovieSection
+          title="Horror Movies"
+          movies={horrorData?.data?.movies}
+          isLoading={horrorLoading}
+          onMovieClick={handleMovieClick}
+          error={horrorError?.message}
+        />
+
+        <MovieSection
+          title="Romance Movies"
+          movies={romanceData?.data?.movies}
+          isLoading={romanceLoading}
+          onMovieClick={handleMovieClick}
+          error={romanceError?.message}
+        />
+
+        <MovieSection
+          title="War Movies"
+          movies={warData?.data?.movies}
+          isLoading={warLoading}
+          onMovieClick={handleMovieClick}
+          error={warError?.message}
+        />
+
+        <MovieSection
+          title="Thriller Movies"
+          movies={thrillerData?.data?.movies}
+          isLoading={thrillerLoading}
+          onMovieClick={handleMovieClick}
+          error={thrillerError?.message}
+        />
+
+        <MovieSection
+          title="Animation Movies"
+          movies={animationData?.data?.movies}
+          isLoading={animationLoading}
+          onMovieClick={handleMovieClick}
+          error={animationError?.message}
         />
       </main>
 
