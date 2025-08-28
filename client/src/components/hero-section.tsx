@@ -13,36 +13,49 @@ interface HeroSectionProps {
 
 export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   const movie = movies?.[currentIndex];
 
-  // Auto-advance slideshow
+  // Auto-advance slideshow - always running
   useEffect(() => {
-    if (!isAutoPlaying || !movies || movies.length <= 1) return;
+    if (!movies || movies.length <= 1) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % movies.length);
-    }, 5000); // Change slide every 5 seconds
+      if (!isPaused) {
+        setCurrentIndex((prev) => (prev + 1) % movies.length);
+      }
+    }, 4000); // Change slide every 4 seconds
     
     return () => clearInterval(interval);
-  }, [isAutoPlaying, movies]);
+  }, [movies, isPaused]);
+
+  // Resume auto-play after user interaction
+  useEffect(() => {
+    if (isPaused) {
+      const timeout = setTimeout(() => {
+        setIsPaused(false);
+      }, 8000); // Resume after 8 seconds of inactivity
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isPaused]);
 
   const nextSlide = () => {
     if (!movies) return;
     setCurrentIndex((prev) => (prev + 1) % movies.length);
-    setIsAutoPlaying(false);
+    setIsPaused(true);
   };
 
   const prevSlide = () => {
     if (!movies) return;
     setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length);
-    setIsAutoPlaying(false);
+    setIsPaused(true);
   };
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    setIsAutoPlaying(false);
+    setIsPaused(true);
   };
   if (isLoading) {
     return (
