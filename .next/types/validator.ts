@@ -46,9 +46,9 @@ type ApiRouteConfig = {
   handler satisfies PagesPageConfig
 }
 
-// Validate ../../pages/_document.tsx
+// Validate ../../pages/genre.tsx
 {
-  const handler = {} as typeof import("../../pages/_document.js")
+  const handler = {} as typeof import("../../pages/genre.js")
   handler satisfies PagesPageConfig
 }
 
@@ -58,9 +58,21 @@ type ApiRouteConfig = {
   handler satisfies PagesPageConfig
 }
 
+// Validate ../../pages/home.tsx
+{
+  const handler = {} as typeof import("../../pages/home.js")
+  handler satisfies PagesPageConfig
+}
+
 // Validate ../../pages/index.tsx
 {
   const handler = {} as typeof import("../../pages/index.js")
+  handler satisfies PagesPageConfig
+}
+
+// Validate ../../pages/movie-detail.tsx
+{
+  const handler = {} as typeof import("../../pages/movie-detail.js")
   handler satisfies PagesPageConfig
 }
 
@@ -70,27 +82,27 @@ type ApiRouteConfig = {
   handler satisfies PagesPageConfig
 }
 
-// Validate ../../pages/api/magnet.ts
+// Validate ../../pages/not-found.tsx
 {
-  const handler = {} as typeof import("../../pages/api/magnet.js")
+  const handler = {} as typeof import("../../pages/not-found.js")
+  handler satisfies PagesPageConfig
+}
+
+// Validate ../../pages/api/movies.ts
+{
+  const handler = {} as typeof import("../../pages/api/movies.js")
   handler satisfies ApiRouteConfig
 }
 
-// Validate ../../pages/api/movies/[id]/index.ts
+// Validate ../../pages/api/routes.ts
 {
-  const handler = {} as typeof import("../../pages/api/movies/[id]/index.js")
+  const handler = {} as typeof import("../../pages/api/routes.js")
   handler satisfies ApiRouteConfig
 }
 
-// Validate ../../pages/api/movies/[id]/suggestions.ts
+// Validate ../../pages/api/storage.ts
 {
-  const handler = {} as typeof import("../../pages/api/movies/[id]/suggestions.js")
-  handler satisfies ApiRouteConfig
-}
-
-// Validate ../../pages/api/movies/index.ts
-{
-  const handler = {} as typeof import("../../pages/api/movies/index.js")
+  const handler = {} as typeof import("../../pages/api/storage.js")
   handler satisfies ApiRouteConfig
 }
 
