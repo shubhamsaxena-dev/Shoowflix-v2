@@ -53,7 +53,7 @@ export default function MovieSection({
         )}
       </div>
       
-      <div className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hidden pb-4">
+      <div className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hidden movie-scroll pb-4">
         {isLoading ? (
           // Loading skeleton
           Array.from({ length: 6 }).map((_, index) => (

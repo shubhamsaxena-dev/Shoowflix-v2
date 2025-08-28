@@ -1,8 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Info, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
 import type { YTSMovie } from "@shared/schema";
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 interface HeroSectionProps {
   movies: YTSMovie[] | undefined;
@@ -13,67 +22,20 @@ interface HeroSectionProps {
 
 export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const swiperRef = useRef<SwiperType>();
 
   const movie = movies?.[currentIndex];
 
-  // Auto-advance slideshow - always running
-  useEffect(() => {
-    if (!movies || movies.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      if (!isPaused) {
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setCurrentIndex((prev) => (prev + 1) % movies.length);
-          setIsTransitioning(false);
-        }, 150);
-      }
-    }, 4000); // Change slide every 4 seconds
-    
-    return () => clearInterval(interval);
-  }, [movies, isPaused]);
-
-  // Resume auto-play after user interaction
-  useEffect(() => {
-    if (isPaused) {
-      const timeout = setTimeout(() => {
-        setIsPaused(false);
-      }, 8000); // Resume after 8 seconds of inactivity
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [isPaused]);
+  const handleSlideChange = (swiper: SwiperType) => {
+    setCurrentIndex(swiper.activeIndex);
+  };
 
   const nextSlide = () => {
-    if (!movies || isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % movies.length);
-      setIsTransitioning(false);
-    }, 150);
-    setIsPaused(true);
+    swiperRef.current?.slideNext();
   };
 
   const prevSlide = () => {
-    if (!movies || isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length);
-      setIsTransitioning(false);
-    }, 150);
-    setIsPaused(true);
-  };
-
-  const goToSlide = (index: number) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setIsTransitioning(false);
-    }, 150);
-    setIsPaused(true);
+    swiperRef.current?.slidePrev();
   };
   if (isLoading) {
     return (
@@ -123,32 +85,67 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
 
   return (
     <section className="relative h-screen overflow-hidden mt-16" data-testid="hero-section">
-      <div className="absolute inset-0">
-        {/* Background images with crossfade animation */}
-        {movies && movies.map((movieItem, index) => (
-          <img 
-            key={movieItem.id}
-            src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
-            alt={`${movieItem?.title} backdrop`}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder-backdrop.jpg';
-            }}
-          />
-        ))}
-        <div className="absolute inset-0 hero-gradient"></div>
-      </div>
+      {movies && movies.length > 0 ? (
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay, EffectFade]}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          onSlideChange={handleSlideChange}
+          spaceBetween={0}
+          slidesPerView={1}
+          loop={true}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          }}
+          effect="fade"
+          fadeEffect={{
+            crossFade: true
+          }}
+          navigation={{
+            prevEl: '.hero-prev-btn',
+            nextEl: '.hero-next-btn',
+          }}
+          pagination={{
+            el: '.hero-pagination',
+            clickable: true,
+            bulletClass: 'hero-bullet',
+            bulletActiveClass: 'hero-bullet-active'
+          }}
+          className="h-full w-full"
+        >
+          {movies.map((movieItem) => (
+            <SwiperSlide key={movieItem.id}>
+              <div className="absolute inset-0">
+                <img 
+                  src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
+                  alt={`${movieItem?.title} backdrop`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder-backdrop.jpg';
+                  }}
+                />
+                <div className="absolute inset-0 hero-gradient"></div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      ) : (
+        <div className="absolute inset-0 bg-muted">
+          <div className="absolute inset-0 hero-gradient"></div>
+        </div>
+      )}
       
-      {/* Navigation arrows */}
+      {/* Custom Navigation arrows */}
       {movies && movies.length > 1 && (
         <>
           <Button
             variant="ghost"
             size="lg"
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all"
+            className="hero-prev-btn absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all"
             onClick={prevSlide}
             data-testid="hero-prev-slide"
           >
@@ -157,7 +154,7 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
           <Button
             variant="ghost"
             size="lg"
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all"
+            className="hero-next-btn absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all"
             onClick={nextSlide}
             data-testid="hero-next-slide"
           >
@@ -169,39 +166,33 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
       <div className="relative z-10 h-full flex items-center">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="max-w-xl sm:max-w-2xl">
-            <div className={`transition-all duration-700 transform ${
-              isTransitioning ? 'translate-x-4 opacity-50' : 'translate-x-0 opacity-100'
-            }`}>
-              <h1 
-                className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4"
-                data-testid="hero-title"
-              >
-                {movie?.title}
-              </h1>
-              <p className="text-base sm:text-xl mb-2 text-muted-foreground">
-                <span data-testid="hero-year">{movie?.year}</span> • 
-                <span data-testid="hero-rating" className="ml-2">{movie?.rating} ⭐</span>
-                {movie?.runtime && (
-                  <>
-                    <span className="mx-2">•</span>
-                    <span data-testid="hero-runtime">{movie.runtime} min</span>
-                  </>
-                )}
-              </p>
-              
-              {movie?.synopsis && (
-                <p 
-                  className="text-sm sm:text-lg mb-8 leading-relaxed text-muted-foreground line-clamp-3"
-                  data-testid="hero-synopsis"
-                >
-                  {movie.synopsis}
-                </p>
+            <h1 
+              className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4"
+              data-testid="hero-title"
+            >
+              {movie?.title}
+            </h1>
+            <p className="text-base sm:text-xl mb-2 text-muted-foreground">
+              <span data-testid="hero-year">{movie?.year}</span> • 
+              <span data-testid="hero-rating" className="ml-2">{movie?.rating} ⭐</span>
+              {movie?.runtime && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span data-testid="hero-runtime">{movie.runtime} min</span>
+                </>
               )}
-            </div>
+            </p>
             
-            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 transition-all duration-700 transform delay-150 ${
-              isTransitioning ? 'translate-y-4 opacity-50' : 'translate-y-0 opacity-100'
-            }`}>
+            {movie?.synopsis && (
+              <p 
+                className="text-sm sm:text-lg mb-8 leading-relaxed text-muted-foreground line-clamp-3"
+                data-testid="hero-synopsis"
+              >
+                {movie.synopsis}
+              </p>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button 
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
@@ -226,20 +217,9 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
         </div>
       </div>
       
-      {/* Slide indicators */}
+      {/* Custom Pagination */}
       {movies && movies.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
-          {movies.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all ${
-                index === currentIndex ? 'bg-primary' : 'bg-white/50 hover:bg-white/75'
-              }`}
-              onClick={() => goToSlide(index)}
-              data-testid={`hero-indicator-${index}`}
-            />
-          ))}
-        </div>
+        <div className="hero-pagination absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2"></div>
       )}
     </section>
   );
