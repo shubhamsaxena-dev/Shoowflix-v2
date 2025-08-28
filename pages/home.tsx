@@ -14,6 +14,18 @@ import {
   useHighRatedMovies, 
   useRecentMovies,
   useSearchMoviesInfinite,
+  useSciFiMovies,
+  useComedyMovies,
+  useAdventureMovies,
+  useCrimeMovies,
+  useFantasyMovies,
+  useMysteryMovies,
+  useDramaMovies,
+  useHorrorMovies,
+  useRomanceMovies,
+  useWarMovies,
+  useThrillerMovies,
+  useAnimationMovies,
   generateMagnetLink
 } from "@/hooks/use-movies";
 import type { YTSMovie, Torrent } from "@shared/schema";
@@ -48,6 +60,20 @@ export default function Home() {
   const { movies: actionMovies, isLoading: actionLoading, error: actionError } = useActionMovies();
   const { movies: highRatedMovies, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
   const { movies: recentMovies, isLoading: recentLoading, error: recentError } = useRecentMovies();
+  
+  // Genre-specific movie data
+  const { movies: sciFiMovies, isLoading: sciFiLoading } = useSciFiMovies();
+  const { movies: comedyMovies, isLoading: comedyLoading } = useComedyMovies();
+  const { movies: adventureMovies, isLoading: adventureLoading } = useAdventureMovies();
+  const { movies: crimeMovies, isLoading: crimeLoading } = useCrimeMovies();
+  const { movies: fantasyMovies, isLoading: fantasyLoading } = useFantasyMovies();
+  const { movies: mysteryMovies, isLoading: mysteryLoading } = useMysteryMovies();
+  const { movies: dramaMovies, isLoading: dramaLoading } = useDramaMovies();
+  const { movies: horrorMovies, isLoading: horrorLoading } = useHorrorMovies();
+  const { movies: romanceMovies, isLoading: romanceLoading } = useRomanceMovies();
+  const { movies: warMovies, isLoading: warLoading } = useWarMovies();
+  const { movies: thrillerMovies, isLoading: thrillerLoading } = useThrillerMovies();
+  const { movies: animationMovies, isLoading: animationLoading } = useAnimationMovies();
 
   // Get featured movies for slideshow (first 5 trending movies)
   const featuredMovies = trendingMovies?.slice(0, 5);
@@ -168,6 +194,126 @@ export default function Home() {
           onPlayMovie={handlePlayMovie}
           showViewAll={true}
           viewAllLink="/genre/recent"
+        />
+
+        <MovieSection
+          title="Sci-Fi Movies"
+          movies={sciFiMovies || []}
+          isLoading={sciFiLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/sci-fi"
+          genre="sci-fi"
+        />
+
+        <MovieSection
+          title="Comedy Movies"
+          movies={comedyMovies || []}
+          isLoading={comedyLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/comedy"
+          genre="comedy"
+        />
+
+        <MovieSection
+          title="Adventure Movies"
+          movies={adventureMovies || []}
+          isLoading={adventureLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/adventure"
+          genre="adventure"
+        />
+
+        <MovieSection
+          title="Crime Movies"
+          movies={crimeMovies || []}
+          isLoading={crimeLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/crime"
+          genre="crime"
+        />
+
+        <MovieSection
+          title="Fantasy Movies"
+          movies={fantasyMovies || []}
+          isLoading={fantasyLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/fantasy"
+          genre="fantasy"
+        />
+
+        <MovieSection
+          title="Mystery Movies"
+          movies={mysteryMovies || []}
+          isLoading={mysteryLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/mystery"
+          genre="mystery"
+        />
+
+        <MovieSection
+          title="Drama Movies"
+          movies={dramaMovies || []}
+          isLoading={dramaLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/drama"
+          genre="drama"
+        />
+
+        <MovieSection
+          title="Horror Movies"
+          movies={horrorMovies || []}
+          isLoading={horrorLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/horror"
+          genre="horror"
+        />
+
+        <MovieSection
+          title="Romance Movies"
+          movies={romanceMovies || []}
+          isLoading={romanceLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/romance"
+          genre="romance"
+        />
+
+        <MovieSection
+          title="War Movies"
+          movies={warMovies || []}
+          isLoading={warLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/war"
+          genre="war"
+        />
+
+        <MovieSection
+          title="Thriller Movies"
+          movies={thrillerMovies || []}
+          isLoading={thrillerLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/thriller"
+          genre="thriller"
+        />
+
+        <MovieSection
+          title="Animation Movies"
+          movies={animationMovies || []}
+          isLoading={animationLoading}
+          onPlayMovie={handlePlayMovie}
+          showViewAll={true}
+          viewAllLink="/genre/animation"
+          genre="animation"
         />
       </main>
 
