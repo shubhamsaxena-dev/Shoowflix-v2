@@ -9,6 +9,7 @@ import MovieSection from "@/components/movie-section";
 import FilterPanel from "@/components/filter-panel";
 import VideoPlayer from "@/components/video-player";
 import MoviesList from "@/components/movies-list";
+import SearchOverlay from "@/components/search-overlay";
 import { 
   useTrendingMovies, 
   useActionMovies, 
@@ -39,6 +40,7 @@ export default function Home() {
   const { toast } = useToast();
   const [searchFilters, setSearchFilters] = useState<MovieFilters>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
@@ -55,11 +57,13 @@ export default function Home() {
   const featuredMovies = trendingData?.data?.movies?.slice(0, 5);
 
   const handleSearch = (query: string) => {
-    setSearchFilters(prev => ({
-      ...prev,
-      query_term: query,
-      page: 1
-    }));
+    if (query.trim()) {
+      setShowSearchOverlay(true);
+    }
+  };
+  
+  const handleSearchClick = () => {
+    setShowSearchOverlay(true);
   };
 
   const handleApplyFilters = (filters: MovieFilters) => {
@@ -148,10 +152,14 @@ export default function Home() {
             
             <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="hidden sm:block">
-                <SearchBar onSearch={handleSearch} />
+                <div onClick={handleSearchClick} className="cursor-pointer">
+                  <SearchBar onSearch={handleSearch} />
+                </div>
               </div>
               <div className="sm:hidden">
-                <SearchBar onSearch={handleSearch} placeholder="Search..." className="w-32" />
+                <div onClick={handleSearchClick} className="cursor-pointer">
+                  <SearchBar onSearch={handleSearch} placeholder="Search..." className="w-32" />
+                </div>
               </div>
               <Button 
                 variant="ghost" 
@@ -238,6 +246,13 @@ export default function Home() {
         <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
 
+      {/* Search Overlay */}
+      <SearchOverlay 
+        isOpen={showSearchOverlay}
+        onClose={() => setShowSearchOverlay(false)}
+        onMovieClick={handleMovieClick}
+      />
+      
       {/* Filter Panel */}
       <FilterPanel
         isOpen={showFilters}
