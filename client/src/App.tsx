@@ -3,10 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Router, Route, Switch } from 'wouter'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/toaster'
-import HomePage from '@/pages/home'
-import GenrePage from '@/pages/genre'
-import MovieDetailPage from '@/pages/movie-detail'
-import NotFoundPage from '@/pages/not-found'
+import HomePage from './pages/home'
+import GenrePage from './pages/genre'
+import MovieDetailPage from './pages/movie-detail'
+import NotFoundPage from './pages/not-found'
 
 // Create a client
 const queryClient = new QueryClient({
