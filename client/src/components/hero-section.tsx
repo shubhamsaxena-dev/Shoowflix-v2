@@ -14,13 +14,11 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
 interface HeroSectionProps {
-  movies: YTSMovie[] | undefined;
-  isLoading: boolean;
-  onPlay: (movie: YTSMovie) => void;
-  onMoreInfo: (movie: YTSMovie) => void;
+  movies: YTSMovie[];
+  onPlayMovie?: (movie: YTSMovie, torrent: any) => void;
 }
 
-export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: HeroSectionProps) {
+export default function HeroSection({ movies, onPlayMovie }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const swiperRef = useRef<SwiperType>();
 
@@ -37,7 +35,7 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
   const prevSlide = () => {
     swiperRef.current?.slidePrev();
   };
-  if (isLoading) {
+  if (!movies || movies.length === 0) {
     return (
       <section className="relative h-screen overflow-hidden mt-16">
         <div className="absolute inset-0">
@@ -192,7 +190,7 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
               <Button 
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
-                onClick={() => movie && onPlay(movie)}
+                onClick={() => movie && onPlayMovie?.(movie, movie.torrents?.[0])}
                 data-testid="hero-play-button"
               >
                 <Play className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -202,7 +200,7 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
                 variant="secondary"
                 size="lg"
                 className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
-                onClick={() => movie && onMoreInfo(movie)}
+                onClick={() => movie && (window.location.href = `/movie/${movie.id}`)}
                 data-testid="hero-info-button"
               >
                 <Info className="h-4 w-4 sm:h-5 sm:w-5" />

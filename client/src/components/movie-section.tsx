@@ -13,46 +13,33 @@ import 'swiper/css/free-mode';
 
 interface MovieSectionProps {
   title: string;
-  movies: YTSMovie[] | undefined;
+  movies: YTSMovie[];
   isLoading: boolean;
-  onMovieClick: (movie: YTSMovie) => void;
-  onViewAll?: () => void;
-  error?: string | null;
+  onPlayMovie?: (movie: YTSMovie, torrent: any) => void;
+  showViewAll?: boolean;
+  viewAllLink?: string;
+  genre?: string;
 }
 
 export default function MovieSection({ 
   title, 
   movies, 
   isLoading, 
-  onMovieClick, 
-  onViewAll,
-  error 
+  onPlayMovie,
+  showViewAll,
+  viewAllLink,
+  genre
 }: MovieSectionProps) {
-  
-  if (error) {
-    return (
-      <section className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
-        </div>
-        <div className="text-center py-8">
-          <p className="text-muted-foreground" data-testid={`section-error-${title}`}>
-            Failed to load movies. Please try again later.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="container mx-auto px-2 sm:px-4 group">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
-        {onViewAll && (
+        {showViewAll && viewAllLink && (
           <Button 
             variant="ghost" 
             className="text-primary hover:text-primary/80 transition-colors"
-            onClick={onViewAll}
+            onClick={() => window.location.href = viewAllLink}
             data-testid={`section-view-all-${title}`}
           >
             View All <ChevronRight className="ml-2 h-4 w-4" />
@@ -107,7 +94,7 @@ export default function MovieSection({
                 <SwiperSlide key={movie.id} className="!w-auto">
                   <MovieCard
                     movie={movie}
-                    onClick={onMovieClick}
+                    onClick={(movie) => onPlayMovie?.(movie, movie.torrents?.[0])}
                   />
                 </SwiperSlide>
               ))}
