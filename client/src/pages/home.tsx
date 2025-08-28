@@ -35,8 +35,8 @@ export default function Home() {
   const { data: recentData, isLoading: recentLoading, error: recentError } = useRecentMovies();
   const { data: searchData, isLoading: searchLoading, error: searchError } = useMovies(searchFilters);
 
-  // Get featured movie (first trending movie)
-  const featuredMovie = trendingData?.data?.movies?.[0];
+  // Get featured movies for slideshow (first 5 trending movies)
+  const featuredMovies = trendingData?.data?.movies?.slice(0, 5);
 
   const handleSearch = (query: string) => {
     setSearchFilters(prev => ({
@@ -106,19 +106,17 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto px-2 sm:px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-2 sm:space-x-8">
               <Link href="/">
-                <h1 className="text-2xl font-bold text-primary cursor-pointer" data-testid="app-logo">
-                  YTS Movies
+                <h1 className="text-xl sm:text-2xl font-bold text-primary cursor-pointer" data-testid="app-logo">
+                  Shoowflix
                 </h1>
               </Link>
               <nav className="hidden md:flex space-x-6">
-                <Link href="/">
-                  <a className="text-foreground hover:text-primary transition-colors" data-testid="nav-home">
-                    Home
-                  </a>
+                <Link href="/" className="text-foreground hover:text-primary transition-colors" data-testid="nav-home">
+                  Home
                 </Link>
                 <a href="#trending" className="text-muted-foreground hover:text-primary transition-colors" data-testid="nav-movies">
                   Movies
@@ -132,15 +130,20 @@ export default function Home() {
               </nav>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <SearchBar onSearch={handleSearch} />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="hidden sm:block">
+                <SearchBar onSearch={handleSearch} />
+              </div>
+              <div className="sm:hidden">
+                <SearchBar onSearch={handleSearch} placeholder="Search..." className="w-32" />
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className="p-2 hover:bg-secondary rounded-full"
                 data-testid="profile-button"
               >
-                <User className="h-5 w-5 text-muted-foreground" />
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               </Button>
             </div>
           </div>
@@ -149,7 +152,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <HeroSection
-        movie={featuredMovie}
+        movies={featuredMovies}
         isLoading={trendingLoading}
         onPlay={handlePlayMovie}
         onMoreInfo={handleMovieClick}
@@ -207,11 +210,11 @@ export default function Home() {
 
       {/* Filter Toggle Button */}
       <Button 
-        className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground p-4 rounded-full shadow-lg z-40"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-primary hover:bg-primary/90 text-primary-foreground p-3 sm:p-4 rounded-full shadow-lg z-40"
         onClick={() => setShowFilters(true)}
         data-testid="filter-toggle-button"
       >
-        <Filter className="h-5 w-5" />
+        <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
 
       {/* Filter Panel */}

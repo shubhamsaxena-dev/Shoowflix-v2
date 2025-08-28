@@ -73,7 +73,7 @@ export const YTSMovieSchema = z.object({
   year: z.number(),
   rating: z.number(),
   runtime: z.number().optional(),
-  genres: z.array(z.string()),
+  genres: z.array(z.string()).optional().default([]),
   synopsis: z.string().optional(),
   description_full: z.string().optional(),
   language: z.string().optional(),
@@ -81,8 +81,8 @@ export const YTSMovieSchema = z.object({
   large_cover_image: z.string().optional(),
   background_image: z.string().optional(),
   background_image_original: z.string().optional(),
-  torrents: z.array(TorrentSchema).optional(),
-  cast: z.array(CastMemberSchema).optional(),
+  torrents: z.array(TorrentSchema).optional().default([]),
+  cast: z.array(CastMemberSchema).optional().default([]),
 });
 
 export const YTSListMoviesResponseSchema = z.object({

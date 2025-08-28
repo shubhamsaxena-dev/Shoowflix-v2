@@ -35,7 +35,7 @@ export default function SearchBar({ onSearch, placeholder = "Search movies...", 
         placeholder={placeholder}
         value={query}
         onChange={handleChange}
-        className="bg-input border-border pl-10 w-64 focus:ring-2 focus:ring-ring"
+        className="bg-input border-border pl-10 w-full focus:ring-2 focus:ring-ring"
         data-testid="search-input"
       />
       <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

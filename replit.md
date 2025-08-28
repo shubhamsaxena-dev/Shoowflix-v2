@@ -1,8 +1,8 @@
-# YTS Movie Streaming Platform
+# Shoowflix Movie Streaming Platform
 
 ## Overview
 
-A modern movie streaming platform that interfaces with the YTS (YIFY Torrents) API to provide users with a Netflix-like browsing experience for movies. The application features movie discovery, filtering, detailed movie information, and in-browser streaming capabilities using WebTorrent technology. Built with a React frontend and Express backend, the platform offers a seamless movie viewing experience with high-quality torrents.
+A modern movie streaming platform called Shoowflix that interfaces with the YTS (YIFY Torrents) API to provide users with a Netflix-like browsing experience for movies. The application features movie discovery, filtering, detailed movie information, and in-browser streaming capabilities using WebTorrent technology. Built with a React frontend and Express backend, the platform offers a seamless movie viewing experience with high-quality torrents.
 
 ## User Preferences
 
@@ -40,11 +40,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - **Movie Discovery**: Browse trending, action, high-rated, and recent movies
+- **Hero Slideshow**: Automatic slideshow of featured movies with navigation controls
 - **Advanced Filtering**: Filter by genre, quality, rating, and sort options
 - **Search Functionality**: Real-time movie search with debouncing
-- **Video Streaming**: In-browser torrent streaming using WebTorrent technology
-- **Responsive Design**: Mobile-first design with adaptive layouts
+- **Video Streaming**: Full-screen in-browser torrent streaming using WebTorrent technology
+- **Mobile-First Design**: Fully responsive design optimized for mobile devices
 - **User Experience**: Loading states, error handling, and smooth transitions
+- **WebTor Integration**: Professional torrent streaming with automatic quality selection
 
 ### Performance Optimizations
 - **Caching Strategy**: React Query provides intelligent caching and background updates

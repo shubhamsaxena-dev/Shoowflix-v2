@@ -38,9 +38,9 @@ export default function MovieSection({
   }
 
   return (
-    <section className="container mx-auto px-4">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
+    <section className="container mx-auto px-2 sm:px-4">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
         {onViewAll && (
           <Button 
             variant="ghost" 
@@ -53,7 +53,7 @@ export default function MovieSection({
         )}
       </div>
       
-      <div className="flex space-x-4 overflow-x-auto scrollbar-hidden pb-4">
+      <div className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hidden pb-4">
         {isLoading ? (
           // Loading skeleton
           Array.from({ length: 6 }).map((_, index) => (

@@ -109,8 +109,8 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black" data-testid="video-player">
-      <div className="relative w-full h-full">
+    <div className="fixed inset-0 z-50 bg-black w-screen h-screen" data-testid="video-player">
+      <div className="relative w-full h-full overflow-hidden">
         <Button
           variant="ghost"
           size="sm"
@@ -161,7 +161,14 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           id="webtor-player" 
           ref={playerRef}
           className="w-full h-full"
-          style={{ display: isLoading || error ? 'none' : 'block' }}
+          style={{ 
+            display: isLoading || error ? 'none' : 'block',
+            width: '100vw',
+            height: '100vh',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
         />
       </div>
     </div>

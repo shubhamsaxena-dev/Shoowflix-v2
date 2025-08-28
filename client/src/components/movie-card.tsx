@@ -22,7 +22,7 @@ export default function MovieCard({ movie, onClick, className = "" }: MovieCardP
 
   return (
     <div 
-      className={`movie-card flex-shrink-0 w-48 cursor-pointer ${className}`}
+      className={`movie-card flex-shrink-0 w-36 sm:w-48 cursor-pointer ${className}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -35,7 +35,7 @@ export default function MovieCard({ movie, onClick, className = "" }: MovieCardP
           <img 
             src={movie.medium_cover_image || '/placeholder-movie.jpg'}
             alt={`${movie.title} poster`}
-            className="w-full h-72 object-cover"
+            className="w-full h-52 sm:h-72 object-cover"
             loading="lazy"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
