@@ -95,8 +95,9 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
           spaceBetween={0}
           slidesPerView={1}
           loop={true}
+          speed={600}
           autoplay={{
-            delay: 5000,
+            delay: 4000,
             disableOnInteraction: false,
             pauseOnMouseEnter: true
           }}
@@ -104,15 +105,10 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
           fadeEffect={{
             crossFade: true
           }}
-          navigation={{
-            prevEl: '.hero-prev-btn',
-            nextEl: '.hero-next-btn',
-          }}
+          navigation={true}
           pagination={{
-            el: '.hero-pagination',
             clickable: true,
-            bulletClass: 'hero-bullet',
-            bulletActiveClass: 'hero-bullet-active'
+            dynamicBullets: true
           }}
           className="h-full w-full"
         >
