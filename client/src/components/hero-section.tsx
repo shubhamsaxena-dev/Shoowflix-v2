@@ -14,6 +14,7 @@ interface HeroSectionProps {
 export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const movie = movies?.[currentIndex];
 
@@ -23,7 +24,11 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
     
     const interval = setInterval(() => {
       if (!isPaused) {
-        setCurrentIndex((prev) => (prev + 1) % movies.length);
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setCurrentIndex((prev) => (prev + 1) % movies.length);
+          setIsTransitioning(false);
+        }, 150);
       }
     }, 4000); // Change slide every 4 seconds
     
@@ -42,19 +47,32 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
   }, [isPaused]);
 
   const nextSlide = () => {
-    if (!movies) return;
-    setCurrentIndex((prev) => (prev + 1) % movies.length);
+    if (!movies || isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % movies.length);
+      setIsTransitioning(false);
+    }, 150);
     setIsPaused(true);
   };
 
   const prevSlide = () => {
-    if (!movies) return;
-    setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length);
+    if (!movies || isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length);
+      setIsTransitioning(false);
+    }, 150);
     setIsPaused(true);
   };
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+    }, 150);
     setIsPaused(true);
   };
   if (isLoading) {
@@ -106,15 +124,21 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
   return (
     <section className="relative h-screen overflow-hidden mt-16" data-testid="hero-section">
       <div className="absolute inset-0">
-        <img 
-          src={movie?.background_image_original || movie?.large_cover_image || movie?.medium_cover_image || '/placeholder-backdrop.jpg'}
-          alt={`${movie?.title} backdrop`}
-          className="w-full h-full object-cover transition-all duration-1000"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/placeholder-backdrop.jpg';
-          }}
-        />
+        {/* Background images with crossfade animation */}
+        {movies && movies.map((movieItem, index) => (
+          <img 
+            key={movieItem.id}
+            src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
+            alt={`${movieItem?.title} backdrop`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              index === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-backdrop.jpg';
+            }}
+          />
+        ))}
         <div className="absolute inset-0 hero-gradient"></div>
       </div>
       
@@ -145,36 +169,42 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
       <div className="relative z-10 h-full flex items-center">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="max-w-xl sm:max-w-2xl">
-            <h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 transition-all duration-500"
-              data-testid="hero-title"
-            >
-              {movie?.title}
-            </h1>
-            <p className="text-base sm:text-xl mb-2 text-muted-foreground">
-              <span data-testid="hero-year">{movie?.year}</span> • 
-              <span data-testid="hero-rating" className="ml-2">{movie?.rating} ⭐</span>
-              {movie?.runtime && (
-                <>
-                  <span className="mx-2">•</span>
-                  <span data-testid="hero-runtime">{movie.runtime} min</span>
-                </>
-              )}
-            </p>
-            
-            {movie?.synopsis && (
-              <p 
-                className="text-sm sm:text-lg mb-8 leading-relaxed text-muted-foreground line-clamp-3 transition-all duration-500"
-                data-testid="hero-synopsis"
+            <div className={`transition-all duration-700 transform ${
+              isTransitioning ? 'translate-x-4 opacity-50' : 'translate-x-0 opacity-100'
+            }`}>
+              <h1 
+                className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4"
+                data-testid="hero-title"
               >
-                {movie.synopsis}
+                {movie?.title}
+              </h1>
+              <p className="text-base sm:text-xl mb-2 text-muted-foreground">
+                <span data-testid="hero-year">{movie?.year}</span> • 
+                <span data-testid="hero-rating" className="ml-2">{movie?.rating} ⭐</span>
+                {movie?.runtime && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span data-testid="hero-runtime">{movie.runtime} min</span>
+                  </>
+                )}
               </p>
-            )}
+              
+              {movie?.synopsis && (
+                <p 
+                  className="text-sm sm:text-lg mb-8 leading-relaxed text-muted-foreground line-clamp-3"
+                  data-testid="hero-synopsis"
+                >
+                  {movie.synopsis}
+                </p>
+              )}
+            </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 transition-all duration-700 transform delay-150 ${
+              isTransitioning ? 'translate-y-4 opacity-50' : 'translate-y-0 opacity-100'
+            }`}>
               <Button 
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
                 onClick={() => movie && onPlay(movie)}
                 data-testid="hero-play-button"
               >
@@ -184,7 +214,7 @@ export default function HeroSection({ movies, isLoading, onPlay, onMoreInfo }: H
               <Button 
                 variant="secondary"
                 size="lg"
-                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
                 onClick={() => movie && onMoreInfo(movie)}
                 data-testid="hero-info-button"
               >
