@@ -1,8 +1,8 @@
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, FreeMode } from 'swiper/modules';
+import { FreeMode } from 'swiper/modules';
 import MovieCard from "./movie-card";
 import type { YTSMovie } from "@shared/schema";
 
@@ -75,14 +75,10 @@ export default function MovieSection({
         ) : movies && movies.length > 0 ? (
           <>
             <Swiper
-              modules={[Navigation, FreeMode]}
+              modules={[FreeMode]}
               spaceBetween={16}
               slidesPerView="auto"
               freeMode={true}
-              navigation={{
-                prevEl: `.movie-nav-prev-${title.replace(/\s+/g, '-').toLowerCase()}`,
-                nextEl: `.movie-nav-next-${title.replace(/\s+/g, '-').toLowerCase()}`,
-              }}
               breakpoints={{
                 320: {
                   slidesPerView: 2.2,
@@ -116,26 +112,6 @@ export default function MovieSection({
                 </SwiperSlide>
               ))}
             </Swiper>
-            
-            {/* Navigation Buttons */}
-            {movies.length > 6 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`movie-nav-prev-${title.replace(/\s+/g, '-').toLowerCase()} absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity`}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`movie-nav-next-${title.replace(/\s+/g, '-').toLowerCase()} absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity`}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </>
-            )}
           </>
         ) : (
           <div className="text-center py-8 w-full">
