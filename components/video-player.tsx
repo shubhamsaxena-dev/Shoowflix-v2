@@ -14,7 +14,7 @@ interface VideoPlayerProps {
 
 declare global {
   interface Window {
-    webtor: any[];
+    webtor: any;
   }
 }
 
@@ -37,7 +37,7 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
       playerRef.current.innerHTML = '';
     }
 
-    // Initialize WebTor player using the simple video tag approach
+    // Initialize WebTor player with proper configuration
     const initializePlayer = () => {
       try {
         console.log('Initializing WebTor player with:', { movieTitle: movie.title, magnetLink });
@@ -51,46 +51,58 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         // Clear existing content
         playerRef.current.innerHTML = '';
         
-        // Create video element with WebTor support
-        const videoElement = document.createElement('video');
-        videoElement.controls = true;
-        videoElement.autoplay = true;
-        videoElement.src = magnetLink;
-        videoElement.poster = movie.large_cover_image || movie.medium_cover_image || '';
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
-        videoElement.style.objectFit = 'contain';
+        // Ensure webtor global array exists
+        window.webtor = window.webtor || [];
         
-        // Add event listeners
-        videoElement.onloadstart = () => {
-          console.log('Video load started');
-          setIsLoading(true);
+        const config = {
+          id: 'webtor-player',
+          className: 'player',
+          magnet: magnetLink,
+          imdbId: movie.imdb_code || '',
+          poster: movie.large_cover_image || movie.medium_cover_image,
+          features: {
+            download: true,
+            fullscreen: true,
+            settings: false,
+            chromecast: true
+          },
+          on: function (e: any) {
+            console.log('WebTor event:', e.name);
+            if (e.name === window.webtor.INITED) {
+              console.log('Player initialized, starting playback');
+              e.player.play();
+              setIsLoading(false);
+            }
+            if (e.name === window.webtor.TORRENT_FETCHED) {
+              console.log('Torrent fetched!', e.data);
+              setIsLoading(false);
+            }
+            if (e.name === window.webtor.TORRENT_ERROR) {
+              console.error('Torrent error!');
+              setError('Failed to load movie stream. Please try a different quality.');
+              setIsLoading(false);
+            }
+          },
+          lang: 'en',
+          i18n: {
+            en: {
+              common: {
+                'prepare to play': 'Preparing Video Stream... Please Wait..'
+              },
+              stat: {
+                seeding: 'Seeding',
+                waiting: 'Client initialization',
+                'waiting for peers': 'Waiting for peers',
+                from: 'from'
+              }
+            }
+          }
         };
         
-        videoElement.oncanplay = () => {
-          console.log('Video can play - stream ready!');
-          setIsLoading(false);
-        };
+        // Add configuration to webtor queue
+        window.webtor.push(config);
         
-        videoElement.onerror = (e) => {
-          console.error('Video error:', e);
-          setError('Failed to connect to stream. Please try a different quality.');
-          setIsLoading(false);
-        };
-        
-        videoElement.onwaiting = () => {
-          console.log('Video waiting for data...');
-        };
-        
-        videoElement.onplaying = () => {
-          console.log('Video is now playing!');
-          setIsLoading(false);
-        };
-        
-        // Append to player container
-        playerRef.current.appendChild(videoElement);
-        
-        console.log('Video element created and added to DOM');
+        console.log('WebTor config added:', config);
         
       } catch (err) {
         console.error('Error initializing WebTor player:', err);

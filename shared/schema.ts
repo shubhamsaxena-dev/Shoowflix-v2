@@ -77,6 +77,7 @@ export const YTSMovieSchema = z.object({
   synopsis: z.string().optional(),
   description_full: z.string().optional(),
   language: z.string().optional(),
+  imdb_code: z.string().optional(),
   medium_cover_image: z.string().optional(),
   large_cover_image: z.string().optional(),
   background_image: z.string().optional(),
