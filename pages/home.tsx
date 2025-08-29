@@ -51,6 +51,9 @@ export default function Home() {
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
   const [initialSearchQuery, setInitialSearchQuery] = useState<string>("");
+  const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
+  const [loadingViewAll, setLoadingViewAll] = useState<string | null>(null);
+  const [loadingPlay, setLoadingPlay] = useState<boolean>(false);
 
   // Data fetching with SWR
   const { movies: trendingMovies, isLoading: trendingLoading, error: trendingError } = useTrendingMovies();
@@ -83,6 +86,9 @@ export default function Home() {
   };
 
   const handleMovieClick = (movie: YTSMovie) => {
+    // Set loading state for this movie
+    setLoadingMovieId(movie.id);
+    
     // Navigate to movie detail page
     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     window.location.href = `/movie/${movie.id}/${movieSlug}`;
@@ -90,6 +96,7 @@ export default function Home() {
 
   const handlePlayMovie = async (movie: YTSMovie, torrent: Torrent) => {
     try {
+      setLoadingPlay(true);
       setSelectedMovie(movie);
       setSelectedTorrent(torrent);
       
@@ -99,7 +106,14 @@ export default function Home() {
       setShowVideoPlayer(true);
     } catch (error) {
       console.error('Error generating magnet link:', error);
+    } finally {
+      setLoadingPlay(false);
     }
+  };
+
+  const handleViewAll = (genre: string) => {
+    setLoadingViewAll(genre);
+    window.location.href = `/genre/${genre}`;
   };
 
   const handleCloseVideoPlayer = () => {
@@ -131,7 +145,7 @@ export default function Home() {
 
       {/* Hero Section */}
       {featuredMovies && featuredMovies.length > 0 && (
-        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} />
+        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} />
       )}
 
       {/* Movie Sections */}
@@ -141,7 +155,9 @@ export default function Home() {
           movies={trendingMovies}
           isLoading={trendingLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/trending"}
+          onViewAll={() => handleViewAll("trending")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "trending"}
         />
 
         <MovieSection
@@ -149,7 +165,9 @@ export default function Home() {
           movies={actionMovies}
           isLoading={actionLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/action"}
+          onViewAll={() => handleViewAll("action")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "action"}
         />
 
         <MovieSection
@@ -157,7 +175,9 @@ export default function Home() {
           movies={highRatedMovies}
           isLoading={highRatedLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/high-rated"}
+          onViewAll={() => handleViewAll("high-rated")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "high-rated"}
         />
 
         <MovieSection
@@ -165,7 +185,9 @@ export default function Home() {
           movies={recentMovies}
           isLoading={recentLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/recent"}
+          onViewAll={() => handleViewAll("recent")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "recent"}
         />
 
         <MovieSection
@@ -173,7 +195,9 @@ export default function Home() {
           movies={sciFiMovies}
           isLoading={sciFiLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/sci-fi"}
+          onViewAll={() => handleViewAll("sci-fi")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "sci-fi"}
         />
 
         <MovieSection
@@ -181,7 +205,9 @@ export default function Home() {
           movies={comedyMovies}
           isLoading={comedyLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/comedy"}
+          onViewAll={() => handleViewAll("comedy")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "comedy"}
         />
 
         <MovieSection
@@ -189,7 +215,9 @@ export default function Home() {
           movies={adventureMovies}
           isLoading={adventureLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/adventure"}
+          onViewAll={() => handleViewAll("adventure")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "adventure"}
         />
 
         <MovieSection
@@ -197,7 +225,9 @@ export default function Home() {
           movies={crimeMovies}
           isLoading={crimeLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/crime"}
+          onViewAll={() => handleViewAll("crime")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "crime"}
         />
 
         <MovieSection
@@ -205,7 +235,9 @@ export default function Home() {
           movies={fantasyMovies}
           isLoading={fantasyLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/fantasy"}
+          onViewAll={() => handleViewAll("fantasy")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "fantasy"}
         />
 
         <MovieSection
@@ -213,7 +245,9 @@ export default function Home() {
           movies={mysteryMovies}
           isLoading={mysteryLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/mystery"}
+          onViewAll={() => handleViewAll("mystery")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "mystery"}
         />
 
         <MovieSection
@@ -221,7 +255,9 @@ export default function Home() {
           movies={dramaMovies}
           isLoading={dramaLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/drama"}
+          onViewAll={() => handleViewAll("drama")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "drama"}
         />
 
         <MovieSection
@@ -229,7 +265,9 @@ export default function Home() {
           movies={horrorMovies}
           isLoading={horrorLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/horror"}
+          onViewAll={() => handleViewAll("horror")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "horror"}
         />
 
         <MovieSection
@@ -237,7 +275,9 @@ export default function Home() {
           movies={romanceMovies}
           isLoading={romanceLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/romance"}
+          onViewAll={() => handleViewAll("romance")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "romance"}
         />
 
         <MovieSection
@@ -245,7 +285,9 @@ export default function Home() {
           movies={warMovies}
           isLoading={warLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/war"}
+          onViewAll={() => handleViewAll("war")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "war"}
         />
 
         <MovieSection
@@ -253,7 +295,9 @@ export default function Home() {
           movies={thrillerMovies}
           isLoading={thrillerLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/thriller"}
+          onViewAll={() => handleViewAll("thriller")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "thriller"}
         />
 
         <MovieSection
@@ -261,7 +305,9 @@ export default function Home() {
           movies={animationMovies}
           isLoading={animationLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => window.location.href = "/genre/animation"}
+          onViewAll={() => handleViewAll("animation")}
+          loadingMovieId={loadingMovieId}
+          loadingViewAll={loadingViewAll === "animation"}
         />
       </main>
 

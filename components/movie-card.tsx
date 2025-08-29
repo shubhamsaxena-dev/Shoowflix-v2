@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import type { YTSMovie } from "@shared/schema";
 
@@ -15,9 +15,10 @@ interface MovieCardProps {
   movie: YTSMovie;
   onClick: (movie: YTSMovie) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-export default function MovieCard({ movie, onClick, className = "" }: MovieCardProps) {
+export default function MovieCard({ movie, onClick, className = "", isLoading = false }: MovieCardProps) {
   const router = useRouter();
   
   const handleClick = () => {
@@ -57,7 +58,14 @@ export default function MovieCard({ movie, onClick, className = "" }: MovieCardP
           />
           <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
-              View Details
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin mr-1 inline" />
+                  Loading...
+                </>
+              ) : (
+                "View Details"
+              )}
             </div>
           </div>
         </div>

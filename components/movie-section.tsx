@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -18,6 +18,8 @@ interface MovieSectionProps {
   onMovieClick?: (movie: YTSMovie) => void;
   onViewAll?: () => void;
   error?: string;
+  loadingMovieId?: number | null;
+  loadingViewAll?: boolean;
 }
 
 export default function MovieSection({ 
@@ -26,7 +28,9 @@ export default function MovieSection({
   isLoading, 
   onMovieClick,
   onViewAll,
-  error
+  error,
+  loadingMovieId,
+  loadingViewAll
 }: MovieSectionProps) {
 
   return (
@@ -38,9 +42,18 @@ export default function MovieSection({
             variant="ghost" 
             className="text-primary hover:text-primary/80 transition-colors"
             onClick={onViewAll}
+            disabled={loadingViewAll}
             data-testid={`section-view-all-${title}`}
           >
-            View All <ChevronRight className="ml-2 h-4 w-4" />
+            {loadingViewAll ? (
+              <>
+                Loading... <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              </>
+            ) : (
+              <>
+                View All <ChevronRight className="ml-2 h-4 w-4" />
+              </>
+            )}
           </Button>
         )}
       </div>
@@ -93,6 +106,7 @@ export default function MovieSection({
                   <MovieCard
                     movie={movie}
                     onClick={(movie) => onMovieClick?.(movie)}
+                    isLoading={loadingMovieId === movie.id}
                   />
                 </SwiperSlide>
               ))}

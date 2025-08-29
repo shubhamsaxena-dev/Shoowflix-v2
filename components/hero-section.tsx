@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Info, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Info, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -16,9 +16,10 @@ import 'swiper/css/effect-fade';
 interface HeroSectionProps {
   movies: YTSMovie[];
   onPlayMovie?: (movie: YTSMovie, torrent: any) => void;
+  isLoadingPlay?: boolean;
 }
 
-export default function HeroSection({ movies, onPlayMovie }: HeroSectionProps) {
+export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const swiperRef = useRef<SwiperType>();
 
@@ -191,10 +192,20 @@ export default function HeroSection({ movies, onPlayMovie }: HeroSectionProps) {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
                 onClick={() => movie && onPlayMovie?.(movie, movie.torrents?.[0])}
+                disabled={isLoadingPlay}
                 data-testid="hero-play-button"
               >
-                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span>Play Now</span>
+                {isLoadingPlay ? (
+                  <>
+                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span>Play Now</span>
+                  </>
+                )}
               </Button>
               <Button 
                 variant="secondary"
