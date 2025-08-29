@@ -54,6 +54,7 @@ export default function GenrePage() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
+  const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
   
   // Filters
   const [quality, setQuality] = useState("all");
@@ -137,6 +138,9 @@ export default function GenrePage() {
   }, [hasMore, loading, page]);
 
   const handleMovieClick = (movie: YTSMovie) => {
+    // Set loading state for this movie
+    setLoadingMovieId(movie.id);
+    
     // Create URL-friendly slug from movie title
     const createSlug = (title: string) => {
       return title
@@ -148,7 +152,11 @@ export default function GenrePage() {
     };
 
     const slug = createSlug(movie.title);
-    router.push(`/movie/${movie.id}/${slug}`);
+    
+    // Use timeout to show loading state briefly before navigation
+    setTimeout(() => {
+      router.push(`/movie/${movie.id}/${slug}`);
+    }, 150);
   };
 
   const goBack = () => {
@@ -244,6 +252,7 @@ export default function GenrePage() {
               key={movie.id}
               movie={movie}
               onClick={handleMovieClick}
+              isLoading={loadingMovieId === movie.id}
             />
           ))}
           

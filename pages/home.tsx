@@ -96,9 +96,13 @@ export default function Home() {
     // Set loading state for this movie
     setLoadingMovieId(movie.id);
     
-    // Navigate to movie detail page
-    const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    window.location.href = `/movie/${movie.id}/${movieSlug}`;
+    // Navigate to movie detail page with proper router
+    const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
+    
+    // Use timeout to show loading state briefly before navigation
+    setTimeout(() => {
+      window.location.href = `/movie/${movie.id}/${movieSlug}`;
+    }, 150);
   };
 
   const handlePlayMovie = async (movie: YTSMovie, torrent: Torrent) => {
@@ -120,7 +124,11 @@ export default function Home() {
 
   const handleViewAll = (genre: string) => {
     setLoadingViewAll(genre);
-    window.location.href = `/genre/${genre}`;
+    
+    // Use timeout to show loading state briefly before navigation
+    setTimeout(() => {
+      window.location.href = `/genre/${genre}`;
+    }, 150);
   };
 
   const handleCloseVideoPlayer = () => {
@@ -362,6 +370,7 @@ export default function Home() {
           }}
           onMovieClick={handleMovieClick}
           initialQuery={initialSearchQuery}
+          loadingMovieId={loadingMovieId}
         />
       )}
 

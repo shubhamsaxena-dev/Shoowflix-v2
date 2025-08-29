@@ -4,8 +4,7 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/api/movies": "pages/api/movies.js",
-  "/genre/[genre]": "pages/genre/[genre].js",
   "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js",
-  "/api/movies/[id]/suggestions": "pages/api/movies/[id]/suggestions.js",
-  "/api/movies/[id]": "pages/api/movies/[id].js"
+  "/api/movies/[id]": "pages/api/movies/[id].js",
+  "/api/movies/[id]/suggestions": "pages/api/movies/[id]/suggestions.js"
 }

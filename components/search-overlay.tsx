@@ -12,9 +12,10 @@ interface SearchOverlayProps {
   onClose: () => void;
   onMovieClick: (movie: YTSMovie) => void;
   initialQuery?: string;
+  loadingMovieId?: number | null;
 }
 
-export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQuery }: SearchOverlayProps) {
+export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQuery, loadingMovieId }: SearchOverlayProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedTerm, setDebouncedTerm] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -147,6 +148,7 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                         key={movie.id}
                         movie={movie}
                         onClick={handleMovieClick}
+                        isLoading={loadingMovieId === movie.id}
                       />
                     ))}
                   </div>
