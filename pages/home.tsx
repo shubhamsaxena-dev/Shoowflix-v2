@@ -177,9 +177,9 @@ export default function Home() {
               <div className="w-full max-w-xs sm:max-w-sm">
                 <SearchBar onSearch={handleSearch} />
               </div>
-              <Button variant="ghost" size="icon" className="flex-shrink-0" data-testid="button-profile">
+              {/* <Button variant="ghost" size="icon" className="flex-shrink-0" data-testid="button-profile">
                 <User className="h-5 w-5" />
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
