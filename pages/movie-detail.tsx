@@ -244,14 +244,22 @@ export default function MovieDetail() {
         <meta property="og:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Movie Details | Shoowflix'} />
         <meta property="og:description" content={movie ? `Watch ${movie.title} online in HD quality. ${movie.description_full?.substring(0, 150) || movie.synopsis?.substring(0, 150) || `${movie.title} - Watch in HD quality`}` : 'Watch movies online in HD quality on Shoowflix.'} />
         <meta property="og:image" content={movie?.large_cover_image || '/og-image.jpg'} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={movie ? `${movie.title} (${movie.year}) Movie Poster` : 'Shoowflix Movie Poster'} />
         <meta property="og:type" content="video.movie" />
-        <meta property="og:url" content={movie ? `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}` : 'https://shoowflix.com'} />
+        <meta property="og:site_name" content="Shoowflix" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:url" content={movie ? `${typeof window !== 'undefined' ? window.location.origin : ''}/movie/${movie.id}/${createSlug(movie.title)}` : typeof window !== 'undefined' ? window.location.origin : ''} />
         
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@shoowflix" />
+        <meta name="twitter:creator" content="@shoowflix" />
         <meta name="twitter:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online` : 'Movie Details'} />
         <meta name="twitter:description" content={movie ? `Watch ${movie.title} online in HD quality on Shoowflix.` : 'Watch movies online in HD quality.'} />
         <meta name="twitter:image" content={movie?.large_cover_image || '/og-image.jpg'} />
+        <meta name="twitter:image:alt" content={movie ? `${movie.title} (${movie.year}) Movie Poster` : 'Shoowflix Movie Poster'} />
         
         {/* Additional Meta Tags */}
         {movie && (
@@ -259,7 +267,7 @@ export default function MovieDetail() {
             <meta property="video:release_date" content={movie.year?.toString()} />
             <meta property="video:duration" content={movie.runtime?.toString()} />
             <meta name="keywords" content={`${movie.title}, ${movie.year}, ${movie.genres?.join(', ')}, watch online, stream, HD, Shoowflix`} />
-            <link rel="canonical" href={`https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}`} />
+            <link rel="canonical" href={`${typeof window !== 'undefined' ? window.location.origin : ''}/movie/${movie.id}/${createSlug(movie.title)}`} />
           </>
         )}
         
