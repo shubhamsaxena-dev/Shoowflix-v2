@@ -92,6 +92,51 @@ export default function MovieDetail() {
     }
   };
 
+  const handleShare = async () => {
+    if (!movie) return;
+
+    const movieUrl = `${window.location.origin}/movie/${movie.id}/${createSlug(movie.title)}`;
+    const shareData = {
+      title: `${movie.title} (${movie.year})`,
+      text: `Watch ${movie.title} on Shoowflix - ${movie.description_full?.substring(0, 100) || movie.synopsis?.substring(0, 100) || 'Stream in HD quality'}...`,
+      url: movieUrl
+    };
+
+    try {
+      // Check if Web Share API is supported (mobile devices)
+      if (navigator.share && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        await navigator.share(shareData);
+        toast({
+          title: "Shared successfully",
+          description: "Movie shared via native sharing.",
+        });
+      } else {
+        // Desktop: Copy to clipboard
+        await navigator.clipboard.writeText(movieUrl);
+        toast({
+          title: "Link copied",
+          description: "Movie link copied to clipboard.",
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(movieUrl);
+        toast({
+          title: "Link copied",
+          description: "Movie link copied to clipboard.",
+        });
+      } catch (clipboardError) {
+        toast({
+          title: "Share failed",
+          description: "Unable to share or copy link.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   const handleDownload = async (torrent: Torrent) => {
     if (!movie) return;
 
@@ -370,6 +415,7 @@ export default function MovieDetail() {
               </Button> */}
               <Button 
                 variant="outline"
+                onClick={handleShare}
                 data-testid="movie-detail-share"
               >
                 <Share2 className="mr-2 h-4 w-4" />
