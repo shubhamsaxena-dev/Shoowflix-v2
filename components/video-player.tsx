@@ -219,17 +219,19 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           </div>
         )}
 
-        <div 
-          id="webtor-player" 
-          ref={playerRef}
-          className="w-full h-full"
-          style={{ 
-            display: isLoading || error ? 'none' : 'block',
-            width: '100%',
-            height: '100%',
-            minHeight: '100vh'
-          }}
-        />
+        <div className="flex items-center justify-center w-full h-full">
+          <div 
+            id="webtor-player" 
+            ref={playerRef}
+            className="w-full h-full max-w-7xl max-h-full"
+            style={{ 
+              display: isLoading || error ? 'none' : 'block',
+              width: '100%',
+              height: '100%',
+              minHeight: '100vh'
+            }}
+          />
+        </div>
         
       </div>
     </div>
