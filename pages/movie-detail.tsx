@@ -44,6 +44,27 @@ export default function MovieDetail() {
     }
   }, [movie, slug, router]);
 
+  // Auto-select 720p torrent by default
+  useEffect(() => {
+    if (movie && movie.torrents && movie.torrents.length > 0 && !selectedTorrent) {
+      // Find 720p torrent first
+      const torrent720p = movie.torrents.find(t => t.quality === "720p");
+      
+      if (torrent720p) {
+        setSelectedTorrent(torrent720p);
+      } else {
+        // Fallback to highest quality available
+        const sortedTorrents = [...movie.torrents].sort((a, b) => {
+          const qualityOrder = { "2160p": 4, "1080p": 3, "720p": 2, "480p": 1 };
+          const aValue = qualityOrder[a.quality as keyof typeof qualityOrder] || 0;
+          const bValue = qualityOrder[b.quality as keyof typeof qualityOrder] || 0;
+          return bValue - aValue;
+        });
+        setSelectedTorrent(sortedTorrents[0]);
+      }
+    }
+  }, [movie, selectedTorrent]);
+
   const handlePlayMovie = async (torrent: Torrent) => {
     if (!movie) return;
 
@@ -271,54 +292,76 @@ export default function MovieDetail() {
               </Button>
             </div>
             
+            {/* Quick Play - Default 720p */}
+            {selectedTorrent && (
+              <div className="mb-8">
+                <Button 
+                  size="lg"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg py-3 px-8"
+                  onClick={() => handlePlayMovie(selectedTorrent)}
+                  data-testid="movie-detail-play-now"
+                >
+                  <Play className="mr-2 h-5 w-5" />
+                  Play Now ({selectedTorrent.quality})
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Default quality: {selectedTorrent.quality} • {selectedTorrent.size}
+                </p>
+              </div>
+            )}
+
             {/* Available qualities */}
             {movie.torrents && movie.torrents.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-4" data-testid="movie-detail-qualities-title">
-                  Available Qualities
+                  All Available Qualities
                 </h3>
                 <div className="grid grid-cols-1 gap-4">
-                  {movie.torrents.map((torrent, index) => (
-                    <Card key={index} className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium" data-testid={`torrent-quality-${index}`}>
-                            {torrent.quality}
-                          </h4>
-                          <p className="text-sm text-muted-foreground" data-testid={`torrent-size-${index}`}>
-                            {torrent.size}
-                          </p>
+                  {movie.torrents.map((torrent, index) => {
+                    const isSelected = selectedTorrent?.quality === torrent.quality;
+                    return (
+                      <Card key={index} className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-medium flex items-center gap-2" data-testid={`torrent-quality-${index}`}>
+                              {torrent.quality}
+                              {isSelected && <Badge variant="default">Default</Badge>}
+                            </h4>
+                            <p className="text-sm text-muted-foreground" data-testid={`torrent-size-${index}`}>
+                              {torrent.size}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm" data-testid={`torrent-seeds-${index}`}>
+                              {torrent.seeds} seeds
+                            </p>
+                            <p className="text-sm text-muted-foreground" data-testid={`torrent-peers-${index}`}>
+                              {torrent.peers} peers
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm" data-testid={`torrent-seeds-${index}`}>
-                            {torrent.seeds} seeds
-                          </p>
-                          <p className="text-sm text-muted-foreground" data-testid={`torrent-peers-${index}`}>
-                            {torrent.peers} peers
-                          </p>
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1 bg-primary hover:bg-primary/90"
+                            onClick={() => handlePlayMovie(torrent)}
+                            data-testid={`torrent-stream-${index}`}
+                          >
+                            <Play className="mr-2 h-4 w-4" />
+                            Stream
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => handleDownload(torrent)}
+                            data-testid={`torrent-download-${index}`}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </Button>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          className="flex-1 bg-primary hover:bg-primary/90"
-                          onClick={() => handlePlayMovie(torrent)}
-                          data-testid={`torrent-stream-${index}`}
-                        >
-                          <Play className="mr-2 h-4 w-4" />
-                          Stream
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="flex-1"
-                          onClick={() => handleDownload(torrent)}
-                          data-testid={`torrent-download-${index}`}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             )}
