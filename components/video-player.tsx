@@ -292,6 +292,44 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           }}
         />
         
+        {/* Global styles for WebTor player controls */}
+        <style jsx global>{`
+          #webtor-player .player {
+            position: relative !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+          
+          #webtor-player .player .controls {
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: auto !important;
+            z-index: 10 !important;
+          }
+          
+          #webtor-player .player .play-button {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 15 !important;
+          }
+          
+          #webtor-player iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+          }
+          
+          #webtor-player .player-wrapper {
+            position: relative !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+        `}</style>
+        
       </div>
     </div>
   );
