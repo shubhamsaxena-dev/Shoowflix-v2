@@ -52,6 +52,57 @@
   --spacing: 0.25rem;
 }
 
+/* WebTor Player Styles */
+#webtor-player {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#webtor-player .player,
+#webtor-player .webtor-player {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#webtor-player iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  position: relative !important;
+}
+
+/* Force WebTor controls to proper positions */
+#webtor-player .controls,
+#webtor-player .webtor-controls {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  z-index: 10 !important;
+}
+
+#webtor-player .play-button,
+#webtor-player .webtor-play-button,
+#webtor-player [class*="play"] {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 15 !important;
+}
+
+#webtor-player .player-wrapper,
+#webtor-player .webtor-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .dark {
   --background: hsl(0, 0%, 8%);
   --foreground: hsl(0, 0%, 98%);

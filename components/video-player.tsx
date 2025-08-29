@@ -66,6 +66,7 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           poster: movie.large_cover_image || movie.medium_cover_image,
           width: '100%',
           height: '100%',
+          style: 'position: relative; width: 100%; height: 100%;',
           features: {
             download: true,
             fullscreen: true,
@@ -80,6 +81,33 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               console.log('Player initialized, starting playback');
               e.player.play();
               setIsLoading(false);
+              
+              // Force reposition controls after player loads
+              setTimeout(() => {
+                const playerContainer = document.querySelector('#webtor-player');
+                if (playerContainer) {
+                  // Force all play buttons to center
+                  const playButtons = playerContainer.querySelectorAll('[class*="play"], .play-button, .webtor-play-button');
+                  playButtons.forEach((btn: any) => {
+                    btn.style.position = 'absolute';
+                    btn.style.top = '50%';
+                    btn.style.left = '50%';
+                    btn.style.transform = 'translate(-50%, -50%)';
+                    btn.style.zIndex = '999';
+                  });
+                  
+                  // Force all controls to bottom
+                  const controls = playerContainer.querySelectorAll('[class*="control"], .controls, .webtor-controls');
+                  controls.forEach((ctrl: any) => {
+                    ctrl.style.position = 'absolute';
+                    ctrl.style.bottom = '0';
+                    ctrl.style.left = '0';
+                    ctrl.style.right = '0';
+                    ctrl.style.top = 'auto';
+                    ctrl.style.zIndex = '10';
+                  });
+                }
+              }, 1000);
             }
             if (e.name === window.webtor.TORRENT_FETCHED) {
               console.log('Torrent fetched!', e.data);
@@ -292,43 +320,6 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           }}
         />
         
-        {/* Global styles for WebTor player controls */}
-        <style jsx global>{`
-          #webtor-player .player {
-            position: relative !important;
-            width: 100% !important;
-            height: 100% !important;
-          }
-          
-          #webtor-player .player .controls {
-            position: absolute !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            top: auto !important;
-            z-index: 10 !important;
-          }
-          
-          #webtor-player .player .play-button {
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            z-index: 15 !important;
-          }
-          
-          #webtor-player iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none !important;
-          }
-          
-          #webtor-player .player-wrapper {
-            position: relative !important;
-            width: 100% !important;
-            height: 100% !important;
-          }
-        `}</style>
         
       </div>
     </div>
