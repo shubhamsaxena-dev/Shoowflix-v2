@@ -1,4 +1,4 @@
-// Simplified Next.js server startup
+// Simple Next.js server startup
 import { spawn } from 'child_process';
 
 console.log('🎬 Starting Shoowflix...');

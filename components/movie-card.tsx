@@ -44,15 +44,16 @@ export default function MovieCard({ movie, onClick, className = "", isLoading = 
       data-testid={`movie-card-${movie.id}`}
     >
       <Card className="bg-card rounded-lg overflow-hidden border-0">
-        <div className="relative">
+        <div className="relative" style={{ aspectRatio: '2/3' }}>
           <img 
             src={movie.medium_cover_image || '/placeholder-movie.jpg'}
             alt={`${movie.title} poster`}
-            className="w-full h-52 sm:h-72 object-cover"
+            className="w-full h-full object-cover"
             width={300}
             height={450}
             loading="lazy"
             decoding="async"
+            style={{ aspectRatio: '2/3' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-movie.jpg';

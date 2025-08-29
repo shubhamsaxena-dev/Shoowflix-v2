@@ -38,21 +38,21 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
   };
   if (!movies || movies.length === 0) {
     return (
-      <section className="relative h-screen overflow-hidden mt-16">
-        <div className="absolute inset-0">
-          <Skeleton className="w-full h-full" />
+      <section className="relative overflow-hidden mt-16" style={{ height: '100vh', minHeight: '600px' }}>
+        <div className="absolute inset-0" style={{ aspectRatio: '16/9' }}>
+          <div className="w-full h-full bg-gray-800"></div>
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
         
         <div className="relative z-10 h-full flex items-center">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="max-w-xl sm:max-w-2xl">
-              <Skeleton className="h-12 sm:h-16 md:h-20 w-3/4 mb-4" />
-              <Skeleton className="h-4 sm:h-6 w-1/2 mb-2" />
-              <Skeleton className="h-16 sm:h-20 w-full mb-8" />
+              <div className="h-12 sm:h-16 md:h-20 w-3/4 mb-4 bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-4 sm:h-6 w-1/2 mb-2 bg-gray-600 rounded animate-pulse"></div>
+              <div className="h-16 sm:h-20 w-full mb-8 bg-gray-600 rounded animate-pulse"></div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Skeleton className="h-10 sm:h-12 w-full sm:w-32" />
-                <Skeleton className="h-10 sm:h-12 w-full sm:w-32" />
+                <div className="h-10 sm:h-12 w-full sm:w-32 bg-gray-600 rounded animate-pulse"></div>
+                <div className="h-10 sm:h-12 w-full sm:w-32 bg-gray-600 rounded animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
   }
 
   return (
-    <section className="relative h-screen overflow-hidden mt-16" data-testid="hero-section">
+    <section className="relative overflow-hidden mt-16" style={{ height: '100vh', minHeight: '600px' }} data-testid="hero-section">
       {movies && movies.length > 0 ? (
         <Swiper
           modules={[Autoplay, EffectFade]}
@@ -111,23 +111,28 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
           {movies.map((movieItem) => (
             <SwiperSlide key={movieItem.id}>
               <div className="absolute inset-0">
-                <img 
-                  src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
-                  alt={`${movieItem?.title} backdrop`}
-                  className="w-full h-full object-cover"
-                  width={1920}
-                  height={1080}
-                  loading={movieItem === movies[0] ? 'eager' : 'lazy'}
-                  decoding="async"
-                  style={movieItem === movies[0] ? { 
-                    // @ts-ignore
-                    fetchPriority: 'high' 
-                  } : {}}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-backdrop.jpg';
-                  }}
-                />
+                <div className="relative w-full h-full">
+                  <img 
+                    src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
+                    alt={`${movieItem?.title} backdrop`}
+                    className="w-full h-full object-cover"
+                    width={1920}
+                    height={1080}
+                    loading={movieItem === movies[0] ? 'eager' : 'lazy'}
+                    decoding="async"
+                    style={{
+                      aspectRatio: '16/9',
+                      ...(movieItem === movies[0] ? { 
+                        // @ts-ignore
+                        fetchPriority: 'high' 
+                      } : {})
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-backdrop.jpg';
+                    }}
+                  />
+                </div>
                 <div className="absolute inset-0 hero-gradient"></div>
               </div>
             </SwiperSlide>
