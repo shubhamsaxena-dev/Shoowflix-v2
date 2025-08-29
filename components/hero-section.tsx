@@ -157,7 +157,7 @@ export default function HeroSection({ movies, onPlayMovie }: HeroSectionProps) {
         </>
       )}
       
-      <div className="relative z-10 h-full flex items-center">
+      <div className="absolute inset-0 z-20 h-full flex items-center">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="max-w-xl sm:max-w-2xl">
             <h1 
@@ -200,7 +200,12 @@ export default function HeroSection({ movies, onPlayMovie }: HeroSectionProps) {
                 variant="secondary"
                 size="lg"
                 className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
-                onClick={() => movie && (window.location.href = `/movie/${movie.id}`)}
+                onClick={() => {
+                  if (movie) {
+                    const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    window.location.href = `/movie/${movie.id}/${movieSlug}`;
+                  }
+                }}
                 data-testid="hero-info-button"
               >
                 <Info className="h-4 w-4 sm:h-5 sm:w-5" />
