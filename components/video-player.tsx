@@ -183,11 +183,11 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white"
+          className="absolute top-6 right-6 sm:top-8 sm:right-8 z-50 p-3 bg-black/80 hover:bg-black/90 rounded-full text-white shadow-lg backdrop-blur-sm border border-white/20"
           onClick={handleClose}
           data-testid="video-player-close"
         >
-          <X className="h-4 w-4 sm:h-5 sm:w-5" />
+          <X className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
         
         {movie && (
