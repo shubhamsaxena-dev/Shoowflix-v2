@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import VPNNotice from '@/components/vpn-notice'
 import ErrorBoundary from '@/components/error-boundary'
 import NetworkErrorHandler from '@/components/network-error-handler'
+import { Toaster } from '@/components/ui/toaster'
 import '../index.css'
 
 // SWR configuration
@@ -23,6 +24,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
         <VPNNotice />
         <NetworkErrorHandler />
+        <Toaster />
         <SpeedInsights />
         <Analytics />
       </SWRConfig>
