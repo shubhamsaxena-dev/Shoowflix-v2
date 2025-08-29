@@ -32,28 +32,26 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
     setIsLoading(true);
     setError(null);
 
+    // Clear any existing player content first
+    if (playerRef.current) {
+      playerRef.current.innerHTML = '';
+    }
+
     // Initialize WebTor player
     const initializePlayer = () => {
       try {
-        // Ensure webtor global array exists
-        if (!window.webtor) {
-          window.webtor = [];
-        }
+        // Ensure webtor global array exists and reset it
+        window.webtor = [];
 
         const config: WebTorConfig = {
           id: 'webtor-player',
           magnet: magnetLink,
           poster: movie.large_cover_image || movie.medium_cover_image,
-          lang: 'en',
+          lang: 'en'
         };
 
         // Add configuration to webtor queue
         window.webtor.push(config);
-
-        // Set up event handlers if webtor API is available
-        if (typeof window.webtor === 'object' && window.webtor.push !== Array.prototype.push) {
-          webtorInstanceRef.current = config;
-        }
 
         setIsLoading(false);
       } catch (err) {
@@ -63,32 +61,33 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
       }
     };
 
-    // Load WebTor SDK if not already loaded
-    if (!document.querySelector('script[src*="webtor"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js/dist/index.min.js';
-      script.async = true;
-      script.onload = initializePlayer;
-      script.onerror = () => {
-        setError('Failed to load video player');
-        setIsLoading(false);
-      };
-      document.head.appendChild(script);
-    } else {
-      initializePlayer();
-    }
+    // Small delay to ensure DOM is ready and prevent multiple initializations
+    const timeoutId = setTimeout(() => {
+      // Load WebTor SDK if not already loaded
+      if (!document.querySelector('script[src*="webtor"]')) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js/dist/index.min.js';
+        script.async = true;
+        script.onload = initializePlayer;
+        script.onerror = () => {
+          setError('Failed to load video player');
+          setIsLoading(false);
+        };
+        document.head.appendChild(script);
+      } else {
+        initializePlayer();
+      }
+    }, 100);
 
     return () => {
       // Cleanup on unmount
-      if (webtorInstanceRef.current) {
-        try {
-          // Clear the player div
-          if (playerRef.current) {
-            playerRef.current.innerHTML = '';
-          }
-        } catch (err) {
-          console.error('Error cleaning up WebTor player:', err);
-        }
+      clearTimeout(timeoutId);
+      if (playerRef.current) {
+        playerRef.current.innerHTML = '';
+      }
+      // Reset webtor array to prevent conflicts
+      if (window.webtor) {
+        window.webtor = [];
       }
     };
   }, [isOpen, movie, magnetLink]);
