@@ -75,11 +75,25 @@ export default function MovieDetail() {
 
     try {
       const magnet = await generateMagnetLink(movie, torrent);
-      window.open(magnet, '_blank');
+      
+      // Create a downloadable .magnet file
+      const blob = new Blob([magnet], { type: 'application/x-magnet' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create temporary download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${movie.title} (${torrent.quality}).magnet`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(url);
       
       toast({
         title: "Download started",
-        description: "Magnet link opened in your torrent client.",
+        description: `${movie.title} magnet file downloaded successfully.`,
       });
     } catch (error) {
       console.error('Error generating download link:', error);
