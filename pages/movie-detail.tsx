@@ -14,7 +14,10 @@ import { useMovieDetails, useMovieSuggestions, generateMagnetLink } from "@/hook
 import type { YTSMovie, Torrent } from "@shared/schema";
 
 // Helper function to create URL-friendly slug from movie title
-function createSlug(title: string): string {
+function createSlug(title: string | null | undefined): string {
+  if (!title) {
+    return 'untitled';
+  }
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
