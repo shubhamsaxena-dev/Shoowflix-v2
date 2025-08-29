@@ -353,13 +353,13 @@ export default function MovieDetail() {
             
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <Button 
+              {/* <Button 
                 variant="outline"
                 data-testid="movie-detail-favorite"
               >
                 <Heart className="mr-2 h-4 w-4" />
                 Add to Favorites
-              </Button>
+              </Button> */}
               <Button 
                 variant="outline"
                 data-testid="movie-detail-share"
