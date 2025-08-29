@@ -168,18 +168,13 @@ export default function Home() {
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-shrink-0">
               <h1 className="text-xl sm:text-2xl font-bold text-primary">Shoowflix</h1>
             </div>
             
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 justify-end">
-              <div className="w-full max-w-xs sm:max-w-sm">
-                <SearchBar onSearch={handleSearch} />
-              </div>
-              {/* <Button variant="ghost" size="icon" className="flex-shrink-0" data-testid="button-profile">
-                <User className="h-5 w-5" />
-              </Button> */}
+            <div className="flex-1 max-w-md mx-4">
+              <SearchBar onSearch={handleSearch} />
             </div>
           </div>
         </div>
