@@ -86,7 +86,7 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
     <section className="relative h-screen overflow-hidden mt-16" data-testid="hero-section">
       {movies && movies.length > 0 ? (
         <Swiper
-          modules={[Navigation, Pagination, Autoplay, EffectFade]}
+          modules={[Autoplay, EffectFade]}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
           }}
@@ -104,11 +104,8 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
           fadeEffect={{
             crossFade: true
           }}
-          navigation={true}
-          pagination={{
-            clickable: true,
-            dynamicBullets: true
-          }}
+          navigation={false}
+          pagination={false}
           className="h-full w-full"
         >
           {movies.map((movieItem) => (
