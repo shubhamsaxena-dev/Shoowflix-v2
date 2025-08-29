@@ -192,9 +192,7 @@ export default function Home() {
           movies={trendingMovies}
           isLoading={trendingLoading}
           onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("trending")}
           loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "trending"}
         />
 
         <MovieSection

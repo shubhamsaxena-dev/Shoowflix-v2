@@ -4,5 +4,9 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/genre/[genre]": "pages/genre/[genre].js",
-  "/api/movies": "pages/api/movies.js"
+  "/api/movies": "pages/api/movies.js",
+  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js",
+  "/api/movies/[id]": "pages/api/movies/[id].js",
+  "/api/movies/[id]/suggestions": "pages/api/movies/[id]/suggestions.js",
+  "/api/magnet": "pages/api/magnet.js"
 }
