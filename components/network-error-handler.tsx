@@ -31,22 +31,27 @@ export default function NetworkErrorHandler() {
     window.fetch = async (...args) => {
       try {
         const response = await originalFetch(...args);
-        if (!response.ok && (response.status >= 500 || response.status === 0)) {
+        // Only show VPN notice for actual network failures, not API errors
+        if (!response.ok && response.status === 0) {
           setHasNetworkError(true);
           setShowVPNNotice(true);
         }
         return response;
       } catch (error) {
-        setHasNetworkError(true);
-        setShowVPNNotice(true);
+        // Only show for network errors, not application errors
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          setHasNetworkError(true);
+          setShowVPNNotice(true);
+        }
         throw error;
       }
     };
 
-    // Check for failed resource loading
+    // Only check for critical resource loading failures
     const handleResourceError = (event: Event) => {
       const target = event.target as HTMLElement;
-      if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK' || target.tagName === 'IMG')) {
+      // Only show for critical resources, not images
+      if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
         setHasNetworkError(true);
         setShowVPNNotice(true);
       }
@@ -70,6 +75,7 @@ export default function NetworkErrorHandler() {
 
   const handleDismiss = () => {
     setShowVPNNotice(false);
+    setHasNetworkError(false);
   };
 
   if (!showVPNNotice) return null;
@@ -77,7 +83,7 @@ export default function NetworkErrorHandler() {
   return (
     <VPNNotice 
       forceShow={true} 
-      onClose={() => setShowVPNNotice(false)} 
+      onClose={handleDismiss} 
     />
   );
 }
