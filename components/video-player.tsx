@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { YTSMovie, Torrent } from "@shared/schema";
 import type { WebTorConfig } from "@/lib/types";
 
@@ -21,6 +22,7 @@ declare global {
 export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink, onClose }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showVPNNotice, setShowVPNNotice] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
   const webtorInstanceRef = useRef<any>(null);
 
@@ -81,6 +83,7 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               console.error('Torrent error!');
               setError('Failed to load movie stream. Please try a different quality.');
               setIsLoading(false);
+              setShowVPNNotice(true);
             }
           },
           lang: 'en',
@@ -210,12 +213,62 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
                 onClick={handleRetry}
                 variant="outline"
                 size="sm"
-                className="sm:size-default"
+                className="sm:size-default mb-4"
                 data-testid="video-player-retry"
               >
                 Retry
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* VPN Notice Popup on Error */}
+        {showVPNNotice && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-20" data-testid="vpn-notice-error-overlay">
+            <Card className="bg-card border-border p-6 max-w-md w-full mx-4">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-6 w-6 text-blue-500" />
+                  <h3 className="text-lg font-semibold" data-testid="vpn-notice-error-title">
+                    Streaming Issue Detected
+                  </h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVPNNotice(false)}
+                  className="p-1 h-auto"
+                  data-testid="vpn-notice-error-close"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-error-message">
+                  Having trouble loading the stream? Using a VPN can help resolve connectivity issues and 
+                  provide better access to streaming content. It also protects your privacy while browsing.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button 
+                    onClick={() => setShowVPNNotice(false)}
+                    className="flex-1"
+                    data-testid="vpn-notice-error-understand"
+                  >
+                    Got It
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => { setShowVPNNotice(false); handleRetry(); }}
+                    className="flex-1"
+                    data-testid="vpn-notice-error-retry"
+                  >
+                    Retry Stream
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
