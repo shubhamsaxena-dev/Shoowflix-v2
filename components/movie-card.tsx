@@ -21,9 +21,8 @@ export default function MovieCard({ movie, onClick, className = "" }: MovieCardP
   const router = useRouter();
   
   const handleClick = () => {
-    // Navigate to movie detail page with slug
-    const movieSlug = createSlug(movie.title);
-    router.push(`/movie/${movie.id}/${movieSlug}`);
+    // Call the onClick prop instead of navigating directly
+    onClick(movie);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
