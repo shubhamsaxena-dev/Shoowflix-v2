@@ -37,45 +37,61 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
       playerRef.current.innerHTML = '';
     }
 
-    // Initialize WebTor player
+    // Initialize WebTor player using the simple video tag approach
     const initializePlayer = () => {
       try {
         console.log('Initializing WebTor player with:', { movieTitle: movie.title, magnetLink });
         
-        // Ensure webtor global array exists
-        window.webtor = window.webtor || [];
+        if (!playerRef.current) {
+          console.error('Player container not found');
+          setError('Player container not available');
+          return;
+        }
 
-        const config = {
-          id: 'webtor-player',
-          magnet: magnetLink,
-          poster: movie.large_cover_image || movie.medium_cover_image,
-          lang: 'en',
-          on: function(e: any) {
-            if (e.name === 'torrent-fetched') {
-              console.log('Torrent fetched successfully!', e.data);
-              setIsLoading(false);
-            }
-            if (e.name === 'torrent-error') {
-              console.error('Torrent error:', e.data);
-              setError('Failed to load movie stream');
-              setIsLoading(false);
-            }
-            if (e.name === 'player-ready') {
-              console.log('WebTor player ready');
-              setIsLoading(false);
-            }
-          }
+        // Clear existing content
+        playerRef.current.innerHTML = '';
+        
+        // Create video element with WebTor support
+        const videoElement = document.createElement('video');
+        videoElement.controls = true;
+        videoElement.autoplay = true;
+        videoElement.src = magnetLink;
+        videoElement.poster = movie.large_cover_image || movie.medium_cover_image || '';
+        videoElement.style.width = '100%';
+        videoElement.style.height = '100%';
+        videoElement.style.objectFit = 'contain';
+        
+        // Add event listeners
+        videoElement.onloadstart = () => {
+          console.log('Video load started');
+          setIsLoading(true);
         };
-
-        // Add configuration to webtor queue
-        window.webtor.push(config);
         
-        console.log('WebTor config added:', config);
-        
-        // Set a timeout to hide loading after WebTor should have initialized
-        setTimeout(() => {
+        videoElement.oncanplay = () => {
+          console.log('Video can play - stream ready!');
           setIsLoading(false);
-        }, 2000);
+        };
+        
+        videoElement.onerror = (e) => {
+          console.error('Video error:', e);
+          setError('Failed to connect to stream. Please try a different quality.');
+          setIsLoading(false);
+        };
+        
+        videoElement.onwaiting = () => {
+          console.log('Video waiting for data...');
+        };
+        
+        videoElement.onplaying = () => {
+          console.log('Video is now playing!');
+          setIsLoading(false);
+        };
+        
+        // Append to player container
+        playerRef.current.appendChild(videoElement);
+        
+        console.log('Video element created and added to DOM');
+        
       } catch (err) {
         console.error('Error initializing WebTor player:', err);
         setError('Failed to initialize video player');
@@ -201,29 +217,6 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           }}
         />
         
-        {/* Alternative WebTor video element approach */}
-        {!isLoading && !error && (
-          <video
-            controls
-            autoPlay
-            src={magnetLink || ''}
-            poster={movie?.large_cover_image || movie?.medium_cover_image}
-            width="100%"
-            height="100%"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain'
-            }}
-            data-testid="webtor-video"
-            onLoadStart={() => console.log('Video load started')}
-            onCanPlay={() => console.log('Video can play')}
-            onError={(e) => {
-              console.error('Video error:', e);
-              setError('Failed to load video stream');
-            }}
-          />
-        )}
       </div>
     </div>
   );
