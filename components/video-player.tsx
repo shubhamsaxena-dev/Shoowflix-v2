@@ -69,7 +69,7 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           style: 'position: relative; width: 100%; height: 100%;',
           features: {
             download: true,
-            fullscreen: true,
+            fullscreen: false,
             settings: false,
             chromecast: true,
             p2pProgress: false,
@@ -235,16 +235,16 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black w-screen h-screen flex items-center justify-center" data-testid="video-player">
-      <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" data-testid="video-player">
+      <div className="relative w-full max-w-[80vw] aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-6 right-6 sm:top-8 sm:right-8 z-50 p-3 bg-black/80 hover:bg-black/90 rounded-full text-white shadow-lg backdrop-blur-sm border border-white/20"
+          className="absolute -top-12 right-0 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white"
           onClick={handleClose}
           data-testid="video-player-close"
         >
-          <X className="h-5 w-5 sm:h-6 sm:w-6" />
+          <X className="h-5 w-5" />
         </Button>
         
         {movie && (
@@ -338,16 +338,12 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <div 
           id="webtor-player" 
           ref={playerRef}
-          className="w-full h-full max-w-none flex items-center justify-center"
+          className="w-full h-full rounded-lg overflow-hidden"
           style={{ 
-            display: isLoading || error ? 'none' : 'flex',
+            display: isLoading || error ? 'none' : 'block',
             width: '100%',
             height: '100%',
-            maxHeight: '100vh',
-            overflow: 'hidden',
-            position: 'relative',
-            alignItems: 'center',
-            justifyContent: 'center'
+            position: 'relative'
           }}
         />
         
