@@ -62,11 +62,14 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           magnet: magnetLink,
           imdbId: movie.imdb_code || '',
           poster: movie.large_cover_image || movie.medium_cover_image,
+          width: '100%',
+          height: '100%',
           features: {
             download: true,
             fullscreen: true,
             settings: false,
-            chromecast: true
+            chromecast: true,
+            p2pProgress: false
           },
           on: function (e: any) {
             console.log('WebTor event:', e.name);
@@ -275,10 +278,11 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <div 
           id="webtor-player" 
           ref={playerRef}
-          className="max-w-6xl w-full h-auto aspect-video mx-auto"
+          className="w-full h-full max-w-none"
           style={{ 
             display: isLoading || error ? 'none' : 'block',
-            maxHeight: '80vh'
+            width: '100%',
+            height: '100%'
           }}
         />
         
