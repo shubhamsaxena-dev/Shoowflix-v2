@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link, useParams } from "wouter";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import { ArrowLeft, Play, Download, Star, Clock, Calendar, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,9 +12,18 @@ import MovieSection from "@/components/movie-section";
 import { useMovieDetails, useMovieSuggestions, generateMagnetLink } from "@/hooks/use-movies";
 import type { YTSMovie, Torrent } from "@shared/schema";
 
+// Helper function to create URL-friendly slug from movie title
+function createSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default function MovieDetail() {
-  const { id } = useParams<{ id: string }>();
-  const movieId = parseInt(id || '0');
+  const router = useRouter();
+  const { id, slug } = router.query;
+  const movieId = parseInt((id as string) || '0');
   const { toast } = useToast();
 
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
@@ -26,6 +36,14 @@ export default function MovieDetail() {
   const movie = movieData?.data?.movie;
   const suggestions = suggestionsData?.data?.movies;
 
+  // Redirect to proper URL with movie name slug if missing
+  useEffect(() => {
+    if (movie && movie.title && !slug) {
+      const movieSlug = createSlug(movie.title);
+      router.replace(`/movie/${movie.id}/${movieSlug}`, undefined, { shallow: true });
+    }
+  }, [movie, slug, router]);
+
   const handlePlayMovie = async (torrent: Torrent) => {
     if (!movie) return;
 
@@ -33,7 +51,7 @@ export default function MovieDetail() {
       setSelectedTorrent(torrent);
 
       // Generate magnet link
-      const magnet = await generateMagnetLink(torrent.hash, movie.title);
+      const magnet = await generateMagnetLink(movie, torrent);
       setMagnetLink(magnet);
       setShowVideoPlayer(true);
 
@@ -56,7 +74,7 @@ export default function MovieDetail() {
     if (!movie) return;
 
     try {
-      const magnet = await generateMagnetLink(torrent.hash, movie.title);
+      const magnet = await generateMagnetLink(movie, torrent);
       window.open(magnet, '_blank');
       
       toast({
@@ -74,7 +92,8 @@ export default function MovieDetail() {
   };
 
   const handleMovieClick = (movie: YTSMovie) => {
-    window.location.href = `/movie/${movie.id}`;
+    const movieSlug = createSlug(movie.title);
+    router.push(`/movie/${movie.id}/${movieSlug}`);
   };
 
   const handleCloseVideoPlayer = () => {
@@ -327,7 +346,6 @@ export default function MovieDetail() {
             title="You might also like"
             movies={suggestions}
             isLoading={suggestionsLoading}
-            onMovieClick={handleMovieClick}
           />
         )}
       </div>

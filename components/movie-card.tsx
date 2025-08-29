@@ -1,6 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { useRouter } from "next/router";
 import type { YTSMovie } from "@shared/schema";
+
+// Helper function to create URL-friendly slug from movie title
+function createSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 interface MovieCardProps {
   movie: YTSMovie;
@@ -9,14 +18,18 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie, onClick, className = "" }: MovieCardProps) {
+  const router = useRouter();
+  
   const handleClick = () => {
-    onClick(movie);
+    // Navigate to movie detail page with slug
+    const movieSlug = createSlug(movie.title);
+    router.push(`/movie/${movie.id}/${movieSlug}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick(movie);
+      handleClick();
     }
   };
 

@@ -94,7 +94,7 @@ export default function Home() {
   };
 
   const handleMovieClick = (movie: YTSMovie) => {
-    // Navigate to movie detail page or show movie info
+    // This is handled by the MovieCard component now
     console.log('Movie clicked:', movie.title);
   };
 
