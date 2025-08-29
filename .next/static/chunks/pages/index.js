@@ -259,16 +259,6 @@ eval(__webpack_require__.ts("module.exports = __webpack_require__(/*! ./dist/sha
 
 /***/ }),
 
-/***/ "(pages-dir-browser)/./node_modules/next/router.js":
-/*!*************************************!*\
-  !*** ./node_modules/next/router.js ***!
-  \*************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval(__webpack_require__.ts("module.exports = __webpack_require__(/*! ./dist/client/router */ \"(pages-dir-browser)/./node_modules/next/dist/client/router.js\")\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHBhZ2VzLWRpci1icm93c2VyKS8uL25vZGVfbW9kdWxlcy9uZXh0L3JvdXRlci5qcyIsIm1hcHBpbmdzIjoiQUFBQSxpSUFBZ0QiLCJzb3VyY2VzIjpbIi9ob21lL3J1bm5lci93b3Jrc3BhY2Uvbm9kZV9tb2R1bGVzL25leHQvcm91dGVyLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIm1vZHVsZS5leHBvcnRzID0gcmVxdWlyZSgnLi9kaXN0L2NsaWVudC9yb3V0ZXInKVxuIl0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6WzBdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///(pages-dir-browser)/./node_modules/next/router.js\n"));
-
-/***/ }),
-
 /***/ "(pages-dir-browser)/./node_modules/swiper/modules/a11y.mjs":
 /*!**********************************************!*\
   !*** ./node_modules/swiper/modules/a11y.mjs ***!

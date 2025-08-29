@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +10,7 @@ interface VPNNoticeProps {
 }
 
 export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps) {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -19,14 +21,17 @@ export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps
   useEffect(() => {
     if (!isMounted) return;
     
-    // Show if forced (from error handlers) or always show on first load
+    // Show if forced (from error handlers)
     if (forceShow) {
       setIsVisible(true);
     } else {
-      // Always show on first load
-      setIsVisible(true);
+      // Only show on first load if we're on the home page
+      const isHomePage = router.pathname === '/';
+      if (isHomePage) {
+        setIsVisible(true);
+      }
     }
-  }, [forceShow, isMounted]);
+  }, [forceShow, isMounted, router.pathname]);
 
   const handleClose = () => {
     setIsVisible(false);
