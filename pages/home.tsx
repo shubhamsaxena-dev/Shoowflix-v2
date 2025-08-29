@@ -127,21 +127,10 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold text-primary">Shoowflix</h1>
-              <nav className="hidden md:flex space-x-6">
-                <a href="#home" className="text-foreground hover:text-primary transition-colors">Home</a>
-              </nav>
             </div>
             
             <div className="flex items-center space-x-4">
               <SearchBar onSearch={handleSearch} onSearchClick={handleSearchClick} />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowFilters(!showFilters)}
-                data-testid="button-filters"
-              >
-                <Filter className="h-5 w-5" />
-              </Button>
               <Button variant="ghost" size="icon" data-testid="button-profile">
                 <User className="h-5 w-5" />
               </Button>
