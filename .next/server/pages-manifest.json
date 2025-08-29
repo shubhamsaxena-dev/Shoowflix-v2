@@ -4,5 +4,6 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/api/magnet": "pages/api/magnet.js",
-  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js"
+  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js",
+  "/api/movies": "pages/api/movies.js"
 }

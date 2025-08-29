@@ -163,11 +163,12 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               setTimeout(centerPlayButton, 3000);
               
               // Set up mutation observer to catch dynamic elements
-              if (playerContainer) {
+              const container = document.querySelector('#webtor-player');
+              if (container) {
                 const observer = new MutationObserver(() => {
                   centerPlayButton();
                 });
-                observer.observe(playerContainer, { 
+                observer.observe(container, { 
                   childList: true, 
                   subtree: true, 
                   attributes: true 
