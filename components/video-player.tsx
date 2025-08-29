@@ -338,14 +338,16 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <div 
           id="webtor-player" 
           ref={playerRef}
-          className="w-full h-full max-w-none"
+          className="w-full h-full max-w-none flex items-center justify-center"
           style={{ 
-            display: isLoading || error ? 'none' : 'block',
+            display: isLoading || error ? 'none' : 'flex',
             width: '100%',
             height: '100%',
             maxHeight: '100vh',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         />
         

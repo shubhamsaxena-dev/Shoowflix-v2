@@ -57,6 +57,9 @@
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 #webtor-player .player,
@@ -64,8 +67,10 @@
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: auto !important;
+  display: block !important;
 }
 
 #webtor-player iframe {
