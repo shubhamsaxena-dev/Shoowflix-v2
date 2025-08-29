@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Filter } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Filter, Search } from "lucide-react";
 import MovieCard from "@/components/movie-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +57,7 @@ export default function GenrePage() {
   const [quality, setQuality] = useState("all");
   const [sortBy, setSortBy] = useState("date_added");
   const [minRating, setMinRating] = useState("0");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const genreTitle = genre?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
 
@@ -70,7 +72,8 @@ export default function GenrePage() {
         page: pageNum.toString(),
         sort_by: sortBy,
         minimum_rating: minRating,
-        ...(quality !== "all" && { quality })
+        ...(quality !== "all" && { quality }),
+        ...(searchQuery && { query_term: searchQuery })
       });
 
       const response = await fetch(`/api/movies?${params}`);
@@ -96,7 +99,7 @@ export default function GenrePage() {
     } finally {
       setLoading(false);
     }
-  }, [genreTitle, quality, sortBy, minRating, loading, toast]);
+  }, [genreTitle, quality, sortBy, minRating, searchQuery, loading, toast]);
 
   // Reset and fetch when filters change
   useEffect(() => {
@@ -104,7 +107,7 @@ export default function GenrePage() {
     setPage(1);
     setHasMore(true);
     fetchMovies(1, true);
-  }, [quality, sortBy, minRating, genreTitle]);
+  }, [quality, sortBy, minRating, searchQuery, genreTitle]);
 
   // Load more movies
   const loadMore = () => {
@@ -156,12 +159,27 @@ export default function GenrePage() {
           <h1 className="text-2xl sm:text-3xl font-bold">{genreTitle} Movies</h1>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-start sm:items-center mb-6 sm:mb-8 p-4 bg-card rounded-lg border">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">Filters:</span>
+        {/* Search and Filters */}
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={`Search ${genreTitle} movies...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-full"
+              data-testid="genre-search-input"
+            />
           </div>
+          
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-start sm:items-center p-4 bg-card rounded-lg border">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span className="text-sm font-medium">Filters:</span>
+            </div>
           
           <Select value={quality} onValueChange={setQuality}>
             <SelectTrigger className="w-full sm:w-[140px]">
@@ -201,6 +219,7 @@ export default function GenrePage() {
               ))}
             </SelectContent>
           </Select>
+          </div>
         </div>
       </div>
 
@@ -252,6 +271,7 @@ export default function GenrePage() {
                 setQuality("all");
                 setSortBy("date_added");
                 setMinRating("0");
+                setSearchQuery("");
               }}
               variant="outline"
               className="mt-4"
