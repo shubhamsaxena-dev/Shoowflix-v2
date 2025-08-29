@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ const ratingOptions = [
 
 export default function GenrePage() {
   const { genre } = useParams<{ genre: string }>();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   
   const [movies, setMovies] = useState<YTSMovie[]>([]);
@@ -135,7 +136,18 @@ export default function GenrePage() {
   }, [hasMore, loading, page]);
 
   const handleMovieClick = (movie: YTSMovie) => {
-    setSelectedMovie(movie);
+    // Create URL-friendly slug from movie title
+    const createSlug = (title: string) => {
+      return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+    };
+
+    const slug = createSlug(movie.title);
+    setLocation(`/movie/${movie.id}/${slug}`);
   };
 
   const goBack = () => {
