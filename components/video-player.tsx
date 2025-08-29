@@ -163,17 +163,19 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               setTimeout(centerPlayButton, 3000);
               
               // Set up mutation observer to catch dynamic elements
-              const observer = new MutationObserver(() => {
-                centerPlayButton();
-              });
-              observer.observe(playerContainer, { 
-                childList: true, 
-                subtree: true, 
-                attributes: true 
-              });
-              
-              // Clean up observer after 10 seconds
-              setTimeout(() => observer.disconnect(), 10000);
+              if (playerContainer) {
+                const observer = new MutationObserver(() => {
+                  centerPlayButton();
+                });
+                observer.observe(playerContainer, { 
+                  childList: true, 
+                  subtree: true, 
+                  attributes: true 
+                });
+                
+                // Clean up observer after 10 seconds
+                setTimeout(() => observer.disconnect(), 10000);
+              }
             }
             if (e.name === window.webtor.TORRENT_FETCHED) {
               console.log('Torrent fetched!', e.data);
