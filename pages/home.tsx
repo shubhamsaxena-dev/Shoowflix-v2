@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Filter, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/search-bar";
 import HeroSection from "@/components/hero-section";
 import MovieSection from "@/components/movie-section";
-import FilterPanel from "@/components/filter-panel";
 import VideoPlayer from "@/components/video-player";
-import MoviesList from "@/components/movies-list";
 import SearchOverlay from "@/components/search-overlay";
 import { 
   useTrendingMovies, 
@@ -47,8 +45,6 @@ const genres = [
 ];
 
 export default function Home() {
-  const [searchFilters, setSearchFilters] = useState<MovieFilters>({});
-  const [showFilters, setShowFilters] = useState(false);
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
@@ -83,15 +79,7 @@ export default function Home() {
       setShowSearchOverlay(true);
     }
   };
-  
-  const handleSearchClick = () => {
-    setShowSearchOverlay(true);
-  };
 
-  const handleApplyFilters = (filters: MovieFilters) => {
-    setSearchFilters(filters);
-    setShowFilters(false);
-  };
 
   const handleMovieClick = (movie: YTSMovie) => {
     // This is handled by the MovieCard component now
@@ -130,7 +118,7 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <SearchBar onSearch={handleSearch} onSearchClick={handleSearchClick} />
+              <SearchBar onSearch={handleSearch} />
               <Button variant="ghost" size="icon" data-testid="button-profile">
                 <User className="h-5 w-5" />
               </Button>
@@ -305,25 +293,19 @@ export default function Home() {
       </main>
 
       {/* Overlays and Modals */}
-      {showFilters && (
-        <FilterPanel
-          onApplyFilters={handleApplyFilters}
-          onClose={() => setShowFilters(false)}
-          genres={genres}
-        />
-      )}
-
       {showSearchOverlay && (
         <SearchOverlay
+          isOpen={showSearchOverlay}
           onClose={() => setShowSearchOverlay(false)}
           onMovieClick={handleMovieClick}
-          onPlayMovie={handlePlayMovie}
         />
       )}
 
       {showVideoPlayer && selectedMovie && magnetLink && (
         <VideoPlayer
+          isOpen={showVideoPlayer}
           movie={selectedMovie}
+          selectedTorrent={selectedTorrent}
           magnetLink={magnetLink}
           onClose={handleCloseVideoPlayer}
         />
