@@ -11,9 +11,10 @@ interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onMovieClick: (movie: YTSMovie) => void;
+  initialQuery?: string;
 }
 
-export default function SearchOverlay({ isOpen, onClose, onMovieClick }: SearchOverlayProps) {
+export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQuery }: SearchOverlayProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedTerm, setDebouncedTerm] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -27,12 +28,18 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick }: SearchO
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Focus input when overlay opens
+  // Set initial search term and focus input when overlay opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      if (initialQuery) {
+        setSearchTerm(initialQuery);
+        setDebouncedTerm(initialQuery);
+      }
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   // Fetch search results
   const searchFilters = {

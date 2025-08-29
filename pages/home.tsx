@@ -50,6 +50,7 @@ export default function Home() {
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
+  const [initialSearchQuery, setInitialSearchQuery] = useState<string>("");
 
   // Data fetching with SWR
   const { movies: trendingMovies, isLoading: trendingLoading, error: trendingError } = useTrendingMovies();
@@ -76,6 +77,7 @@ export default function Home() {
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
+      setInitialSearchQuery(query.trim());
       setShowSearchOverlay(true);
     }
   };
@@ -267,8 +269,12 @@ export default function Home() {
       {showSearchOverlay && (
         <SearchOverlay
           isOpen={showSearchOverlay}
-          onClose={() => setShowSearchOverlay(false)}
+          onClose={() => {
+            setShowSearchOverlay(false);
+            setInitialSearchQuery("");
+          }}
           onMovieClick={handleMovieClick}
+          initialQuery={initialSearchQuery}
         />
       )}
 
