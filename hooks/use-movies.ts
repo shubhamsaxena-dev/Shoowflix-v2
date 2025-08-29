@@ -13,23 +13,29 @@ const fetcher = async (url: string) => {
 };
 
 // Build query string from filters
-function buildQueryString(filters: MovieFilters = {}, page: number = 1): string {
+function buildQueryString(filters: MovieFilters | null = {}, page: number = 1): string {
   const params = new URLSearchParams();
   
   // Add page parameter
   params.append('page', page.toString());
   
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== '' && value !== 0) {
-      params.append(key, value.toString());
-    }
-  });
+  // Handle null or undefined filters
+  if (filters && typeof filters === 'object') {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && value !== 0) {
+        params.append(key, value.toString());
+      }
+    });
+  }
   
   return params.toString();
 }
 
 // Get key for infinite loading
-const getKey = (filters: MovieFilters) => (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
+const getKey = (filters: MovieFilters | null) => (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
+  // If filters is null, return null (no request)
+  if (!filters) return null;
+  
   // First page, no previous data
   if (pageIndex === 0) return `/api/movies?${buildQueryString(filters, 1)}`;
   
@@ -41,7 +47,7 @@ const getKey = (filters: MovieFilters) => (pageIndex: number, previousPageData: 
 };
 
 // Base hook for movies with infinite scroll
-export function useMoviesInfinite(filters: MovieFilters = {}) {
+export function useMoviesInfinite(filters: MovieFilters | null = {}) {
   const {
     data,
     error,
@@ -90,10 +96,14 @@ export function useMoviesInfinite(filters: MovieFilters = {}) {
 }
 
 // Regular hook for single page of movies (for sections)
-export function useMovies(filters: MovieFilters = {}) {
-  const queryString = buildQueryString(filters, 1);
+export function useMovies(filters: MovieFilters | null = {}) {
+  // If filters is null, don't make any request
+  const shouldFetch = filters !== null;
+  const queryString = shouldFetch ? buildQueryString(filters, 1) : '';
+  const url = shouldFetch ? `/api/movies?${queryString}` : null;
+  
   const { data, error, mutate } = useSWR<YTSListMoviesResponse>(
-    `/api/movies?${queryString}`,
+    url,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -105,7 +115,7 @@ export function useMovies(filters: MovieFilters = {}) {
   return {
     data,
     error,
-    isLoading: !data && !error,
+    isLoading: shouldFetch ? (!data && !error) : false,
     mutate,
     movies: data?.data?.movies || [],
   };
