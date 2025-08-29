@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/api/magnet": "pages/api/magnet.js",
-  "/api/movies": "pages/api/movies.js"
+  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js",
+  "/api/movies/[id]/suggestions": "pages/api/movies/[id]/suggestions.js",
+  "/api/movies/[id]": "pages/api/movies/[id].js"
 }

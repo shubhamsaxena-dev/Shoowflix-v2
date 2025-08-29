@@ -37,6 +37,8 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
     // Clear any existing player content first
     if (playerRef.current) {
       playerRef.current.innerHTML = '';
+      playerRef.current.style.height = '100%';
+      playerRef.current.style.width = '100%';
     }
 
     // Initialize WebTor player with proper configuration
@@ -69,7 +71,8 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
             fullscreen: true,
             settings: false,
             chromecast: true,
-            p2pProgress: false
+            p2pProgress: false,
+            autoplay: true
           },
           on: function (e: any) {
             console.log('WebTor event:', e.name);
@@ -282,7 +285,10 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           style={{ 
             display: isLoading || error ? 'none' : 'block',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            maxHeight: '100vh',
+            overflow: 'hidden',
+            position: 'relative'
           }}
         />
         
