@@ -88,12 +88,20 @@
 
 #webtor-player .play-button,
 #webtor-player .webtor-play-button,
-#webtor-player [class*="play"] {
+#webtor-player [class*="play"],
+#webtor-player button[class*="play"],
+#webtor-player div[class*="play"],
+#webtor-player [role="button"],
+#webtor-player svg[class*="play"],
+#webtor-player .player-play-button,
+#webtor-player .vjs-big-play-button {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  z-index: 15 !important;
+  z-index: 9999 !important;
+  margin: 0 !important;
+  inset: auto !important;
 }
 
 #webtor-player .player-wrapper,

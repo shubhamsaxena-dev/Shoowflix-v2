@@ -73,40 +73,70 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
             settings: false,
             chromecast: true,
             p2pProgress: false,
-            autoplay: false
+            autoplay: true
           },
           on: function (e: any) {
             console.log('WebTor event:', e.name);
             if (e.name === window.webtor.INITED) {
-              console.log('Player initialized');
+              console.log('Player initialized, starting playback');
+              e.player.play();
               setIsLoading(false);
               
-              // Force reposition controls after player loads
-              setTimeout(() => {
+              // Multiple attempts to center play button with different timings
+              const centerPlayButton = () => {
                 const playerContainer = document.querySelector('#webtor-player');
                 if (playerContainer) {
-                  // Force all play buttons to center
-                  const playButtons = playerContainer.querySelectorAll('[class*="play"], .play-button, .webtor-play-button');
-                  playButtons.forEach((btn: any) => {
-                    btn.style.position = 'absolute';
-                    btn.style.top = '50%';
-                    btn.style.left = '50%';
-                    btn.style.transform = 'translate(-50%, -50%)';
-                    btn.style.zIndex = '999';
+                  // Target all possible play button selectors
+                  const selectors = [
+                    '[class*="play"]',
+                    '.play-button', 
+                    '.webtor-play-button',
+                    'button[class*="play"]',
+                    'div[class*="play"]',
+                    '[role="button"]',
+                    'svg[class*="play"]',
+                    '.player-play-button',
+                    '.vjs-big-play-button'
+                  ];
+                  
+                  selectors.forEach(selector => {
+                    const elements = playerContainer.querySelectorAll(selector);
+                    elements.forEach((btn: any) => {
+                      btn.style.cssText = `
+                        position: absolute !important;
+                        top: 50% !important;
+                        left: 50% !important;
+                        transform: translate(-50%, -50%) !important;
+                        z-index: 9999 !important;
+                        margin: 0 !important;
+                        inset: auto !important;
+                      `;
+                    });
                   });
                   
-                  // Force all controls to bottom
-                  const controls = playerContainer.querySelectorAll('[class*="control"], .controls, .webtor-controls');
-                  controls.forEach((ctrl: any) => {
-                    ctrl.style.position = 'absolute';
-                    ctrl.style.bottom = '0';
-                    ctrl.style.left = '0';
-                    ctrl.style.right = '0';
-                    ctrl.style.top = 'auto';
-                    ctrl.style.zIndex = '10';
+                  // Force controls to bottom
+                  const controlSelectors = ['[class*="control"]', '.controls', '.webtor-controls', '.player-controls'];
+                  controlSelectors.forEach(selector => {
+                    const controls = playerContainer.querySelectorAll(selector);
+                    controls.forEach((ctrl: any) => {
+                      ctrl.style.cssText = `
+                        position: absolute !important;
+                        bottom: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        top: auto !important;
+                        z-index: 10 !important;
+                      `;
+                    });
                   });
                 }
-              }, 1000);
+              };
+              
+              // Run multiple times with different delays
+              setTimeout(centerPlayButton, 500);
+              setTimeout(centerPlayButton, 1000);
+              setTimeout(centerPlayButton, 2000);
+              setTimeout(centerPlayButton, 3000);
             }
             if (e.name === window.webtor.TORRENT_FETCHED) {
               console.log('Torrent fetched!', e.data);
