@@ -99,11 +99,11 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, currentFi
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="modal-backdrop bg-black/80 absolute inset-0" onClick={onClose}></div>
       
-      <Card className="relative z-10 bg-card border-border rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <div className="flex items-center justify-between mb-6">
+      <Card className="relative z-10 bg-card border-border rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <h3 className="text-lg font-semibold" data-testid="filter-panel-title">Filters</h3>
+            <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
+            <h3 className="text-base sm:text-lg font-semibold" data-testid="filter-panel-title">Filters</h3>
           </div>
           <Button 
             variant="ghost" 
@@ -115,7 +115,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, currentFi
           </Button>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Quality Filter */}
           <div>
             <label className="block text-sm font-medium mb-3" data-testid="quality-filter-label">
@@ -142,7 +142,7 @@ export default function FilterPanel({ isOpen, onClose, onApplyFilters, currentFi
             <label className="block text-sm font-medium mb-3" data-testid="genre-filter-label">
               Genre
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {GENRES.map((genre) => (
                 <Button
                   key={genre}

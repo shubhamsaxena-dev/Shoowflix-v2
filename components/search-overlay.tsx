@@ -80,24 +80,24 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
         className="absolute inset-0 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="min-h-screen py-8">
-          <div className="container mx-auto px-4 max-w-6xl">
+        <div className="min-h-screen py-4 sm:py-8">
+          <div className="container mx-auto px-2 sm:px-4 max-w-6xl">
             {/* Search Header */}
-            <div className="bg-card rounded-lg border mb-6 p-6">
+            <div className="bg-card rounded-lg border mb-4 sm:mb-6 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">Search Movies</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">Search Movies</h2>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="rounded-full"
+                  className="rounded-full flex-shrink-0"
                 >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
               
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <Input
                   ref={inputRef}
                   type="text"
@@ -105,13 +105,13 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="pl-10 text-lg h-12"
+                  className="pl-10 text-base sm:text-lg h-10 sm:h-12"
                 />
               </div>
             </div>
 
             {/* Search Results */}
-            <div className="bg-card rounded-lg border p-6">
+            <div className="bg-card rounded-lg border p-4 sm:p-6">
               {!debouncedTerm ? (
                 <div className="text-center py-16">
                   <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -126,10 +126,10 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                     <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     <span>Searching for "{debouncedTerm}"...</span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                     {Array.from({ length: 10 }).map((_, index) => (
                       <div key={index} className="space-y-2">
-                        <Skeleton className="h-64 w-full rounded-lg" />
+                        <Skeleton className="h-48 sm:h-64 w-full rounded-lg" />
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-3 w-24" />
                       </div>
@@ -138,10 +138,10 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                 </div>
               ) : searchData?.data?.movies && searchData.data.movies.length > 0 ? (
                 <div>
-                  <h3 className="text-lg font-semibold mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">
                     Found {searchData.data.movies.length} results for "{debouncedTerm}"
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                     {searchData.data.movies.map((movie) => (
                       <MovieCard
                         key={movie.id}

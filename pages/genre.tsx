@@ -142,29 +142,29 @@ export default function GenrePage() {
   return (
     <div className="min-h-screen bg-background pt-20">
       {/* Header */}
-      <div className="container mx-auto px-4 mb-8">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="container mx-auto px-4 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={goBack}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 self-start"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold">{genreTitle} Movies</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{genreTitle} Movies</h1>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center mb-8 p-4 bg-card rounded-lg border">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-start sm:items-center mb-6 sm:mb-8 p-4 bg-card rounded-lg border">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
             <span className="text-sm font-medium">Filters:</span>
           </div>
           
           <Select value={quality} onValueChange={setQuality}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Quality" />
             </SelectTrigger>
             <SelectContent>
@@ -177,7 +177,7 @@ export default function GenrePage() {
           </Select>
 
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -190,7 +190,7 @@ export default function GenrePage() {
           </Select>
 
           <Select value={minRating} onValueChange={setMinRating}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-full sm:w-[140px]">
               <SelectValue placeholder="Rating" />
             </SelectTrigger>
             <SelectContent>
@@ -218,7 +218,7 @@ export default function GenrePage() {
           {/* Loading skeletons */}
           {loading && Array.from({ length: 12 }).map((_, index) => (
             <div key={`skeleton-${index}`} className="space-y-2">
-              <Skeleton className="h-72 w-full rounded-lg" />
+              <Skeleton className="h-48 sm:h-64 lg:h-72 w-full rounded-lg" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-3 w-24" />
             </div>

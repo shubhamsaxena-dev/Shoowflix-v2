@@ -46,10 +46,10 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
 
   if (isLoading) {
     return (
-      <div className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 ${className}`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 ${className}`}>
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="space-y-2">
-            <Skeleton className="h-72 w-full" />
+            <Skeleton className="h-48 sm:h-64 lg:h-72 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
           </div>
@@ -68,7 +68,7 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {movies.map((movie, index) => {
           const isLast = index === movies.length - 1
           return (
@@ -85,10 +85,10 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
 
       {/* Loading more indicator */}
       {isLoadingMore && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={`loading-${i}`} className="space-y-2">
-              <Skeleton className="h-72 w-full" />
+              <Skeleton className="h-48 sm:h-64 lg:h-72 w-full" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>

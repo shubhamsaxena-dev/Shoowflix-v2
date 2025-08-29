@@ -174,18 +174,18 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white"
           onClick={handleClose}
           data-testid="video-player-close"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         
         {movie && (
-          <div className="absolute top-4 left-4 z-10 bg-black/70 text-white px-4 py-2 rounded-lg">
-            <h3 className="font-medium" data-testid="video-player-title">{movie.title}</h3>
+          <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-black/70 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-xs sm:max-w-none">
+            <h3 className="font-medium text-sm sm:text-base truncate" data-testid="video-player-title">{movie.title}</h3>
             {selectedTorrent && (
-              <p className="text-sm text-gray-300" data-testid="video-player-quality">
+              <p className="text-xs sm:text-sm text-gray-300" data-testid="video-player-quality">
                 {selectedTorrent.quality} • {selectedTorrent.size}
               </p>
             )}
@@ -194,21 +194,23 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
 
         {isLoading && (
           <div className="flex items-center justify-center h-full text-white">
-            <div className="text-center">
-              <Loader2 className="animate-spin h-12 w-12 mx-auto mb-4" />
-              <p data-testid="video-player-loading">Loading stream...</p>
-              <p className="text-sm text-gray-400 mt-2">Connecting to WebTor...</p>
+            <div className="text-center px-4">
+              <Loader2 className="animate-spin h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-4" />
+              <p className="text-sm sm:text-base" data-testid="video-player-loading">Loading stream...</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-2">Connecting to WebTor...</p>
             </div>
           </div>
         )}
 
         {error && (
           <div className="flex items-center justify-center h-full text-white">
-            <div className="text-center">
-              <p className="text-red-400 mb-4" data-testid="video-player-error">{error}</p>
+            <div className="text-center px-4">
+              <p className="text-red-400 mb-4 text-sm sm:text-base" data-testid="video-player-error">{error}</p>
               <Button 
                 onClick={handleRetry}
                 variant="outline"
+                size="sm"
+                className="sm:size-default"
                 data-testid="video-player-retry"
               >
                 Retry
