@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Head from "next/head";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/search-bar";
@@ -124,7 +125,46 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <>
+      <Head>
+        <title>Shoowflix - Stream Movies Online in HD Quality</title>
+        <meta name="description" content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more on Shoowflix - your premium movie streaming platform." />
+        <meta property="og:title" content="Shoowflix - Stream Movies Online in HD Quality" />
+        <meta property="og:description" content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more on Shoowflix." />
+        <meta property="og:url" content="https://shoowflix.com" />
+        <meta name="twitter:title" content="Shoowflix - Stream Movies Online in HD Quality" />
+        <meta name="twitter:description" content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more." />
+        <link rel="canonical" href="https://shoowflix.com" />
+        
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Shoowflix",
+              "description": "Premium movie streaming platform offering HD quality films across all genres",
+              "url": "https://shoowflix.com",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://shoowflix.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Shoowflix",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://shoowflix.com/og-image.jpg"
+                }
+              }
+            })
+          }}
+        />
+      </Head>
+      
+      <div className="min-h-screen bg-background text-foreground">
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
         <div className="container mx-auto px-4 py-3">
@@ -336,5 +376,6 @@ export default function Home() {
         />
       )}
     </div>
+    </>
   );
 }

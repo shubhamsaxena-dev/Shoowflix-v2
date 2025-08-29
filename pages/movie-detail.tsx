@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Link from "next/link";
 import { ArrowLeft, Play, Download, Star, Clock, Calendar, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -184,7 +185,83 @@ export default function MovieDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <Head>
+        <title>
+          {movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Loading Movie | Shoowflix'}
+        </title>
+        <meta 
+          name="description" 
+          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.summary || `Starring ${movie.cast?.join(', ') || 'talented cast'}.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
+        />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Movie Details | Shoowflix'} />
+        <meta property="og:description" content={movie ? `Watch ${movie.title} online in HD quality. ${movie.summary?.substring(0, 150)}...` : 'Watch movies online in HD quality on Shoowflix.'} />
+        <meta property="og:image" content={movie?.large_cover_image || '/og-image.jpg'} />
+        <meta property="og:type" content="video.movie" />
+        <meta property="og:url" content={movie ? `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}` : 'https://shoowflix.com'} />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online` : 'Movie Details'} />
+        <meta name="twitter:description" content={movie ? `Watch ${movie.title} online in HD quality on Shoowflix.` : 'Watch movies online in HD quality.'} />
+        <meta name="twitter:image" content={movie?.large_cover_image || '/og-image.jpg'} />
+        
+        {/* Additional Meta Tags */}
+        {movie && (
+          <>
+            <meta property="video:release_date" content={movie.year?.toString()} />
+            <meta property="video:duration" content={movie.runtime?.toString()} />
+            <meta name="keywords" content={`${movie.title}, ${movie.year}, ${movie.genres?.join(', ')}, watch online, stream, HD, Shoowflix`} />
+            <link rel="canonical" href={`https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}`} />
+          </>
+        )}
+        
+        {/* JSON-LD Structured Data for Movie */}
+        {movie && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Movie",
+                "name": movie.title,
+                "description": movie.summary,
+                "image": movie.large_cover_image,
+                "datePublished": movie.year?.toString(),
+                "duration": movie.runtime ? `PT${movie.runtime}M` : undefined,
+                "genre": movie.genres,
+                "aggregateRating": movie.rating ? {
+                  "@type": "AggregateRating",
+                  "ratingValue": movie.rating,
+                  "ratingCount": movie.download_count || 1,
+                  "bestRating": 10,
+                  "worstRating": 1
+                } : undefined,
+                "actor": movie.cast?.map(actor => ({
+                  "@type": "Person",
+                  "name": actor
+                })),
+                "director": {
+                  "@type": "Person",
+                  "name": "Director"
+                },
+                "url": `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}`,
+                "potentialAction": {
+                  "@type": "WatchAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}`
+                  }
+                }
+              })
+            }}
+          />
+        )}
+      </Head>
+      
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 w-full z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container mx-auto px-4 py-3">
@@ -416,5 +493,6 @@ export default function MovieDetail() {
         onClose={handleCloseVideoPlayer}
       />
     </div>
+    </>
   );
 }
