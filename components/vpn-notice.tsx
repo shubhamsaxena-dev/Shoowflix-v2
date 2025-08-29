@@ -19,20 +19,12 @@ export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps
   useEffect(() => {
     if (!isMounted) return;
     
-    // Show if forced (from error handlers) or first time visit
+    // Show if forced (from error handlers) or always show on first load
     if (forceShow) {
       setIsVisible(true);
     } else {
-      // Check if user has already seen the VPN notice
-      try {
-        const hasSeenVPNNotice = localStorage.getItem('vpn-notice-seen');
-        if (!hasSeenVPNNotice) {
-          setIsVisible(true);
-        }
-      } catch (error) {
-        // If localStorage fails, show the notice anyway
-        setIsVisible(true);
-      }
+      // Always show on first load
+      setIsVisible(true);
     }
   }, [forceShow, isMounted]);
 
