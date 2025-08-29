@@ -1,6 +1,7 @@
 import { SWRConfig } from 'swr'
 import type { AppProps } from 'next/app'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import '../index.css'
 
 // SWR configuration
@@ -17,6 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <SWRConfig value={swrConfig}>
       <Component {...pageProps} />
       <SpeedInsights />
+      <Analytics />
     </SWRConfig>
   )
 }
