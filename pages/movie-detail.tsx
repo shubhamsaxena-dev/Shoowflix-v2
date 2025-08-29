@@ -40,6 +40,14 @@ export default function MovieDetail() {
   const movie = movieData?.data?.movie;
   const suggestions = suggestionsData?.data?.movies;
 
+  // Debug suggestions data
+  useEffect(() => {
+    if (suggestionsData) {
+      console.log('Suggestions API Response:', suggestionsData);
+      console.log('Extracted suggestions:', suggestions);
+    }
+  }, [suggestionsData, suggestions]);
+
   // Redirect to proper URL with movie name slug if missing
   useEffect(() => {
     if (movie && movie.title && !slug) {
@@ -540,7 +548,7 @@ export default function MovieDetail() {
         )}
 
         {/* Similar movies */}
-        {suggestions && suggestions.length > 0 && (
+        {(suggestionsLoading || (suggestions && suggestions.length > 0)) && (
           <MovieSection
             title="You might also like"
             movies={suggestions}
