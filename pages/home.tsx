@@ -129,8 +129,6 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-primary">Shoowflix</h1>
               <nav className="hidden md:flex space-x-6">
                 <a href="#home" className="text-foreground hover:text-primary transition-colors">Home</a>
-                <a href="#movies" className="text-muted-foreground hover:text-primary transition-colors">Movies</a>
-                <a href="#genres" className="text-muted-foreground hover:text-primary transition-colors">Genres</a>
               </nav>
             </div>
             
