@@ -16,8 +16,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const ytsUrl = `${YTS_API_BASE}/movie_suggestions.json?movie_id=${id}`
     
-    console.log('Fetching suggestions from:', ytsUrl)
-    
     const response = await fetch(ytsUrl)
     
     if (!response.ok) {
@@ -26,19 +24,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const data = await response.json()
     
-    console.log('YTS suggestions response:', JSON.stringify(data, null, 2))
-    
     // If YTS doesn't return suggestions, create fallback with similar movies
     if (!data?.data?.movies || data.data.movies.length === 0) {
-      console.log('No suggestions from YTS, creating fallback...')
-      
       // Fallback: Get similar movies by fetching popular movies
       const fallbackUrl = `${YTS_API_BASE}/list_movies.json?sort_by=rating&limit=8&minimum_rating=7`
       const fallbackResponse = await fetch(fallbackUrl)
       
       if (fallbackResponse.ok) {
         const fallbackData = await fallbackResponse.json()
-        console.log('Using fallback movies as suggestions')
         return res.status(200).json(fallbackData)
       }
     }
