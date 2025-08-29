@@ -52,7 +52,7 @@ export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps
           <div className="flex items-center space-x-2">
             <Shield className="h-6 w-6 text-blue-500" />
             <h3 className="text-lg font-semibold" data-testid="vpn-notice-title">
-              {forceShow ? 'Connection Issue' : 'VPN Recommended'}
+              {forceShow ? 'Privacy & Quality Tip' : 'VPN Recommended'}
             </h3>
           </div>
           <Button
@@ -69,7 +69,7 @@ export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps
         <div className="space-y-4">
           <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-message">
             {forceShow 
-              ? 'Shoowflix is experiencing connectivity issues. Using a VPN can help resolve these problems and ensure uninterrupted streaming access. It also protects your privacy while browsing.'
+              ? 'For the best streaming experience, we recommend using a VPN for enhanced privacy and better quality access to content. VPNs protect your browsing activity and can provide access to higher quality streams.'
               : 'For your privacy and security, we recommend using a VPN when streaming content. This helps protect your identity and ensures a safer browsing experience.'
             }
           </p>

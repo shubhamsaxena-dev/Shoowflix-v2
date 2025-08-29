@@ -357,8 +357,8 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               
               <div className="space-y-4">
                 <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-error-message">
-                  Having trouble loading the stream? Using a VPN can help resolve connectivity issues and 
-                  provide better access to streaming content. It also protects your privacy while browsing.
+                  For the best streaming experience, we recommend using a VPN for enhanced privacy and 
+                  better quality access to content. VPNs protect your browsing activity and can improve stream quality.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-2">
