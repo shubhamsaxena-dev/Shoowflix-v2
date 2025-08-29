@@ -3,21 +3,34 @@ import { X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-export default function VPNNotice() {
+interface VPNNoticeProps {
+  forceShow?: boolean;
+  onClose?: () => void;
+}
+
+export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if user has already seen the VPN notice
-    const hasSeenVPNNotice = localStorage.getItem('vpn-notice-seen');
-    
-    if (!hasSeenVPNNotice) {
+    // Show if forced (from error handlers) or first time visit
+    if (forceShow) {
       setIsVisible(true);
+    } else {
+      // Check if user has already seen the VPN notice
+      const hasSeenVPNNotice = localStorage.getItem('vpn-notice-seen');
+      
+      if (!hasSeenVPNNotice) {
+        setIsVisible(true);
+      }
     }
-  }, []);
+  }, [forceShow]);
 
   const handleClose = () => {
     setIsVisible(false);
-    localStorage.setItem('vpn-notice-seen', 'true');
+    if (!forceShow) {
+      localStorage.setItem('vpn-notice-seen', 'true');
+    }
+    onClose?.();
   };
 
   if (!isVisible) return null;
@@ -29,7 +42,7 @@ export default function VPNNotice() {
           <div className="flex items-center space-x-2">
             <Shield className="h-6 w-6 text-blue-500" />
             <h3 className="text-lg font-semibold" data-testid="vpn-notice-title">
-              VPN Recommended
+              {forceShow ? 'Connection Issue' : 'VPN Recommended'}
             </h3>
           </div>
           <Button
@@ -45,8 +58,10 @@ export default function VPNNotice() {
         
         <div className="space-y-4">
           <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-message">
-            For your privacy and security, we recommend using a VPN when streaming content. 
-            This helps protect your identity and ensures a safer browsing experience.
+            {forceShow 
+              ? 'Shoowflix is experiencing connectivity issues. Using a VPN can help resolve these problems and ensure uninterrupted streaming access. It also protects your privacy while browsing.'
+              : 'For your privacy and security, we recommend using a VPN when streaming content. This helps protect your identity and ensures a safer browsing experience.'
+            }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-2">
@@ -55,7 +70,7 @@ export default function VPNNotice() {
               className="flex-1"
               data-testid="vpn-notice-understand"
             >
-              I Understand
+              {forceShow ? 'Understood' : 'I Understand'}
             </Button>
             <Button 
               variant="outline"
@@ -63,7 +78,7 @@ export default function VPNNotice() {
               className="flex-1"
               data-testid="vpn-notice-dismiss"
             >
-              Dismiss
+              {forceShow ? 'Continue' : 'Dismiss'}
             </Button>
           </div>
         </div>
