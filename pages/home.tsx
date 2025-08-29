@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Head from "next/head";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,42 +76,8 @@ export default function Home() {
   const { movies: thrillerMovies, isLoading: thrillerLoading } = useThrillerMovies();
   const { movies: animationMovies, isLoading: animationLoading } = useAnimationMovies();
 
-  // Get featured movies for slideshow (random movies from all available)
-  const featuredMovies = useMemo(() => {
-    // Collect all available movies
-    const allMovies = [
-      ...(trendingMovies || []),
-      ...(actionMovies || []),
-      ...(highRatedMovies || []),
-      ...(recentMovies || []),
-      ...(sciFiMovies || []),
-      ...(comedyMovies || []),
-      ...(adventureMovies || []),
-      ...(crimeMovies || []),
-      ...(fantasyMovies || []),
-      ...(mysteryMovies || []),
-      ...(dramaMovies || []),
-      ...(horrorMovies || []),
-      ...(romanceMovies || []),
-      ...(warMovies || []),
-      ...(thrillerMovies || []),
-      ...(animationMovies || [])
-    ];
-
-    // Remove duplicates based on movie id
-    const uniqueMovies = allMovies.filter((movie, index, array) => 
-      array.findIndex(m => m.id === movie.id) === index
-    );
-
-    // Shuffle and take first 5
-    const shuffled = uniqueMovies.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 5);
-  }, [
-    trendingMovies, actionMovies, highRatedMovies, recentMovies,
-    sciFiMovies, comedyMovies, adventureMovies, crimeMovies,
-    fantasyMovies, mysteryMovies, dramaMovies, horrorMovies,
-    romanceMovies, warMovies, thrillerMovies, animationMovies
-  ]);
+  // Get featured movies for slideshow (first 5 trending movies)
+  const featuredMovies = trendingMovies?.slice(0, 5);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
