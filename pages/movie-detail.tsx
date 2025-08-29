@@ -192,12 +192,12 @@ export default function MovieDetail() {
         </title>
         <meta 
           name="description" 
-          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.summary || `Starring ${movie.cast?.join(', ') || 'talented cast'}.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
+          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.description_full || `Starring ${movie.cast?.join(', ') || 'talented cast'}.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
         />
         
         {/* Open Graph Meta Tags */}
         <meta property="og:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Movie Details | Shoowflix'} />
-        <meta property="og:description" content={movie ? `Watch ${movie.title} online in HD quality. ${movie.summary?.substring(0, 150)}...` : 'Watch movies online in HD quality on Shoowflix.'} />
+        <meta property="og:description" content={movie ? `Watch ${movie.title} online in HD quality. ${movie.description_full?.substring(0, 150) || movie.synopsis?.substring(0, 150) || `${movie.title} - Watch in HD quality`}` : 'Watch movies online in HD quality on Shoowflix.'} />
         <meta property="og:image" content={movie?.large_cover_image || '/og-image.jpg'} />
         <meta property="og:type" content="video.movie" />
         <meta property="og:url" content={movie ? `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}` : 'https://shoowflix.com'} />
@@ -227,7 +227,7 @@ export default function MovieDetail() {
                 "@context": "https://schema.org",
                 "@type": "Movie",
                 "name": movie.title,
-                "description": movie.summary,
+                "description": movie.description_full || movie.synopsis,
                 "image": movie.large_cover_image,
                 "datePublished": movie.year?.toString(),
                 "duration": movie.runtime ? `PT${movie.runtime}M` : undefined,
@@ -235,7 +235,7 @@ export default function MovieDetail() {
                 "aggregateRating": movie.rating ? {
                   "@type": "AggregateRating",
                   "ratingValue": movie.rating,
-                  "ratingCount": movie.download_count || 1,
+                  "ratingCount": 100,
                   "bestRating": 10,
                   "worstRating": 1
                 } : undefined,
