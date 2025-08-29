@@ -222,9 +222,10 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         <div 
           id="webtor-player" 
           ref={playerRef}
-          className="w-full h-full max-w-6xl aspect-video"
+          className="max-w-6xl w-full h-auto aspect-video mx-auto"
           style={{ 
-            display: isLoading || error ? 'none' : 'block'
+            display: isLoading || error ? 'none' : 'block',
+            maxHeight: '80vh'
           }}
         />
         
