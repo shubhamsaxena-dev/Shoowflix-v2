@@ -33,6 +33,7 @@ export default function MovieDetail() {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
+  const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
 
   const { data: movieData, isLoading: movieLoading, error: movieError } = useMovieDetails(movieId);
   const { data: suggestionsData, isLoading: suggestionsLoading } = useMovieSuggestions(movieId);
@@ -177,8 +178,15 @@ export default function MovieDetail() {
   };
 
   const handleMovieClick = (movie: YTSMovie) => {
+    // Set loading state for this movie
+    setLoadingMovieId(movie.id);
+    
     const movieSlug = createSlug(movie.title);
-    router.push(`/movie/${movie.id}/${movieSlug}`);
+    
+    // Use timeout to show loading state briefly before navigation
+    setTimeout(() => {
+      router.push(`/movie/${movie.id}/${movieSlug}`);
+    }, 150);
   };
 
   const handleCloseVideoPlayer = () => {
@@ -575,6 +583,7 @@ export default function MovieDetail() {
             movies={suggestions}
             isLoading={suggestionsLoading}
             onMovieClick={handleMovieClick}
+            loadingMovieId={loadingMovieId}
           />
         )}
       </div>
