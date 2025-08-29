@@ -1,0 +1,73 @@
+import { useState, useEffect } from "react";
+import { X, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+export default function VPNNotice() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already seen the VPN notice
+    const hasSeenVPNNotice = localStorage.getItem('vpn-notice-seen');
+    
+    if (!hasSeenVPNNotice) {
+      setIsVisible(true);
+    }
+  }, []);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    localStorage.setItem('vpn-notice-seen', 'true');
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" data-testid="vpn-notice-overlay">
+      <Card className="bg-card border-border p-6 max-w-md w-full mx-4">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-6 w-6 text-blue-500" />
+            <h3 className="text-lg font-semibold" data-testid="vpn-notice-title">
+              VPN Recommended
+            </h3>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="p-1 h-auto"
+            data-testid="vpn-notice-close"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-message">
+            For your privacy and security, we recommend using a VPN when streaming content. 
+            This helps protect your identity and ensures a safer browsing experience.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              onClick={handleClose}
+              className="flex-1"
+              data-testid="vpn-notice-understand"
+            >
+              I Understand
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1"
+              data-testid="vpn-notice-dismiss"
+            >
+              Dismiss
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
