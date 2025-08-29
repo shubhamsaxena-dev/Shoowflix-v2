@@ -82,36 +82,57 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
               e.player.play();
               setIsLoading(false);
               
-              // Multiple attempts to center play button with different timings
+              // Aggressive play button centering with multiple approaches
               const centerPlayButton = () => {
                 const playerContainer = document.querySelector('#webtor-player');
                 if (playerContainer) {
-                  // Target all possible play button selectors
-                  const selectors = [
-                    '[class*="play"]',
-                    '.play-button', 
-                    '.webtor-play-button',
-                    'button[class*="play"]',
-                    'div[class*="play"]',
-                    '[role="button"]',
-                    'svg[class*="play"]',
-                    '.player-play-button',
-                    '.vjs-big-play-button'
+                  // Target ALL possible button and interactive elements
+                  const allSelectors = [
+                    'button', 'div[role="button"]', '[class*="play"]', '.play-button', 
+                    '.webtor-play-button', 'button[class*="play"]', 'div[class*="play"]',
+                    '[role="button"]', 'svg[class*="play"]', '.player-play-button',
+                    '.vjs-big-play-button', '[data-testid*="play"]', '[aria-label*="play"]',
+                    '[title*="play"]', 'iframe + div', '.webtor-player button',
+                    '.webtor-player > div > button'
                   ];
                   
-                  selectors.forEach(selector => {
+                  // Force center ALL interactive elements
+                  allSelectors.forEach(selector => {
                     const elements = playerContainer.querySelectorAll(selector);
                     elements.forEach((btn: any) => {
-                      btn.style.cssText = `
-                        position: absolute !important;
-                        top: 50% !important;
-                        left: 50% !important;
-                        transform: translate(-50%, -50%) !important;
-                        z-index: 9999 !important;
-                        margin: 0 !important;
-                        inset: auto !important;
-                      `;
+                      // Only center if it looks like a play button (has reasonable size)
+                      const rect = btn.getBoundingClientRect();
+                      if (rect.width > 10 && rect.height > 10) {
+                        btn.style.cssText = `
+                          position: absolute !important;
+                          top: 50% !important;
+                          left: 50% !important;
+                          transform: translate(-50%, -50%) !important;
+                          z-index: 9999 !important;
+                          margin: 0 !important;
+                          inset: auto !important;
+                        `;
+                      }
                     });
+                  });
+                  
+                  // Force center any overlay divs
+                  const overlays = playerContainer.querySelectorAll('div:not(.webtor-player)');
+                  overlays.forEach((overlay: any) => {
+                    const rect = overlay.getBoundingClientRect();
+                    if (rect.width > 0 && rect.height > 0 && overlay.children.length > 0) {
+                      overlay.style.cssText = `
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        z-index: 100 !important;
+                      `;
+                    }
                   });
                   
                   // Force controls to bottom
@@ -132,11 +153,27 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
                 }
               };
               
-              // Run multiple times with different delays
+              // Run immediately and at multiple intervals
+              centerPlayButton();
+              setTimeout(centerPlayButton, 100);
+              setTimeout(centerPlayButton, 300);
               setTimeout(centerPlayButton, 500);
               setTimeout(centerPlayButton, 1000);
               setTimeout(centerPlayButton, 2000);
               setTimeout(centerPlayButton, 3000);
+              
+              // Set up mutation observer to catch dynamic elements
+              const observer = new MutationObserver(() => {
+                centerPlayButton();
+              });
+              observer.observe(playerContainer, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true 
+              });
+              
+              // Clean up observer after 10 seconds
+              setTimeout(() => observer.disconnect(), 10000);
             }
             if (e.name === window.webtor.TORRENT_FETCHED) {
               console.log('Torrent fetched!', e.data);
