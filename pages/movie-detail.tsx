@@ -330,7 +330,7 @@ export default function MovieDetail() {
               </Button>
             </Link>
             <h1 className="text-lg sm:text-xl font-semibold truncate" data-testid="movie-detail-header-title">
-              {movie.title}
+              {movie.title || 'Untitled Movie'}
             </h1>
           </div>
         </div>
@@ -338,19 +338,29 @@ export default function MovieDetail() {
 
       {/* Movie backdrop */}
       <div className="relative h-64 overflow-hidden mt-16">
-        <img 
-          src={movie.background_image_original || movie.large_cover_image || movie.medium_cover_image}
-          alt={`${movie.title} backdrop`}
-          className="w-full h-full object-cover"
-          width={1920}
-          height={1080}
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/placeholder-backdrop.jpg';
-          }}
-        />
+        {(movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? (
+          <img 
+            src={movie.background_image_original || movie.large_cover_image || movie.medium_cover_image}
+            alt={`${movie.title || 'Movie'} backdrop`}
+            className="w-full h-full object-cover"
+            width={1920}
+            height={1080}
+            loading="eager"
+            decoding="async"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const fallback = target.nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div className="w-full h-full bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center" style={{ display: (movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? 'none' : 'flex' }}>
+          <div className="text-center text-muted-foreground">
+            <div className="text-4xl mb-2">🎬</div>
+            <p className="text-lg font-medium">{movie.title || 'Untitled Movie'}</p>
+          </div>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-background/95 to-transparent"></div>
       </div>
 
@@ -358,25 +368,34 @@ export default function MovieDetail() {
       <div className="container mx-auto px-4 py-8 -mt-16 relative z-10">
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
           <div className="flex-shrink-0 mx-auto lg:mx-0">
-            <img 
-              src={movie.medium_cover_image}
-              alt={`${movie.title} poster`}
-              className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
-              width={300}
-              height={450}
-              loading="lazy"
-              decoding="async"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/placeholder-movie.jpg';
-              }}
-              data-testid="movie-detail-poster"
-            />
+            {movie.medium_cover_image || movie.large_cover_image ? (
+              <img 
+                src={movie.medium_cover_image || movie.large_cover_image}
+                alt={`${movie.title || 'Movie'} poster`}
+                className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
+                width={300}
+                height={450}
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
+                data-testid="movie-detail-poster"
+              />
+            ) : null}
+            <div className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 bg-gradient-to-br from-muted/50 to-muted/80 rounded-lg shadow-lg flex flex-col items-center justify-center text-center" style={{ display: (movie.medium_cover_image || movie.large_cover_image) ? 'none' : 'flex' }} data-testid="movie-detail-poster-fallback">
+              <div className="text-3xl sm:text-4xl mb-2">🎬</div>
+              <p className="text-sm font-medium text-muted-foreground px-2">{movie.title || 'Untitled Movie'}</p>
+              {movie.year && <p className="text-xs text-muted-foreground">({movie.year})</p>}
+            </div>
           </div>
           
           <div className="flex-1 text-center lg:text-left">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4" data-testid="movie-detail-title">
-              {movie.title}
+              {movie.title || 'Untitled Movie'}
             </h1>
             
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 lg:gap-6 mb-6 text-muted-foreground">
