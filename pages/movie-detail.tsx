@@ -542,6 +542,7 @@ export default function MovieDetail() {
             title="You might also like"
             movies={suggestions}
             isLoading={suggestionsLoading}
+            onMovieClick={handleMovieClick}
           />
         )}
       </div>
