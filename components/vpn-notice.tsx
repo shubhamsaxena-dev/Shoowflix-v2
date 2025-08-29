@@ -25,9 +25,11 @@ export default function VPNNotice({ forceShow = false, onClose }: VPNNoticeProps
     if (forceShow) {
       setIsVisible(true);
     } else {
-      // Only show on first load if we're on the home page
+      // Only show on first load if we're on the home page and haven't seen it before
       const isHomePage = router.pathname === '/';
-      if (isHomePage) {
+      const hasSeenNotice = localStorage.getItem('vpn-notice-seen');
+      
+      if (isHomePage && !hasSeenNotice) {
         setIsVisible(true);
       }
     }
