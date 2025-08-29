@@ -80,10 +80,10 @@ export default function Home() {
     }
   };
 
-
   const handleMovieClick = (movie: YTSMovie) => {
-    // This is handled by the MovieCard component now
-    console.log('Movie clicked:', movie.title);
+    // Navigate to movie detail page
+    const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    window.location.href = `/movie/${movie.id}/${movieSlug}`;
   };
 
   const handlePlayMovie = async (movie: YTSMovie, torrent: Torrent) => {
@@ -136,159 +136,130 @@ export default function Home() {
       <main className="relative z-10 -mt-32 space-y-12 pb-20">
         <MovieSection
           title="Trending Now"
-          movies={trendingMovies || []}
+          movies={trendingMovies}
           isLoading={trendingLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/trending"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/trending"}
         />
 
         <MovieSection
           title="Action Movies"
-          movies={actionMovies || []}
+          movies={actionMovies}
           isLoading={actionLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/action"
-          genre="action"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/action"}
         />
 
         <MovieSection
           title="High Rated Movies"
-          movies={highRatedMovies || []}
+          movies={highRatedMovies}
           isLoading={highRatedLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/high-rated"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/high-rated"}
         />
 
         <MovieSection
           title="Recently Added"
-          movies={recentMovies || []}
+          movies={recentMovies}
           isLoading={recentLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/recent"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/recent"}
         />
 
         <MovieSection
           title="Sci-Fi Movies"
-          movies={sciFiMovies || []}
+          movies={sciFiMovies}
           isLoading={sciFiLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/sci-fi"
-          genre="sci-fi"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/sci-fi"}
         />
 
         <MovieSection
           title="Comedy Movies"
-          movies={comedyMovies || []}
+          movies={comedyMovies}
           isLoading={comedyLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/comedy"
-          genre="comedy"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/comedy"}
         />
 
         <MovieSection
           title="Adventure Movies"
-          movies={adventureMovies || []}
+          movies={adventureMovies}
           isLoading={adventureLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/adventure"
-          genre="adventure"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/adventure"}
         />
 
         <MovieSection
           title="Crime Movies"
-          movies={crimeMovies || []}
+          movies={crimeMovies}
           isLoading={crimeLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/crime"
-          genre="crime"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/crime"}
         />
 
         <MovieSection
           title="Fantasy Movies"
-          movies={fantasyMovies || []}
+          movies={fantasyMovies}
           isLoading={fantasyLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/fantasy"
-          genre="fantasy"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/fantasy"}
         />
 
         <MovieSection
           title="Mystery Movies"
-          movies={mysteryMovies || []}
+          movies={mysteryMovies}
           isLoading={mysteryLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/mystery"
-          genre="mystery"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/mystery"}
         />
 
         <MovieSection
           title="Drama Movies"
-          movies={dramaMovies || []}
+          movies={dramaMovies}
           isLoading={dramaLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/drama"
-          genre="drama"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/drama"}
         />
 
         <MovieSection
           title="Horror Movies"
-          movies={horrorMovies || []}
+          movies={horrorMovies}
           isLoading={horrorLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/horror"
-          genre="horror"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/horror"}
         />
 
         <MovieSection
           title="Romance Movies"
-          movies={romanceMovies || []}
+          movies={romanceMovies}
           isLoading={romanceLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/romance"
-          genre="romance"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/romance"}
         />
 
         <MovieSection
           title="War Movies"
-          movies={warMovies || []}
+          movies={warMovies}
           isLoading={warLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/war"
-          genre="war"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/war"}
         />
 
         <MovieSection
           title="Thriller Movies"
-          movies={thrillerMovies || []}
+          movies={thrillerMovies}
           isLoading={thrillerLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/thriller"
-          genre="thriller"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/thriller"}
         />
 
         <MovieSection
           title="Animation Movies"
-          movies={animationMovies || []}
+          movies={animationMovies}
           isLoading={animationLoading}
-          onPlayMovie={handlePlayMovie}
-          showViewAll={true}
-          viewAllLink="/genre/animation"
-          genre="animation"
+          onMovieClick={handleMovieClick}
+          onViewAll={() => window.location.href = "/genre/animation"}
         />
       </main>
 

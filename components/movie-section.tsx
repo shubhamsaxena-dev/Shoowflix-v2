@@ -13,33 +13,31 @@ import 'swiper/css/free-mode';
 
 interface MovieSectionProps {
   title: string;
-  movies: YTSMovie[];
+  movies?: YTSMovie[];
   isLoading: boolean;
-  onPlayMovie?: (movie: YTSMovie, torrent: any) => void;
-  showViewAll?: boolean;
-  viewAllLink?: string;
-  genre?: string;
+  onMovieClick?: (movie: YTSMovie) => void;
+  onViewAll?: () => void;
+  error?: string;
 }
 
 export default function MovieSection({ 
   title, 
   movies, 
   isLoading, 
-  onPlayMovie,
-  showViewAll,
-  viewAllLink,
-  genre
+  onMovieClick,
+  onViewAll,
+  error
 }: MovieSectionProps) {
 
   return (
     <section className="container mx-auto px-2 sm:px-4 group">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
-        {showViewAll && viewAllLink && (
+        {onViewAll && (
           <Button 
             variant="ghost" 
             className="text-primary hover:text-primary/80 transition-colors"
-            onClick={() => window.location.href = viewAllLink}
+            onClick={onViewAll}
             data-testid={`section-view-all-${title}`}
           >
             View All <ChevronRight className="ml-2 h-4 w-4" />
@@ -94,7 +92,7 @@ export default function MovieSection({
                 <SwiperSlide key={movie.id} className="!w-auto">
                   <MovieCard
                     movie={movie}
-                    onClick={(movie) => onPlayMovie?.(movie, movie.torrents?.[0])}
+                    onClick={(movie) => onMovieClick?.(movie)}
                   />
                 </SwiperSlide>
               ))}

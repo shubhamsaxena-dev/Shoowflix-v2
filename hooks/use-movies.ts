@@ -74,7 +74,7 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
   }, []) || [];
 
   // Check if we can load more
-  const canLoadMore = data && data[data.length - 1]?.data?.movies?.length === parseInt(filters.limit?.toString() || '20');
+  const canLoadMore = data && data[data.length - 1]?.data?.movies?.length === parseInt(filters?.limit?.toString() || '20');
   
   const loadMore = () => {
     if (canLoadMore && !isValidating) {

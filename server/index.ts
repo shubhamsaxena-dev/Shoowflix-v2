@@ -1,30 +1,19 @@
-import { createServer } from 'http'
-import { parse } from 'url'
-import next from 'next'
+// Just run Next.js dev server directly
+import { spawn } from 'child_process';
 
-const dev = process.env.NODE_ENV !== 'production'
-const hostname = '0.0.0.0'
-const port = parseInt(process.env.PORT || '5000')
+console.log('🎬 Starting Shoowflix movie streaming platform...');
 
-const app = next({ dev, hostname, port })
-const handle = app.getRequestHandler()
+const nextDev = spawn('npx', ['next', 'dev', '-H', '0.0.0.0', '-p', '5000'], {
+  stdio: 'inherit',
+  cwd: process.cwd()
+});
 
-app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url!, true)
-      await handle(req, res, parsedUrl)
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err)
-      res.statusCode = 500
-      res.end('internal server error')
-    }
-  })
-  .once('error', (err) => {
-    console.error(err)
-    process.exit(1)
-  })
-  .listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`)
-  })
-})
+nextDev.on('error', (error) => {
+  console.error('Failed to start Next.js server:', error);
+  process.exit(1);
+});
+
+nextDev.on('close', (code) => {
+  console.log(`Next.js server exited with code ${code}`);
+  process.exit(code || 0);
+});
