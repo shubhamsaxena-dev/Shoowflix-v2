@@ -3,6 +3,8 @@ import type { AppProps } from 'next/app'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 import VPNNotice from '@/components/vpn-notice'
+import ErrorBoundary from '@/components/error-boundary'
+import NetworkErrorHandler from '@/components/network-error-handler'
 import '../index.css'
 
 // SWR configuration
@@ -16,11 +18,14 @@ const swrConfig = {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <SWRConfig value={swrConfig}>
-      <Component {...pageProps} />
-      <VPNNotice />
-      <SpeedInsights />
-      <Analytics />
-    </SWRConfig>
+    <ErrorBoundary>
+      <SWRConfig value={swrConfig}>
+        <Component {...pageProps} />
+        <VPNNotice />
+        <NetworkErrorHandler />
+        <SpeedInsights />
+        <Analytics />
+      </SWRConfig>
+    </ErrorBoundary>
   )
 }
