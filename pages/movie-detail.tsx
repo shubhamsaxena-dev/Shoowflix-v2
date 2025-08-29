@@ -145,15 +145,15 @@ export default function MovieDetail() {
         </div>
         
         <div className="container mx-auto px-4 py-8">
-          <div className="flex gap-6">
-            <Skeleton className="w-48 h-72 flex-shrink-0" />
+          <div className="flex flex-col lg:flex-row gap-6">
+            <Skeleton className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 flex-shrink-0 mx-auto lg:mx-0" />
             <div className="flex-1 space-y-4">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-8 w-3/4 mx-auto lg:mx-0" />
+              <Skeleton className="h-4 w-1/2 mx-auto lg:mx-0" />
               <Skeleton className="h-20 w-full" />
-              <div className="flex gap-2">
-                <Skeleton className="h-10 w-32" />
-                <Skeleton className="h-10 w-32" />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Skeleton className="h-10 w-full sm:w-32" />
+                <Skeleton className="h-10 w-full sm:w-32" />
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function MovieDetail() {
                 Back to Home
               </Button>
             </Link>
-            <h1 className="text-xl font-semibold truncate" data-testid="movie-detail-header-title">
+            <h1 className="text-lg sm:text-xl font-semibold truncate" data-testid="movie-detail-header-title">
               {movie.title}
             </h1>
           </div>
@@ -197,12 +197,12 @@ export default function MovieDetail() {
 
       {/* Movie details */}
       <div className="container mx-auto px-4 py-8 -mt-16 relative z-10">
-        <div className="flex gap-6 mb-8">
-          <div className="flex-shrink-0">
+        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          <div className="flex-shrink-0 mx-auto lg:mx-0">
             <img 
               src={movie.medium_cover_image}
               alt={`${movie.title} poster`}
-              className="w-48 h-72 object-cover rounded-lg shadow-lg"
+              className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = '/placeholder-movie.jpg';
@@ -211,12 +211,12 @@ export default function MovieDetail() {
             />
           </div>
           
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-4" data-testid="movie-detail-title">
+          <div className="flex-1 text-center lg:text-left">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4" data-testid="movie-detail-title">
               {movie.title}
             </h1>
             
-            <div className="flex items-center space-x-6 mb-6 text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 lg:gap-6 mb-6 text-muted-foreground">
               <div className="flex items-center space-x-1" data-testid="movie-detail-year">
                 <Calendar className="h-4 w-4" />
                 <span>{movie.year}</span>
@@ -254,7 +254,7 @@ export default function MovieDetail() {
             )}
             
             {/* Action buttons */}
-            <div className="flex gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button 
                 variant="outline"
                 data-testid="movie-detail-favorite"
@@ -277,7 +277,7 @@ export default function MovieDetail() {
                 <h3 className="font-semibold mb-4" data-testid="movie-detail-qualities-title">
                   Available Qualities
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {movie.torrents.map((torrent, index) => (
                     <Card key={index} className="p-4">
                       <div className="flex items-center justify-between mb-3">
