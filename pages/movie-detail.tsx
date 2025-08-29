@@ -436,7 +436,7 @@ export default function MovieDetail() {
             </div>
             
             {/* Quick Play - Default 720p */}
-            {selectedTorrent && (
+            {selectedTorrent && movie.torrents && movie.torrents.length > 0 && (
               <div className="mb-8">
                 <Button 
                   size="lg"
@@ -449,6 +449,15 @@ export default function MovieDetail() {
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
                   Default quality: {selectedTorrent.quality} • {selectedTorrent.size}
+                </p>
+              </div>
+            )}
+
+            {/* No torrents available message */}
+            {(!movie.torrents || movie.torrents.length === 0) && (
+              <div className="mb-8 p-4 bg-muted rounded-lg">
+                <p className="text-muted-foreground text-center" data-testid="movie-detail-no-torrents">
+                  No streaming links available for this movie at the moment.
                 </p>
               </div>
             )}
