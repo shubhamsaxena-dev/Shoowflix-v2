@@ -40,7 +40,7 @@ export default function MovieSection({
         {onViewAll && (
           <Button 
             variant="ghost" 
-            className="text-foreground hover:text-primary transition-colors font-medium"
+            className="text-foreground hover:text-foreground hover:bg-accent transition-colors font-medium"
             onClick={onViewAll}
             disabled={loadingViewAll}
             data-testid={`section-view-all-${title}`}
