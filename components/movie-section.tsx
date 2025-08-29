@@ -34,7 +34,7 @@ export default function MovieSection({
 }: MovieSectionProps) {
 
   return (
-    <section className="container mx-auto px-2 sm:px-4 group">
+    <section className="container mx-auto px-2 sm:px-4 group" style={{ minHeight: '380px', paddingBottom: '2rem' }}>
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-bold" data-testid={`section-title-${title}`}>{title}</h2>
         {onViewAll && (
@@ -60,13 +60,13 @@ export default function MovieSection({
       
       <div className="relative">
         {isLoading ? (
-          // Loading skeleton
-          <div className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hidden pb-4">
+          // Loading skeleton with fixed dimensions
+          <div className="flex space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hidden pb-4" style={{ minHeight: '320px' }}>
             {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="flex-shrink-0 w-48">
-                <Skeleton className="h-72 w-full rounded-lg mb-4" />
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-3 w-24" />
+              <div key={index} className="flex-shrink-0 w-36 sm:w-48">
+                <div className="bg-gray-700 rounded-lg mb-4 animate-pulse" style={{ aspectRatio: '2/3', height: '208px' }}></div>
+                <div className="h-4 w-full mb-2 bg-gray-600 rounded animate-pulse"></div>
+                <div className="h-3 w-24 bg-gray-600 rounded animate-pulse"></div>
               </div>
             ))}
           </div>
