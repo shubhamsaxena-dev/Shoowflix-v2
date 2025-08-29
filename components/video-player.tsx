@@ -275,12 +275,20 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" data-testid="video-player">
-      <div className="relative w-full max-w-[80vw] aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+    <div 
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" 
+      data-testid="video-player"
+      onClick={handleClose}
+    >
+      <div 
+        className="relative w-full max-w-[80vw] aspect-video bg-black rounded-lg overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button positioned inside the modal for better visibility */}
         <Button
           variant="ghost"
           size="sm"
-          className="absolute -top-12 right-0 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white"
+          className="absolute top-2 right-2 z-50 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white border border-white/20"
           onClick={handleClose}
           data-testid="video-player-close"
         >
