@@ -115,6 +115,14 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
                   src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
                   alt={`${movieItem?.title} backdrop`}
                   className="w-full h-full object-cover"
+                  width={1920}
+                  height={1080}
+                  loading={movieItem === movies[0] ? 'eager' : 'lazy'}
+                  decoding="async"
+                  style={movieItem === movies[0] ? { 
+                    // @ts-ignore
+                    fetchPriority: 'high' 
+                  } : {}}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/placeholder-backdrop.jpg';

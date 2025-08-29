@@ -49,7 +49,10 @@ export default function MovieCard({ movie, onClick, className = "", isLoading = 
             src={movie.medium_cover_image || '/placeholder-movie.jpg'}
             alt={`${movie.title} poster`}
             className="w-full h-52 sm:h-72 object-cover"
+            width={300}
+            height={450}
             loading="lazy"
+            decoding="async"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-movie.jpg';

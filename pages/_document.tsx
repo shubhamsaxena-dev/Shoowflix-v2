@@ -55,8 +55,13 @@ export default function Document() {
         
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://yts.mx" />
+        <link rel="preconnect" href="https://img.yts.mx" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Preload critical resources */}
+        <link rel="preload" href="/placeholder-backdrop.jpg" as="image" />
+        <link rel="preload" href="/placeholder-movie.jpg" as="image" />
       </Head>
       <body>
         <Main />

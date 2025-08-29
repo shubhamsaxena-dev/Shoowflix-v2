@@ -285,6 +285,10 @@ export default function MovieDetail() {
           src={movie.background_image_original || movie.large_cover_image || movie.medium_cover_image}
           alt={`${movie.title} backdrop`}
           className="w-full h-full object-cover"
+          width={1920}
+          height={1080}
+          loading="eager"
+          decoding="async"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = '/placeholder-backdrop.jpg';
@@ -301,6 +305,10 @@ export default function MovieDetail() {
               src={movie.medium_cover_image}
               alt={`${movie.title} poster`}
               className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
+              width={300}
+              height={450}
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = '/placeholder-movie.jpg';
