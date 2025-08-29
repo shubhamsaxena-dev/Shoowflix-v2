@@ -73,13 +73,12 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
             settings: false,
             chromecast: true,
             p2pProgress: false,
-            autoplay: true
+            autoplay: false
           },
           on: function (e: any) {
             console.log('WebTor event:', e.name);
             if (e.name === window.webtor.INITED) {
-              console.log('Player initialized, starting playback');
-              e.player.play();
+              console.log('Player initialized');
               setIsLoading(false);
               
               // Force reposition controls after player loads
