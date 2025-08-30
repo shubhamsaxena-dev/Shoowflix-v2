@@ -293,7 +293,7 @@ export default function MovieDetail() {
         </title>
         <meta 
           name="description" 
-          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.description_full || `Starring ${movie.cast?.join(', ') || 'talented cast'}.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
+          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.description_full || movie.summary || `${movie.title} - High quality movie streaming.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
         />
         
         {/* Open Graph Meta Tags */}
@@ -348,10 +348,6 @@ export default function MovieDetail() {
                   "bestRating": 10,
                   "worstRating": 1
                 } : undefined,
-                "actor": movie.cast?.map(actor => ({
-                  "@type": "Person",
-                  "name": actor
-                })),
                 "director": {
                   "@type": "Person",
                   "name": "Director"
@@ -617,34 +613,7 @@ export default function MovieDetail() {
           </div>
         </div>
 
-        {/* Cast section */}
-        {movie.cast && movie.cast.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold mb-6" data-testid="movie-detail-cast-title">Cast</h3>
-            <div className="flex space-x-4 overflow-x-auto scrollbar-hidden pb-4">
-              {movie.cast.map((actor, index) => (
-                <div key={index} className="flex-shrink-0 text-center w-32">
-                  <img 
-                    src={actor.url_small_image || '/placeholder-actor.jpg'}
-                    alt={actor.name}
-                    className="w-20 h-20 object-cover rounded-full mb-2 mx-auto"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-actor.jpg';
-                    }}
-                    data-testid={`cast-image-${index}`}
-                  />
-                  <p className="text-sm font-medium" data-testid={`cast-name-${index}`}>
-                    {actor.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground" data-testid={`cast-character-${index}`}>
-                    {actor.character_name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Cast information not available from YTS API */}
 
         {/* Similar movies */}
         {(suggestionsLoading || (suggestions && suggestions.length > 0)) && (
