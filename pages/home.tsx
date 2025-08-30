@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/search-bar";
@@ -50,6 +51,7 @@ const genres = [
 
 export default function Home() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
@@ -199,7 +201,7 @@ export default function Home() {
               {session ? (
                 <UserProfileDropdown />
               ) : (
-                <Button variant="outline" size="sm" onClick={() => signIn()} data-testid="button-signin">
+                <Button variant="outline" size="sm" onClick={() => router.push('/auth/signin')} data-testid="button-signin">
                   <User className="h-4 w-4 mr-2" />
                   Sign In
                 </Button>
