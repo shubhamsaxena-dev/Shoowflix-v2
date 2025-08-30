@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useSession, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft, Play, Download, Star, Clock, Calendar, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, Play, Download, Star, Clock, Calendar, Heart, Share2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import VideoPlayer from "@/components/video-player";
 import MovieSection from "@/components/movie-section";
 import { useMovieDetails, useMovieSuggestions, generateMagnetLink } from "@/hooks/use-movies";
+import { useFavorites } from "@/hooks/use-favorites";
 import type { YTSMovie, Torrent } from "@/types/movie";
 
 // Helper function to create URL-friendly slug from movie title
@@ -26,14 +28,17 @@ function createSlug(title: string | null | undefined): string {
 
 export default function MovieDetail() {
   const router = useRouter();
+  const { data: session } = useSession();
   const { id, slug } = router.query;
   const movieId = parseInt((id as string) || '0');
   const { toast } = useToast();
+  const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
 
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
   const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   const { data: movieData, isLoading: movieLoading, error: movieError } = useMovieDetails(movieId);
   const { data: suggestionsData, isLoading: suggestionsLoading } = useMovieSuggestions(movieId);
@@ -139,6 +144,45 @@ export default function MovieDetail() {
           variant: "destructive"
         });
       }
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (!session) {
+      signIn()
+      return
+    }
+
+    if (!movie) return
+
+    setFavoriteLoading(true)
+    
+    try {
+      if (isFavorite(movie.id)) {
+        const success = await removeFromFavorites(movie.id)
+        if (success) {
+          toast({
+            title: "Removed from favorites",
+            description: `${movie.title} has been removed from your favorites`,
+          })
+        }
+      } else {
+        const success = await addToFavorites(movie.id)
+        if (success) {
+          toast({
+            title: "Added to favorites",
+            description: `${movie.title} has been added to your favorites`,
+          })
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update favorites. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setFavoriteLoading(false)
     }
   };
 
@@ -445,13 +489,25 @@ export default function MovieDetail() {
             
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              {/* <Button 
+              <Button 
                 variant="outline"
+                onClick={handleFavoriteToggle}
+                disabled={favoriteLoading}
                 data-testid="movie-detail-favorite"
               >
-                <Heart className="mr-2 h-4 w-4" />
-                Add to Favorites
-              </Button> */}
+                {favoriteLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Heart className={`mr-2 h-4 w-4 ${
+                    session && isFavorite(movie.id) 
+                      ? 'fill-red-500 text-red-500' 
+                      : ''
+                  }`} />
+                )}
+                {session ? (
+                  isFavorite(movie.id) ? 'Remove from Favorites' : 'Add to Favorites'
+                ) : 'Sign in to Save'}
+              </Button>
               <Button 
                 variant="outline"
                 onClick={handleShare}
