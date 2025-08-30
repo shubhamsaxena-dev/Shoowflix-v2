@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[974],{2068:(e,_,n)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/genre/[genre]",function(){return n(2693)}])},2693:(e,_,n)=>{"use strict";n.r(_),n.d(_,{default:()=>u});let u=n(7273).default}},e=>{e.O(0,[462,349,273,636,593,792],()=>e(e.s=2068)),_N_E=e.O()}]);
