@@ -52,6 +52,12 @@ type ApiRouteConfig = {
   handler satisfies PagesPageConfig
 }
 
+// Validate ../../pages/auth/signin.tsx
+{
+  const handler = {} as typeof import("../../pages/auth/signin.js")
+  handler satisfies PagesPageConfig
+}
+
 // Validate ../../pages/genre.tsx
 {
   const handler = {} as typeof import("../../pages/genre.js")
@@ -98,6 +104,24 @@ type ApiRouteConfig = {
 {
   const handler = {} as typeof import("../../pages/not-found.js")
   handler satisfies PagesPageConfig
+}
+
+// Validate ../../pages/profile.tsx
+{
+  const handler = {} as typeof import("../../pages/profile.js")
+  handler satisfies PagesPageConfig
+}
+
+// Validate ../../pages/api/auth/[...nextauth].ts
+{
+  const handler = {} as typeof import("../../pages/api/auth/[...nextauth].js")
+  handler satisfies ApiRouteConfig
+}
+
+// Validate ../../pages/api/favorites.ts
+{
+  const handler = {} as typeof import("../../pages/api/favorites.js")
+  handler satisfies ApiRouteConfig
 }
 
 // Validate ../../pages/api/magnet.ts

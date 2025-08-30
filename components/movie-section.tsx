@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper/modules';
-import MovieCard from "./movie-card";
+import MovieCardWithFavorites from "./movie-card-with-favorites";
 import type { YTSMovie } from "@/types/movie";
 
 // Import Swiper styles
@@ -103,7 +103,7 @@ export default function MovieSection({
             >
               {movies.map((movie) => (
                 <SwiperSlide key={movie.id} className="!w-auto">
-                  <MovieCard
+                  <MovieCardWithFavorites
                     movie={movie}
                     onClick={(movie) => onMovieClick?.(movie)}
                     isLoading={loadingMovieId === movie.id}

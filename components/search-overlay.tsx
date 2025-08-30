@@ -3,7 +3,7 @@ import { X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import MovieCard from "./movie-card";
+import MovieCardWithFavorites from "./movie-card-with-favorites";
 import { useMovies } from "@/hooks/use-movies";
 import type { YTSMovie } from "@/types/movie";
 
@@ -144,7 +144,7 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                     {searchData.data.movies.map((movie) => (
-                      <MovieCard
+                      <MovieCardWithFavorites
                         key={movie.id}
                         movie={movie}
                         onClick={handleMovieClick}

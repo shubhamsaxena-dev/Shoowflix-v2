@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
+import { useSession, signIn } from "next-auth/react";
 import Head from "next/head";
-import { User } from "lucide-react";
+import Link from "next/link";
+import { User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SearchBar from "@/components/search-bar";
 import HeroSection from "@/components/hero-section";
 import MovieSection from "@/components/movie-section";
@@ -46,6 +49,7 @@ const genres = [
 ];
 
 export default function Home() {
+  const { data: session } = useSession();
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
@@ -189,6 +193,27 @@ export default function Home() {
             
             <div className="flex-1 max-w-md mx-4">
               <SearchBar onSearch={handleSearch} />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              {session ? (
+                <Link href="/profile">
+                  <Button variant="ghost" size="sm" data-testid="button-profile">
+                    <Avatar className="h-6 w-6 mr-2">
+                      <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
+                      <AvatarFallback>
+                        <User className="h-3 w-3" />
+                      </AvatarFallback>
+                    </Avatar>
+                    Profile
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => signIn()} data-testid="button-signin">
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         </div>
