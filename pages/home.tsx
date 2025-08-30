@@ -4,10 +4,10 @@ import Head from "next/head";
 import Link from "next/link";
 import { User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SearchBar from "@/components/search-bar";
 import HeroSection from "@/components/hero-section";
 import MovieSection from "@/components/movie-section";
+import UserProfileDropdown from "@/components/user-profile-dropdown";
 import VideoPlayer from "@/components/video-player";
 import SearchOverlay from "@/components/search-overlay";
 import { 
@@ -197,17 +197,7 @@ export default function Home() {
             
             <div className="flex items-center space-x-2">
               {session ? (
-                <Link href="/profile">
-                  <Button variant="ghost" size="sm" data-testid="button-profile">
-                    <Avatar className="h-6 w-6 mr-2">
-                      <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
-                      <AvatarFallback>
-                        <User className="h-3 w-3" />
-                      </AvatarFallback>
-                    </Avatar>
-                    Profile
-                  </Button>
-                </Link>
+                <UserProfileDropdown />
               ) : (
                 <Button variant="outline" size="sm" onClick={() => signIn()} data-testid="button-signin">
                   <User className="h-4 w-4 mr-2" />
