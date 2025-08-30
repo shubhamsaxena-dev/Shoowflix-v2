@@ -68,7 +68,7 @@ export default function Profile() {
                        movie.torrents?.[0]
     
     if (bestTorrent) {
-      const magnet = generateMagnetLink(movie, bestTorrent)
+      const magnet = await generateMagnetLink(movie, bestTorrent)
       setSelectedMovie(movie)
       setSelectedTorrent(bestTorrent)
       setMagnetLink(magnet)

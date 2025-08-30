@@ -179,7 +179,7 @@ export default function UserProfileDropdown() {
               View Full Profile
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600 hover:text-red-600" data-testid="dropdown-sign-out">
+          <DropdownMenuItem onClick={() => signOut()} className="text-red-600 focus:text-red-600 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" data-testid="dropdown-sign-out">
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
           </DropdownMenuItem>
