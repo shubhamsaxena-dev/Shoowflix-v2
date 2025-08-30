@@ -221,7 +221,7 @@ export default function Home() {
 
       {/* Hero Section */}
       {featuredMovies && featuredMovies.length > 0 && (
-        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} />
+        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} isAuthenticated={!!session} />
       )}
 
       {/* Movie Sections */}
