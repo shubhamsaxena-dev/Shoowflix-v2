@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
+import { createId } from '@paralleldrive/cuid2'
 
 const prisma = new PrismaClient()
 
@@ -35,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create user
     const user = await prisma.user.create({
       data: {
+        id: createId(),
         name,
         email,
         password: hashedPassword
