@@ -4,5 +4,7 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/auth/signin": "pages/auth/signin.js",
-  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js"
+  "/movie/[id]/[slug]": "pages/movie/[id]/[slug].js",
+  "/api/movies": "pages/api/movies.js",
+  "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js"
 }
