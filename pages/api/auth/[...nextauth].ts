@@ -1,16 +1,11 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import GitHubProvider from 'next-auth/providers/github'
 
 export default NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "demo-google-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "demo-google-secret",
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID || "demo-github-id",
-      clientSecret: process.env.GITHUB_SECRET || "demo-github-secret",
     }),
   ],
   session: {
