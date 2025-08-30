@@ -10,16 +10,6 @@ exports.id = "vendor-chunks/swiper";
 exports.ids = ["vendor-chunks/swiper"];
 exports.modules = {
 
-/***/ "(pages-dir-node)/./node_modules/swiper/modules/effect-fade.css":
-/*!*****************************************************!*\
-  !*** ./node_modules/swiper/modules/effect-fade.css ***!
-  \*****************************************************/
-/***/ (() => {
-
-
-
-/***/ }),
-
 /***/ "(pages-dir-node)/./node_modules/swiper/modules/free-mode.css":
 /*!***************************************************!*\
   !*** ./node_modules/swiper/modules/free-mode.css ***!
@@ -33,16 +23,6 @@ exports.modules = {
 /***/ "(pages-dir-node)/./node_modules/swiper/modules/navigation.css":
 /*!****************************************************!*\
   !*** ./node_modules/swiper/modules/navigation.css ***!
-  \****************************************************/
-/***/ (() => {
-
-
-
-/***/ }),
-
-/***/ "(pages-dir-node)/./node_modules/swiper/modules/pagination.css":
-/*!****************************************************!*\
-  !*** ./node_modules/swiper/modules/pagination.css ***!
   \****************************************************/
 /***/ (() => {
 
