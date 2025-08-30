@@ -149,7 +149,7 @@ export default function MovieDetail() {
 
   const handleFavoriteToggle = async () => {
     if (!session) {
-      signIn()
+      router.push('/auth/signin')
       return
     }
 
