@@ -506,7 +506,7 @@ export default function MovieDetail() {
                 )}
                 {session ? (
                   isFavorite(movie.id) ? 'Remove from Favorites' : 'Add to Favorites'
-                ) : 'Sign in to Save'}
+                ) : 'Favourite'}
               </Button>
               <Button 
                 variant="outline"
