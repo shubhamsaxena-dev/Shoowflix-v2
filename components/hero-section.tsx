@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 // Import Swiper styles
 import 'swiper/css';

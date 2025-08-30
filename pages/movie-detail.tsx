@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import VideoPlayer from "@/components/video-player";
 import MovieSection from "@/components/movie-section";
 import { useMovieDetails, useMovieSuggestions, generateMagnetLink } from "@/hooks/use-movies";
-import type { YTSMovie, Torrent } from "@shared/schema";
+import type { YTSMovie, Torrent } from "@/types/movie";
 
 // Helper function to create URL-friendly slug from movie title
 function createSlug(title: string | null | undefined): string {

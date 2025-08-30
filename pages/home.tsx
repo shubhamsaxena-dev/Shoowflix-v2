@@ -27,7 +27,7 @@ import {
   useAnimationMovies,
   generateMagnetLink
 } from "@/hooks/use-movies";
-import type { YTSMovie, Torrent } from "@shared/schema";
+import type { YTSMovie, Torrent } from "@/types/movie";
 import type { MovieFilters } from "@/lib/types";
 
 const genres = [

@@ -1,6 +1,6 @@
 import MovieSection from "./movie-section";
 import { useMoviesByGenre } from "@/hooks/use-movies";
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 interface MoviesListProps {
   genre: string;

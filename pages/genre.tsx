@@ -8,7 +8,7 @@ import { ArrowLeft, Filter, Search } from "lucide-react";
 import MovieCard from "@/components/movie-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 interface MoviesResponse {
   status: string;

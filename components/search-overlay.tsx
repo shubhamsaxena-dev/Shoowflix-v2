@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import MovieCard from "./movie-card";
 import { useMovies } from "@/hooks/use-movies";
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 interface SearchOverlayProps {
   isOpen: boolean;
