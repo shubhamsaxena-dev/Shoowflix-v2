@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model User {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  email            String?   @unique
+  name             String?   @map("first_name")
+  lastName         String?   @map("last_name")
+  userName         String?   @unique
+  password         String?   // For email/password authentication
+  emailVerified    DateTime?
+  image            String?   @map("profile_image_url")
+  hasAccess        Boolean?  @map("has_access")
+  inviteCode       String?   @map("invite_code")
+  accounts         Account[]
+  sessions         Session[]
+  // Optional for WebAuthn support
+
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+  userFeturedMovies UserFeturedMovies[]
+  comments          Comments[]
+  notifications     Notification[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                       String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId                   String  @db.ObjectId
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  refresh_token_expires_in Int?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Optional for WebAuthn support
+// model Authenticator {
+//   credentialID         String  @id @map("_id")
+//   userId               String  @db.ObjectId
+//   providerAccountId    String
+//   credentialPublicKey  String
+//   counter              Int
+//   credentialDeviceType String
+//   credentialBackedUp   Boolean
+//   transports           String?
+
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@unique([userId, credentialID])
+// }
+model UserFeturedMovies {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @unique @db.ObjectId
+  movieIds String[]
+}
+
+model Comments {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  parentId      String?        @db.ObjectId
+  userId        String         @db.ObjectId
+  text          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  commentedBy   User           @relation(fields: [userId], references: [id])
+  upVotes       Int?           @default(0)
+  downVotes     Int?           @default(0)
+  movieId       String         @unique
+  MovieComments MovieComments? @relation(fields: [movieId], references: [movieId])
+}
+
+model MovieComments {
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  movieId  String     @unique
+  comments Comments[]
+}
+
+
+model Notification {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  type      String
+  message   String
+  commentId String
+  createdAt DateTime  @default(now())
+  seen      Boolean   @default(false)
+}
+
+model Subscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}

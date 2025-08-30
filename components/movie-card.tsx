@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Star, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 // Helper function to create URL-friendly slug from movie title
 function createSlug(title: string): string {

@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/**/*.ts"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
     "incremental": true,
@@ -19,9 +19,9 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       "@/*": ["./*"],
-      "@shared/*": ["./shared/*"],
       "@assets/*": ["./attached_assets/*"]
     },
     "plugins": [

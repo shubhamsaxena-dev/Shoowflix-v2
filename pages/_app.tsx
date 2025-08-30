@@ -1,4 +1,5 @@
 import { SWRConfig } from 'swr'
+import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
@@ -17,17 +18,19 @@ const swrConfig = {
   dedupingInterval: 5 * 60 * 1000, // 5 minutes
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <ErrorBoundary>
-      <SWRConfig value={swrConfig}>
-        <Component {...pageProps} />
-        <VPNNotice />
-        <NetworkErrorHandler />
-        <Toaster />
-        <SpeedInsights />
-        <Analytics />
-      </SWRConfig>
+      <SessionProvider session={session}>
+        <SWRConfig value={swrConfig}>
+          <Component {...pageProps} />
+          <VPNNotice />
+          <NetworkErrorHandler />
+          <Toaster />
+          <SpeedInsights />
+          <Analytics />
+        </SWRConfig>
+      </SessionProvider>
     </ErrorBoundary>
   )
 }

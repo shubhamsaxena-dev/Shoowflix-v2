@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
 import type { MovieFilters } from "@/lib/types";
-import type { YTSListMoviesResponse, YTSMovieDetailsResponse, YTSMovie, Torrent } from "@shared/schema";
+import type { YTSListMoviesResponse, YTSMovieDetailsResponse, YTSMovie, Torrent } from "@/types/movie";
 
 // Fetcher function for SWR
 const fetcher = async (url: string) => {

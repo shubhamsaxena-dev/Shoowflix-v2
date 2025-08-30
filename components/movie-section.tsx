@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper/modules';
 import MovieCard from "./movie-card";
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 // Import Swiper styles
 import 'swiper/css';

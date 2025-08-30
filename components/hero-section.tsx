@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
-import type { YTSMovie } from "@shared/schema";
+import type { YTSMovie } from "@/types/movie";
 
 // Import Swiper styles
 import 'swiper/css';
@@ -17,9 +17,10 @@ interface HeroSectionProps {
   movies: YTSMovie[];
   onPlayMovie?: (movie: YTSMovie, torrent: any) => void;
   isLoadingPlay?: boolean;
+  isAuthenticated?: boolean;
 }
 
-export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: HeroSectionProps) {
+export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuthenticated }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const swiperRef = useRef<SwiperType>();
 
@@ -198,25 +199,27 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay }: Hero
             )}
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button 
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
-                onClick={() => movie && onPlayMovie?.(movie, movie.torrents?.[0])}
-                disabled={isLoadingPlay}
-                data-testid="hero-play-button"
-              >
-                {isLoadingPlay ? (
-                  <>
-                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Play Now</span>
-                  </>
-                )}
-              </Button>
+              {isAuthenticated && (
+                <Button 
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
+                  onClick={() => movie && onPlayMovie?.(movie, movie.torrents?.[0])}
+                  disabled={isLoadingPlay}
+                  data-testid="hero-play-button"
+                >
+                  {isLoadingPlay ? (
+                    <>
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span>Play Now</span>
+                    </>
+                  )}
+                </Button>
+              )}
               <Button 
                 variant="secondary"
                 size="lg"

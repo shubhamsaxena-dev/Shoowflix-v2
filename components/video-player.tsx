@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { YTSMovie, Torrent } from "@shared/schema";
+import type { YTSMovie, Torrent } from "@/types/movie";
 import type { WebTorConfig } from "@/lib/types";
 
 interface VideoPlayerProps {

@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
+import { useSession, signIn } from "next-auth/react";
 import Head from "next/head";
-import { User } from "lucide-react";
+import Link from "next/link";
+import { User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/search-bar";
 import HeroSection from "@/components/hero-section";
 import MovieSection from "@/components/movie-section";
+import UserProfileDropdown from "@/components/user-profile-dropdown";
 import VideoPlayer from "@/components/video-player";
 import SearchOverlay from "@/components/search-overlay";
 import { 
@@ -27,7 +30,7 @@ import {
   useAnimationMovies,
   generateMagnetLink
 } from "@/hooks/use-movies";
-import type { YTSMovie, Torrent } from "@shared/schema";
+import type { YTSMovie, Torrent } from "@/types/movie";
 import type { MovieFilters } from "@/lib/types";
 
 const genres = [
@@ -46,6 +49,7 @@ const genres = [
 ];
 
 export default function Home() {
+  const { data: session } = useSession();
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
@@ -190,13 +194,24 @@ export default function Home() {
             <div className="flex-1 max-w-md mx-4">
               <SearchBar onSearch={handleSearch} />
             </div>
+            
+            <div className="flex items-center space-x-2">
+              {session ? (
+                <UserProfileDropdown />
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => signIn()} data-testid="button-signin">
+                  <User className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
       {featuredMovies && featuredMovies.length > 0 && (
-        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} />
+        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} isAuthenticated={!!session} />
       )}
 
       {/* Movie Sections */}
