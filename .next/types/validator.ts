@@ -118,6 +118,12 @@ type ApiRouteConfig = {
   handler satisfies ApiRouteConfig
 }
 
+// Validate ../../pages/api/auth/register.ts
+{
+  const handler = {} as typeof import("../../pages/api/auth/register.js")
+  handler satisfies ApiRouteConfig
+}
+
 // Validate ../../pages/api/favorites.ts
 {
   const handler = {} as typeof import("../../pages/api/favorites.js")

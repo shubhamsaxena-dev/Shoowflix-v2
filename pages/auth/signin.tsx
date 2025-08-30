@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { getProviders, signIn, getSession } from 'next-auth/react'
 import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Github } from 'lucide-react'
+import { ArrowLeft, Mail, Github, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { useToast } from '@/hooks/use-toast'
 
 interface Provider {
   id: string
@@ -21,15 +26,88 @@ interface SignInProps {
 
 export default function SignIn({ providers }: SignInProps) {
   const [loading, setLoading] = useState<string | null>(null)
+  const [isLogin, setIsLogin] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
+  const [credentialsLoading, setCredentialsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  })
+  const router = useRouter()
+  const { toast } = useToast()
+  const { callbackUrl } = router.query
 
   const handleSignIn = async (providerId: string) => {
     setLoading(providerId)
     try {
-      await signIn(providerId, { callbackUrl: '/' })
+      await signIn(providerId, { callbackUrl: callbackUrl as string || '/' })
     } catch (error) {
       console.error('Sign in error:', error)
     } finally {
       setLoading(null)
+    }
+  }
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCredentialsLoading(true)
+
+    try {
+      if (isLogin) {
+        // Sign in with credentials
+        const result = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false
+        })
+
+        if (result?.error) {
+          toast({
+            title: 'Sign in failed',
+            description: 'Invalid email or password',
+            variant: 'destructive'
+          })
+        } else if (result?.ok) {
+          toast({
+            title: 'Welcome back!',
+            description: 'You have been signed in successfully'
+          })
+          router.push(callbackUrl as string || '/')
+        }
+      } else {
+        // Register new user
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+          toast({
+            title: 'Account created!',
+            description: 'You can now sign in with your email and password'
+          })
+          setIsLogin(true)
+          setFormData({ ...formData, name: '', password: '' })
+        } else {
+          toast({
+            title: 'Registration failed',
+            description: data.message || 'Something went wrong',
+            variant: 'destructive'
+          })
+        }
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        variant: 'destructive'
+      })
+    } finally {
+      setCredentialsLoading(false)
     }
   }
 
@@ -63,13 +141,19 @@ export default function SignIn({ providers }: SignInProps) {
 
         <Card>
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {isLogin ? 'Welcome back' : 'Create Account'}
+            </CardTitle>
             <CardDescription>
-              Sign in to your account to save favorites and continue watching
+              {isLogin 
+                ? 'Sign in to your account to save favorites and continue watching'
+                : 'Join Shoowflix to start watching movies and saving favorites'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.values(providers || {}).map((provider) => (
+            {/* Google Sign In */}
+            {Object.values(providers || {}).filter(p => p.id !== 'credentials').map((provider) => (
               <Button
                 key={provider.name}
                 variant="outline"
@@ -80,7 +164,7 @@ export default function SignIn({ providers }: SignInProps) {
               >
                 {loading === provider.id ? (
                   <div className="flex items-center">
-                    <div className="h-5 w-5 mr-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Signing in...
                   </div>
                 ) : (
@@ -91,6 +175,109 @@ export default function SignIn({ providers }: SignInProps) {
                 )}
               </Button>
             ))}
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            {/* Email/Password Form */}
+            <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required={!isLogin}
+                    data-testid="input-name"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  data-testid="input-email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder={isLogin ? 'Enter your password' : 'Create a password (min 6 characters)'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    minLength={6}
+                    data-testid="input-password"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                    data-testid="button-toggle-password"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={credentialsLoading}
+                data-testid={`button-${isLogin ? 'signin' : 'signup'}`}
+              >
+                {credentialsLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isLogin ? 'Signing In...' : 'Creating Account...'}
+                  </>
+                ) : (
+                  isLogin ? 'Sign In' : 'Create Account'
+                )}
+              </Button>
+            </form>
+
+            {/* Toggle between login/register */}
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setFormData({ name: '', email: '', password: '' })
+                }}
+                data-testid="button-toggle-auth-mode"
+              >
+                {isLogin 
+                  ? "Don't have an account? Sign up" 
+                  : "Already have an account? Sign in"
+                }
+              </Button>
+            </div>
 
             <div className="text-center text-sm text-muted-foreground">
               <p>
