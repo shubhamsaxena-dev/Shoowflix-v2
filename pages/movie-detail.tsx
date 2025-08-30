@@ -518,8 +518,8 @@ export default function MovieDetail() {
               </Button>
             </div>
             
-            {/* Quick Play - Default 720p */}
-            {selectedTorrent && movie.torrents && movie.torrents.length > 0 && (
+            {/* Quick Play - Default 720p - Only show for authenticated users */}
+            {session && selectedTorrent && movie.torrents && movie.torrents.length > 0 && (
               <div className="mb-8">
                 <Button 
                   size="lg"
@@ -536,6 +536,20 @@ export default function MovieDetail() {
               </div>
             )}
 
+            {/* Sign in prompt for non-authenticated users */}
+            {!session && (
+              <div className="mb-8 p-6 bg-muted rounded-lg text-center">
+                <h3 className="font-semibold mb-2">Sign in to watch movies</h3>
+                <p className="text-muted-foreground mb-4">
+                  Create an account or sign in to stream movies and save your favorites
+                </p>
+                <Button onClick={() => signIn()} data-testid="movie-detail-signin-prompt">
+                  <Heart className="mr-2 h-4 w-4" />
+                  Sign In to Continue
+                </Button>
+              </div>
+            )}
+
             {/* No torrents available message */}
             {(!movie.torrents || movie.torrents.length === 0) && (
               <div className="mb-8 p-4 bg-muted rounded-lg">
@@ -545,8 +559,8 @@ export default function MovieDetail() {
               </div>
             )}
 
-            {/* Available qualities */}
-            {movie.torrents && movie.torrents.length > 0 && (
+            {/* Available qualities - Only show for authenticated users */}
+            {session && movie.torrents && movie.torrents.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-4" data-testid="movie-detail-qualities-title">
                   All Available Qualities
