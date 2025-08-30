@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowLeft, Play, Download, Star, Clock, Calendar, Heart, Share2, Loader2 } from "lucide-react";
@@ -543,7 +543,7 @@ export default function MovieDetail() {
                 <p className="text-muted-foreground mb-4">
                   Create an account or sign in to stream movies and save your favorites
                 </p>
-                <Button onClick={() => signIn()} data-testid="movie-detail-signin-prompt">
+                <Button onClick={() => router.push('/auth/signin')} data-testid="movie-detail-signin-prompt">
                   <Heart className="mr-2 h-4 w-4" />
                   Sign In to Continue
                 </Button>
