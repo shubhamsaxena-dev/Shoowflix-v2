@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth/next'
+import { authOptions } from './auth/[...nextauth]'
 
 // Simple in-memory storage for favorites (for demo purposes)
 // In production, this would be stored in a database
 const userFavorites: Record<string, string[]> = {}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, {})
+  const session = await getServerSession(req, res, authOptions)
   
   if (!session?.user?.id) {
     return res.status(401).json({ message: 'Unauthorized' })

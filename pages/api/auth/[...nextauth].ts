@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import NextAuth, { type NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
@@ -6,7 +6,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "demo-google-id",
@@ -74,5 +74,7 @@ export default NextAuth({
       return session
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
-})
+  secret: process.env.NEXTAUTH_SECRET || 'development-secret',
+}
+
+export default NextAuth(authOptions)
