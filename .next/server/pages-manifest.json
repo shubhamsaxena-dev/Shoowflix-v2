@@ -6,5 +6,8 @@
   "/api/auth/[...nextauth]": "pages/api/auth/[...nextauth].js",
   "/api/movies/[id]": "pages/api/movies/[id].js",
   "/api/movies/[id]/suggestions": "pages/api/movies/[id]/suggestions.js",
-  "/api/favorites": "pages/api/favorites.js"
+  "/api/favorites": "pages/api/favorites.js",
+  "/": "pages/index.js",
+  "/api/movies": "pages/api/movies.js",
+  "/profile": "pages/profile.js"
 }
