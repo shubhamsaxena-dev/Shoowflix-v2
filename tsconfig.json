@@ -19,6 +19,7 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       "@/*": ["./*"],
       "@assets/*": ["./attached_assets/*"]

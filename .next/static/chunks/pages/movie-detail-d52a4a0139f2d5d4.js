@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[454],{6980:(_,e,n)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/movie-detail",function(){return n(6616)}])}},_=>{_.O(0,[561,739,164,616,636,593,792],()=>_(_.s=6980)),_N_E=_.O()}]);
