@@ -14,39 +14,43 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import type { YTSMovie } from '@/types/movie'
+import { useFavorites } from '@/hooks/use-favorites'
+import { useMovieDetails } from '@/hooks/use-movies'
 
-interface FavoriteMovie {
-  id: string
-  movieId: string
-  movieData: YTSMovie
-  createdAt: string
+const FavList = ({ movieId, handleMovieClick }: any) => {
+
+  const { data: movieData, isLoading: movieLoading, } = useMovieDetails(movieId);
+  const movie = movieData?.data?.movie as YTSMovie;
+  if (movieLoading) return null
+  return (<div
+    key={movieId}
+    className="flex items-center space-x-3 p-2 hover:bg-accent rounded cursor-pointer transition-colors"
+    onClick={() => handleMovieClick(movie)}
+    data-testid={`dropdown-favorite-${movieId}`}
+  >
+    <img
+      src={movie.small_cover_image || '/placeholder-movie.jpg'}
+      alt={movie.title}
+      className="h-12 w-8 object-cover rounded"
+      onError={(e) => {
+        const target = e.target as HTMLImageElement
+        target.src = '/placeholder-movie.jpg'
+      }}
+    />
+    <div className="flex-1 min-w-0">
+      <div className="text-sm font-medium truncate">
+        {movie.title}
+      </div>
+      <div className="text-xs text-muted-foreground">
+        {movie.year} • {movie.rating}⭐
+      </div>
+    </div>
+  </div>
+  )
 }
-
 export default function UserProfileDropdown() {
   const { data: session } = useSession()
-  const [favorites, setFavorites] = useState<FavoriteMovie[]>([])
-  const [loadingFavorites, setLoadingFavorites] = useState(false)
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      loadFavorites()
-    }
-  }, [session])
-
-  const loadFavorites = async () => {
-    try {
-      setLoadingFavorites(true)
-      const response = await fetch('/api/favorites')
-      if (response.ok) {
-        const data = await response.json()
-        setFavorites(data.favorites || [])
-      }
-    } catch (error) {
-      console.error('Failed to load favorites:', error)
-    } finally {
-      setLoadingFavorites(false)
-    }
-  }
+  const { favorites, loading: loadingFavorites } = useFavorites()
 
   const handleMovieClick = (movie: YTSMovie) => {
     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
@@ -74,7 +78,7 @@ export default function UserProfileDropdown() {
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent className="w-80 p-0" align="end" data-testid="user-profile-dropdown-content">
         {/* User Info Header */}
         <div className="p-4 border-b">
@@ -109,7 +113,7 @@ export default function UserProfileDropdown() {
               </Button>
             </Link>
           </div>
-          
+
           {loadingFavorites ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, index) => (
@@ -125,30 +129,7 @@ export default function UserProfileDropdown() {
           ) : favorites.length > 0 ? (
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {favorites.slice(0, 5).map((favorite) => (
-                <div 
-                  key={favorite.id}
-                  className="flex items-center space-x-3 p-2 hover:bg-accent rounded cursor-pointer transition-colors"
-                  onClick={() => handleMovieClick(favorite.movieData)}
-                  data-testid={`dropdown-favorite-${favorite.movieId}`}
-                >
-                  <img 
-                    src={favorite.movieData.small_cover_image || '/placeholder-movie.jpg'}
-                    alt={favorite.movieData.title}
-                    className="h-12 w-8 object-cover rounded"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = '/placeholder-movie.jpg'
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
-                      {favorite.movieData.title}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {favorite.movieData.year} • {favorite.movieData.rating}⭐
-                    </div>
-                  </div>
-                </div>
+                <FavList movieId={favorite}  handleMovieClick={handleMovieClick}/>
               ))}
               {favorites.length > 5 && (
                 <div className="text-center pt-2">
@@ -170,7 +151,7 @@ export default function UserProfileDropdown() {
         </div>
 
         <DropdownMenuSeparator />
-        
+
         {/* Actions */}
         <div className="p-2">
           <DropdownMenuItem asChild>

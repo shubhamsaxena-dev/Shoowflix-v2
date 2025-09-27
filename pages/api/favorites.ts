@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       // Get user's favorite movies
       const featured = await prisma.userFeaturedMovies.findUnique({ where: { userId } })
-      return res.status(200).json({ favorites: featured ?? [] })
+      return res.status(200).json({ favorites: featured?.movieIds ?? [] })
     }
 
     if (req.method === 'POST') {

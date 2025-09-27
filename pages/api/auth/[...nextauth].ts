@@ -40,13 +40,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google' && user.email) {
-        const existingUser = await prisma.user.findUnique({ where: { email: user.email } })
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+        })
+
         if (existingUser) {
+          // 1. Link Google account if not already linked
           const existingAccount = await prisma.account.findFirst({
             where: { provider: 'google', userId: existingUser.id },
           })
 
-          if (!existingAccount && account.providerAccountId) {
+          if (!existingAccount) {
             await prisma.account.create({
               data: {
                 userId: existingUser.id,
@@ -60,7 +64,37 @@ export const authOptions: NextAuthOptions = {
             })
           }
 
+          // 2. Update user profile if missing values
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: existingUser.name ?? user.name,
+              image: existingUser.image ?? user.image,
+            },
+          })
+
+          // Ensure session/jwt uses correct ID
           user.id = existingUser.id
+        } else {
+          // If no user exists, create a new one with Google info
+          const newUser = await prisma.user.create({
+            data: {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: 'google',
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  refresh_token: account.refresh_token,
+                  expires_at: account.expires_at,
+                },
+              },
+            },
+          })
+          user.id = newUser.id
         }
       }
 
