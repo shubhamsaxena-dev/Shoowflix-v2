@@ -1,14 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from './auth/[...nextauth]'
-
-// Simple in-memory storage for favorites (for demo purposes)
-// In production, this would be stored in a database
-const userFavorites: Record<string, string[]> = {}
+import { prisma } from '@/lib/prisma'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions)
-  
+
   if (!session?.user?.id) {
     return res.status(401).json({ message: 'Unauthorized' })
   }
@@ -17,37 +14,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      const movieIds = userFavorites[userId] || []
-      
-      if (!movieIds.length) {
+      const featuredMovies = await prisma.userFeaturedMovies.findUnique({
+        where: { userId },
+      })
+
+      if (!featuredMovies) {
         return res.json({ favorites: [] })
       }
 
-      // Fetch movie details for each favorite
-      const favorites = []
-      for (const movieId of movieIds) {
-        try {
-          const movieResponse = await fetch(`http://localhost:5000/api/movies/${movieId}`)
-          if (movieResponse.ok) {
-            const movieData = await movieResponse.json()
-            favorites.push({
-              id: `fav-${movieId}`,
-              movieId,
-              movieData: movieData.data.movie,
-              createdAt: new Date().toISOString()
-            })
-          }
-        } catch (error) {
-          console.error(`Failed to fetch movie ${movieId}:`, error)
-        }
-      }
-
-      res.json({ favorites })
+      return res.json({ favorites: featuredMovies.movieIds })
     } catch (error) {
       console.error('Failed to get favorites:', error)
-      res.status(500).json({ message: 'Failed to get favorites' })
+      return res.status(500).json({ message: 'Failed to get favorites' })
     }
-  } else if (req.method === 'POST') {
+  }
+
+  if (req.method === 'POST') {
     try {
       const { movieId, action } = req.body
 
@@ -55,25 +37,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: 'Movie ID and action required' })
       }
 
-      // Get current favorites for user
-      const currentFavorites = userFavorites[userId] || []
+      const featuredMovies = await prisma.userFeaturedMovies.findUnique({
+        where: { userId },
+      })
 
       if (action === 'add') {
-        // Add to favorites if not already there
-        if (!currentFavorites.includes(movieId.toString())) {
-          userFavorites[userId] = [...currentFavorites, movieId.toString()]
+        if (!featuredMovies) {
+          // Create if not exists
+          await prisma.userFeaturedMovies.create({
+            data: {
+              userId,
+              movieIds: [movieId],
+            },
+          })
+        } else if (!featuredMovies.movieIds.includes(movieId)) {
+          // Append if not already present
+          await prisma.userFeaturedMovies.update({
+            where: { userId },
+            data: {
+              movieIds: [...featuredMovies.movieIds, movieId],
+            },
+          })
         }
-      } else if (action === 'remove') {
-        // Remove from favorites
-        userFavorites[userId] = currentFavorites.filter(id => id !== movieId.toString())
+        return res.status(201).json({ message: 'Movie added to favorites' })
       }
 
-      res.json({ success: true, favorites: userFavorites[userId] || [] })
+      if (action === 'remove') {
+        if (featuredMovies) {
+          await prisma.userFeaturedMovies.update({
+            where: { userId },
+            data: {
+              movieIds: featuredMovies.movieIds.filter((id) => id !== movieId),
+            },
+          })
+        }
+        return res.status(200).json({ message: 'Movie removed from favorites' })
+      }
+
+      return res.status(400).json({ message: 'Invalid action' })
     } catch (error) {
       console.error('Failed to update favorites:', error)
-      res.status(500).json({ message: 'Failed to update favorites' })
+      return res.status(500).json({ message: 'Failed to update favorites' })
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' })
   }
+
+  return res.status(405).json({ message: 'Method not allowed' })
 }

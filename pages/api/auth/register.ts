@@ -1,9 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
-import { createId } from '@paralleldrive/cuid2'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -23,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     })
 
     if (existingUser) {
@@ -33,25 +31,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
+    // Create user (no id — MongoDB generates ObjectId automatically)
     const user = await prisma.user.create({
       data: {
-        id: createId(),
         name,
         email,
-        password: hashedPassword
-      }
+        password: hashedPassword,
+      },
     })
 
-    // Return user without password
+    // Remove password before sending back
     const { password: _, ...userWithoutPassword } = user
-    res.status(201).json({ 
+    return res.status(201).json({
       message: 'User created successfully',
-      user: userWithoutPassword 
+      user: userWithoutPassword,
     })
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error)
-    res.status(500).json({ message: 'Internal server error' })
+    if (error.code === 'P2002') {
+      return res.status(400).json({ message: 'Email already in use' })
+    }
+    return res.status(500).json({ message: 'Internal server error' })
   }
 }
