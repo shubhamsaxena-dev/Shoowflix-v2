@@ -4,7 +4,6 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -35,9 +34,12 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
   session: { strategy: 'jwt' },
+
   callbacks: {
-    async signIn({ user, account }) {
+    // Merge Google login with existing user or create a new one
+    async signIn({ user, account, profile }) {
       if (!user.email) return true
 
       // Find existing user by email
@@ -45,14 +47,21 @@ export const authOptions: NextAuthOptions = {
 
       if (account?.provider === 'google') {
         if (existingUser) {
-          // Link Google account if not linked
-          const existingAccount = await prisma.account.findFirst({
-            where: { provider: 'google', userId: existingUser.id },
-          })
-
-          if (!existingAccount && account.providerAccountId) {
-            await prisma.account.create({
-              data: {
+          // Upsert Google account (avoid unique constraint error)
+          if (account.providerAccountId) {
+            await prisma.account.upsert({
+              where: {
+                provider_providerAccountId: {
+                  provider: 'google',
+                  providerAccountId: account.providerAccountId,
+                },
+              },
+              update: {
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+              },
+              create: {
                 userId: existingUser.id,
                 type: account.type,
                 provider: 'google',
@@ -64,28 +73,28 @@ export const authOptions: NextAuthOptions = {
             })
           }
 
-          // Always update name and profile image from Google
+          // Always update profile info from Google
           await prisma.user.update({
             where: { id: existingUser.id },
             data: {
-              name: user.name,     // overwrite name
-              image: user.image,   // overwrite profile pic
+              name: user.name,
+              image: user.image,
             },
           })
 
           user.id = existingUser.id
         } else {
-          // No user exists → create new with Google info
+          // Create a new user with Google info
           existingUser = await prisma.user.create({
             data: {
               email: user.email,
               name: user.name,
-              image: user.image,  // profile pic from Google
+              image: user.image,
               accounts: {
                 create: {
                   type: account.type,
                   provider: 'google',
-                  providerAccountId: account.providerAccountId,
+                  providerAccountId: account.providerAccountId!,
                   access_token: account.access_token,
                   refresh_token: account.refresh_token,
                   expires_at: account.expires_at,
@@ -100,6 +109,7 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
+    // Add user info to JWT
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
@@ -109,6 +119,8 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
+
+    // Add JWT info to session
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
@@ -119,6 +131,14 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
+
+  // Redirect to the page the user was on
+  pages: {
+    signIn: '/auth/signin',
+    signOut: '/auth/signout',
+    error: '/auth/signin', // Redirect to signin on errors
+  },
+
   secret: process.env.NEXTAUTH_SECRET,
 }
 
