@@ -4,42 +4,39 @@ import { authOptions } from './auth/[...nextauth]'
 import { prisma } from '@/lib/prisma'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions)
-
-  if (!session?.user?.id) {
-    return res.status(401).json({ message: 'Unauthorized' })
-  }
-
-  const userId = session.user.id
-  const { movieId, action } = req.body
-
   try {
-    // ---------------- GET ----------------
+    const session = await getServerSession(req, res, authOptions)
+    if (!session?.user?.id) return res.status(401).json({ message: 'Unauthorized' })
+
+    const userId = session.user.id
+
     if (req.method === 'GET') {
-      const featured = await prisma.userFeaturedMovies.findFirst({ where: { userId } })
+      // Get user's favorite movies
+      const featured = await prisma.userFeaturedMovies.findUnique({ where: { userId } })
       return res.status(200).json({ favorites: featured?.movieIds ?? [] })
     }
 
-    // ---------------- POST ----------------
     if (req.method === 'POST') {
-      if (!movieId || !action) {
-        return res.status(400).json({ message: 'Movie ID and action required' })
-      }
+      const { movieId, action } = req.body
+      if (!movieId || !action) return res.status(400).json({ message: 'Movie ID and action required' })
 
-      // Get the existing document (if any)
-      const featured = await prisma.userFeaturedMovies.findFirst({ where: { userId } })
+      // Convert to string (MongoDB schema expects String[])
+      const movieIdStr = movieId.toString()
 
       if (action === 'add') {
-        if (!featured) {
-          // Create new document
+        // Upsert: create if not exists, otherwise update
+        const existing = await prisma.userFeaturedMovies.findUnique({ where: { userId } })
+
+        if (!existing) {
           await prisma.userFeaturedMovies.create({
-            data: { userId, movieIds: [movieId] },
+            data: { userId, movieIds: [movieIdStr] },
           })
-        } else if (!featured.movieIds.includes(movieId)) {
-          // Update existing document using Mongo $push via Prisma
+        } else {
+          // Prevent duplicates
+          const updatedMovieIds = Array.from(new Set([...existing.movieIds, movieIdStr]))
           await prisma.userFeaturedMovies.update({
-            where: { id: featured.id },
-            data: { movieIds: { push: movieId } },
+            where: { userId },
+            data: { movieIds: updatedMovieIds },
           })
         }
 
@@ -47,15 +44,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       if (action === 'remove') {
-        if (featured && featured.movieIds.includes(movieId)) {
+        const existing = await prisma.userFeaturedMovies.findUnique({ where: { userId } })
+        if (existing && existing.movieIds.includes(movieIdStr)) {
           await prisma.userFeaturedMovies.update({
-            where: { id: featured.id },
+            where: { userId },
             data: {
-              movieIds: featured.movieIds.filter((id) => id !== movieId),
+              movieIds: existing.movieIds.filter((id) => id !== movieIdStr),
             },
           })
         }
-
         return res.status(200).json({ message: 'Movie removed from favorites' })
       }
 
@@ -64,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(405).json({ message: 'Method not allowed' })
   } catch (error: any) {
-    console.error('Favorites API error:', error.code, error.message, error)
-    return res.status(500).json({ message: 'Failed to update favorites' })
+    console.error('Favorites API error:', error)
+    return res.status(500).json({ message: 'Failed to update favorites', error: error.message })
   }
 }
