@@ -2,9 +2,8 @@ import NextAuth, { type NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -39,18 +38,19 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === 'google' && user.email) {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email },
-        })
+      if (!user.email) return true
 
+      // Find existing user by email
+      let existingUser = await prisma.user.findUnique({ where: { email: user.email } })
+
+      if (account?.provider === 'google') {
         if (existingUser) {
-          // 1. Link Google account if not already linked
+          // Link Google account if not linked
           const existingAccount = await prisma.account.findFirst({
             where: { provider: 'google', userId: existingUser.id },
           })
 
-          if (!existingAccount) {
+          if (!existingAccount && account.providerAccountId) {
             await prisma.account.create({
               data: {
                 userId: existingUser.id,
@@ -64,24 +64,23 @@ export const authOptions: NextAuthOptions = {
             })
           }
 
-          // 2. Update user profile if missing values
+          // Always update name and profile image from Google
           await prisma.user.update({
             where: { id: existingUser.id },
             data: {
-              name: existingUser.name ?? user.name,
-              image: existingUser.image ?? user.image,
+              name: user.name,     // overwrite name
+              image: user.image,   // overwrite profile pic
             },
           })
 
-          // Ensure session/jwt uses correct ID
           user.id = existingUser.id
         } else {
-          // If no user exists, create a new one with Google info
-          const newUser = await prisma.user.create({
+          // No user exists → create new with Google info
+          existingUser = await prisma.user.create({
             data: {
               email: user.email,
               name: user.name,
-              image: user.image,
+              image: user.image,  // profile pic from Google
               accounts: {
                 create: {
                   type: account.type,
@@ -94,12 +93,13 @@ export const authOptions: NextAuthOptions = {
               },
             },
           })
-          user.id = newUser.id
+          user.id = existingUser.id
         }
       }
 
       return true
     },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
