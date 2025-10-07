@@ -3,7 +3,6 @@ import { X, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { YTSMovie, Torrent } from "@/types/movie";
-import type { WebTorConfig } from "@/lib/types";
 
 interface VideoPlayerProps {
   isOpen: boolean;
@@ -19,242 +18,136 @@ declare global {
   }
 }
 
-export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink, onClose }: VideoPlayerProps) {
+export default function VideoPlayer({
+  isOpen,
+  movie,
+  selectedTorrent,
+  magnetLink,
+  onClose,
+}: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showVPNNotice, setShowVPNNotice] = useState(false);
+  const [torrentStatus, setTorrentStatus] = useState<{ downloaded: string; peers: number }>({
+    downloaded: "0 MB",
+    peers: 0,
+  });
+
   const playerRef = useRef<HTMLDivElement>(null);
-  const webtorInstanceRef = useRef<any>(null);
+  const initializedRef = useRef(false);
+  const observerRef = useRef<MutationObserver | null>(null);
 
   useEffect(() => {
-    if (!isOpen || !movie || !magnetLink || !playerRef.current) {
-      return;
-    }
+    if (!isOpen || !movie || !magnetLink || !playerRef.current) return;
 
     setIsLoading(true);
     setError(null);
+    initializedRef.current = false;
 
-    // Clear any existing player content first
-    if (playerRef.current) {
-      playerRef.current.innerHTML = '';
-      playerRef.current.style.height = '100%';
-      playerRef.current.style.width = '100%';
-    }
+    // Clear previous content
+    playerRef.current.innerHTML = "";
+    playerRef.current.style.display = "block";
 
-    // Initialize WebTor player with proper configuration
-    const initializePlayer = () => {
-      try {
-        console.log('Initializing WebTor player with:', { movieTitle: movie.title, magnetLink });
-        
-        if (!playerRef.current) {
-          console.error('Player container not found');
-          setError('Player container not available');
-          return;
+    const centerElements = () => {
+      if (!playerRef.current) return;
+      const container = playerRef.current;
+
+      const candidates = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          "button, div[role='button'], [class*='play'], .webtor-play-button"
+        )
+      );
+
+      candidates.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 10 && rect.height > 10) {
+          el.style.position = "absolute";
+          el.style.top = "50%";
+          el.style.left = "50%";
+          el.style.transform = "translate(-50%, -50%)";
+          el.style.zIndex = "9999";
         }
-
-        // Clear existing content
-        playerRef.current.innerHTML = '';
-        
-        // Ensure webtor global array exists
-        window.webtor = window.webtor || [];
-        
-        const config = {
-          id: 'webtor-player',
-          className: 'player',
-          magnet: magnetLink,
-          imdbId: movie.imdb_code || '',
-          poster: movie.large_cover_image || movie.medium_cover_image,
-          width: '100%',
-          height: '100%',
-          style: 'position: relative; width: 100%; height: 100%;',
-          features: {
-            download: true,
-            fullscreen: false,
-            settings: false,
-            chromecast: true,
-            p2pProgress: false,
-            autoplay: true
-          },
-          on: function (e: any) {
-            console.log('WebTor event:', e.name);
-            if (e.name === window.webtor.INITED) {
-              console.log('Player initialized, starting playback');
-              e.player.play();
-              setIsLoading(false);
-              
-              // Aggressive play button centering with multiple approaches
-              const centerPlayButton = () => {
-                const playerContainer = document.querySelector('#webtor-player');
-                if (playerContainer) {
-                  // Target ALL possible button and interactive elements
-                  const allSelectors = [
-                    'button', 'div[role="button"]', '[class*="play"]', '.play-button', 
-                    '.webtor-play-button', 'button[class*="play"]', 'div[class*="play"]',
-                    '[role="button"]', 'svg[class*="play"]', '.player-play-button',
-                    '.vjs-big-play-button', '[data-testid*="play"]', '[aria-label*="play"]',
-                    '[title*="play"]', 'iframe + div', '.webtor-player button',
-                    '.webtor-player > div > button'
-                  ];
-                  
-                  // Force center ALL interactive elements
-                  allSelectors.forEach(selector => {
-                    const elements = playerContainer.querySelectorAll(selector);
-                    elements.forEach((btn: any) => {
-                      // Only center if it looks like a play button (has reasonable size)
-                      const rect = btn.getBoundingClientRect();
-                      if (rect.width > 10 && rect.height > 10) {
-                        btn.style.cssText = `
-                          position: absolute !important;
-                          top: 50% !important;
-                          left: 50% !important;
-                          transform: translate(-50%, -50%) !important;
-                          z-index: 9999 !important;
-                          margin: 0 !important;
-                          inset: auto !important;
-                        `;
-                      }
-                    });
-                  });
-                  
-                  // Force center any overlay divs
-                  const overlays = playerContainer.querySelectorAll('div:not(.webtor-player)');
-                  overlays.forEach((overlay: any) => {
-                    const rect = overlay.getBoundingClientRect();
-                    if (rect.width > 0 && rect.height > 0 && overlay.children.length > 0) {
-                      overlay.style.cssText = `
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                        position: absolute !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        right: 0 !important;
-                        bottom: 0 !important;
-                        z-index: 100 !important;
-                      `;
-                    }
-                  });
-                  
-                  // Force controls to bottom
-                  const controlSelectors = ['[class*="control"]', '.controls', '.webtor-controls', '.player-controls'];
-                  controlSelectors.forEach(selector => {
-                    const controls = playerContainer.querySelectorAll(selector);
-                    controls.forEach((ctrl: any) => {
-                      ctrl.style.cssText = `
-                        position: absolute !important;
-                        bottom: 0 !important;
-                        left: 0 !important;
-                        right: 0 !important;
-                        top: auto !important;
-                        z-index: 10 !important;
-                      `;
-                    });
-                  });
-                }
-              };
-              
-              // Run immediately and at multiple intervals
-              centerPlayButton();
-              setTimeout(centerPlayButton, 100);
-              setTimeout(centerPlayButton, 300);
-              setTimeout(centerPlayButton, 500);
-              setTimeout(centerPlayButton, 1000);
-              setTimeout(centerPlayButton, 2000);
-              setTimeout(centerPlayButton, 3000);
-              
-              // Set up mutation observer to catch dynamic elements
-              const container = document.querySelector('#webtor-player');
-              if (container) {
-                const observer = new MutationObserver(() => {
-                  centerPlayButton();
-                });
-                observer.observe(container, { 
-                  childList: true, 
-                  subtree: true, 
-                  attributes: true 
-                });
-                
-                // Clean up observer after 10 seconds
-                setTimeout(() => observer.disconnect(), 10000);
-              }
-            }
-            if (e.name === window.webtor.TORRENT_FETCHED) {
-              console.log('Torrent fetched!', e.data);
-              setIsLoading(false);
-            }
-            if (e.name === window.webtor.TORRENT_ERROR) {
-              console.error('Torrent error!');
-              setError('Failed to load movie stream. Please try a different quality.');
-              setIsLoading(false);
-              setShowVPNNotice(true);
-            }
-          },
-          lang: 'en',
-          i18n: {
-            en: {
-              common: {
-                'prepare to play': 'Preparing Video Stream... Please Wait..'
-              },
-              stat: {
-                seeding: 'Seeding',
-                waiting: 'Client initialization',
-                'waiting for peers': 'Waiting for peers',
-                from: 'from'
-              }
-            }
-          }
-        };
-        
-        // Add configuration to webtor queue
-        window.webtor.push(config);
-        
-        console.log('WebTor config added:', config);
-        
-      } catch (err) {
-        console.error('Error initializing WebTor player:', err);
-        setError('Failed to initialize video player');
-        setIsLoading(false);
-      }
+      });
     };
 
-    // Load WebTor SDK and initialize player
-    const timeoutId = setTimeout(() => {
+    const initializePlayer = () => {
+      if (initializedRef.current) return;
+      initializedRef.current = true;
+
+      if (!window.webtor) window.webtor = [];
+
+      const config = {
+        id: "webtor-player",
+        magnet: magnetLink,
+        imdbId: movie.imdb_code || "",
+        poster: movie.large_cover_image || movie.medium_cover_image,
+        width: "100%",
+        height: "100%",
+        features: { download: true, fullscreen: false, chromecast: true, autoplay: true },
+        on: (e: any) => {
+          if (e.name === window.webtor.INITED) {
+            e.player.play();
+            setIsLoading(false);
+
+            // Center play buttons
+            centerElements();
+
+            // Observe dynamic elements
+            if (playerRef.current && !observerRef.current) {
+              observerRef.current = new MutationObserver(centerElements);
+              observerRef.current.observe(playerRef.current, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+              });
+            }
+          }
+
+          if (e.name === window.webtor.TORRENT_FETCHED) {
+            setIsLoading(false);
+            setTorrentStatus({ downloaded: e.data.downloaded, peers: e.data.peers });
+          }
+
+          if (e.name === window.webtor.TORRENT_ERROR) {
+            setError("Failed to load movie stream. Please try a different quality.");
+            setIsLoading(false);
+            setShowVPNNotice(true);
+          }
+
+          if (e.name === window.webtor.STAT) {
+            // Example: update warming up / peers dynamically
+            setTorrentStatus({ downloaded: e.data.downloaded || torrentStatus.downloaded, peers: e.data.peers || 0 });
+          }
+        },
+      };
+
+      window.webtor.push(config);
+    };
+
+    if (typeof window !== "undefined") {
       const existingScript = document.querySelector('script[src*="webtor"]');
-      
       if (!existingScript) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js/dist/index.min.js';
+        const script = document.createElement("script");
+        script.src = "https://cdn.webtor.io/webtor.min.js";
         script.async = true;
-        script.charset = 'utf-8';
-        
-        script.onload = () => {
-          console.log('WebTor SDK loaded successfully');
-          // Wait a bit more for SDK to fully initialize
-          setTimeout(initializePlayer, 500);
-        };
-        
+        script.onload = () => setTimeout(initializePlayer, 300);
         script.onerror = () => {
-          console.error('Failed to load WebTor SDK');
-          setError('Failed to load video player');
+          setError("Failed to load video player");
           setIsLoading(false);
         };
-        
         document.head.appendChild(script);
       } else {
-        console.log('WebTor SDK already loaded, initializing...');
         initializePlayer();
       }
-    }, 200);
+    }
 
     return () => {
-      // Cleanup on unmount
-      clearTimeout(timeoutId);
-      if (playerRef.current) {
-        playerRef.current.innerHTML = '';
-      }
-      // Reset webtor array to prevent conflicts
-      if (window.webtor) {
-        window.webtor = [];
+      if (playerRef.current) playerRef.current.innerHTML = "";
+      if (window.webtor) window.webtor = [];
+      initializedRef.current = false;
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
       }
     };
   }, [isOpen, movie, magnetLink]);
@@ -268,38 +161,37 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
   const handleRetry = () => {
     setError(null);
     setIsLoading(true);
-    // Re-trigger the effect by updating a state or calling initialization again
+    initializedRef.current = false;
+    if (playerRef.current) playerRef.current.innerHTML = "";
+    if (window.webtor) window.webtor = [];
     window.location.reload();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" 
-      data-testid="video-player"
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleClose}
     >
-      <div 
+      <div
         className="relative w-full max-w-[80vw] aspect-video bg-black rounded-lg overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button positioned inside the modal for better visibility */}
         <Button
           variant="ghost"
           size="sm"
           className="absolute top-2 right-2 z-50 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white border border-white/20"
           onClick={handleClose}
-          data-testid="video-player-close"
         >
           <X className="h-5 w-5" />
         </Button>
-        
+
         {movie && (
           <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-black/70 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-xs sm:max-w-none">
-            <h3 className="font-medium text-sm sm:text-base truncate" data-testid="video-player-title">{movie.title}</h3>
+            <h3 className="font-medium text-sm sm:text-base truncate">{movie.title}</h3>
             {selectedTorrent && (
-              <p className="text-xs sm:text-sm text-gray-300" data-testid="video-player-quality">
+              <p className="text-xs sm:text-sm text-gray-300">
                 {selectedTorrent.quality} • {selectedTorrent.size}
               </p>
             )}
@@ -307,73 +199,56 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
         )}
 
         {isLoading && (
-          <div className="flex items-center justify-center h-full text-white">
-            <div className="text-center px-4">
-              <Loader2 className="animate-spin h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-4" />
-              <p className="text-sm sm:text-base" data-testid="video-player-loading">Loading stream...</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-2">Connecting to WebTor...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center h-full text-white">
+            <Loader2 className="animate-spin h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-4" />
+            <p className="text-sm sm:text-base">Warming up torrent client...</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-2">
+              Downloaded: {torrentStatus.downloaded}, Peers: {torrentStatus.peers}
+            </p>
           </div>
         )}
 
         {error && (
           <div className="flex items-center justify-center h-full text-white">
             <div className="text-center px-4">
-              <p className="text-red-400 mb-4 text-sm sm:text-base" data-testid="video-player-error">{error}</p>
-              <Button 
-                onClick={handleRetry}
-                variant="outline"
-                size="sm"
-                className="sm:size-default mb-4"
-                data-testid="video-player-retry"
-              >
+              <p className="text-red-400 mb-4 text-sm sm:text-base">{error}</p>
+              <Button onClick={handleRetry} variant="outline" size="sm" className="mb-4">
                 Retry
               </Button>
             </div>
           </div>
         )}
 
-        {/* VPN Notice Popup on Error */}
         {showVPNNotice && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-20" data-testid="vpn-notice-error-overlay">
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-20">
             <Card className="bg-card border-border p-6 max-w-md w-full mx-4">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-6 w-6 text-blue-500" />
-                  <h3 className="text-lg font-semibold" data-testid="vpn-notice-error-title">
-                    Streaming Issue Detected
-                  </h3>
+                  <h3 className="text-lg font-semibold">Streaming Issue Detected</h3>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowVPNNotice(false)}
                   className="p-1 h-auto"
-                  data-testid="vpn-notice-error-close"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
               <div className="space-y-4">
-                <p className="text-muted-foreground leading-relaxed" data-testid="vpn-notice-error-message">
-                  For the best streaming experience, we recommend using a VPN for enhanced privacy and 
-                  better quality access to content. VPNs protect your browsing activity and can improve stream quality.
+                <p className="text-muted-foreground leading-relaxed">
+                  For the best streaming experience, we recommend using a VPN for enhanced privacy and better quality access to content.
                 </p>
-                
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button 
-                    onClick={() => setShowVPNNotice(false)}
-                    className="flex-1"
-                    data-testid="vpn-notice-error-understand"
-                  >
-                    Got It
-                  </Button>
-                  <Button 
+                  <Button onClick={() => setShowVPNNotice(false)} className="flex-1">Got It</Button>
+                  <Button
                     variant="outline"
-                    onClick={() => { setShowVPNNotice(false); handleRetry(); }}
+                    onClick={() => {
+                      setShowVPNNotice(false);
+                      handleRetry();
+                    }}
                     className="flex-1"
-                    data-testid="vpn-notice-error-retry"
                   >
                     Retry Stream
                   </Button>
@@ -383,19 +258,12 @@ export default function VideoPlayer({ isOpen, movie, selectedTorrent, magnetLink
           </div>
         )}
 
-        <div 
-          id="webtor-player" 
+        <div
+          id="webtor-player"
           ref={playerRef}
           className="w-full h-full rounded-lg overflow-hidden"
-          style={{ 
-            display: isLoading || error ? 'none' : 'block',
-            width: '100%',
-            height: '100%',
-            position: 'relative'
-          }}
+          style={{ display: isLoading || error ? "none" : "block", position: "relative" }}
         />
-        
-        
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
 import type { MovieFilters } from "@/lib/types";
 import type { YTSListMoviesResponse, YTSMovieDetailsResponse, YTSMovie, Torrent } from "@/types/movie";
+import { useSwr } from './use-swr';
 
 // Fetcher function for SWR
 const fetcher = async (url: string) => {
@@ -15,10 +16,10 @@ const fetcher = async (url: string) => {
 // Build query string from filters
 function buildQueryString(filters: MovieFilters | null = {}, page: number = 1): string {
   const params = new URLSearchParams();
-  
+
   // Add page parameter
   params.append('page', page.toString());
-  
+
   // Handle null or undefined filters
   if (filters && typeof filters === 'object') {
     Object.entries(filters).forEach(([key, value]) => {
@@ -27,7 +28,7 @@ function buildQueryString(filters: MovieFilters | null = {}, page: number = 1): 
       }
     });
   }
-  
+
   return params.toString();
 }
 
@@ -35,13 +36,13 @@ function buildQueryString(filters: MovieFilters | null = {}, page: number = 1): 
 const getKey = (filters: MovieFilters | null) => (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
   // If filters is null, return null (no request)
   if (!filters) return null;
-  
+
   // First page, no previous data
   if (pageIndex === 0) return `/api/movies?${buildQueryString(filters, 1)}`;
-  
+
   // Previous page didn't have data or we reached the end
   if (!previousPageData || !previousPageData.data?.movies?.length) return null;
-  
+
   // Return URL for next page
   return `/api/movies?${buildQueryString(filters, pageIndex + 1)}`;
 };
@@ -75,7 +76,7 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
 
   // Check if we can load more
   const canLoadMore = data && data[data.length - 1]?.data?.movies?.length === parseInt(filters?.limit?.toString() || '20');
-  
+
   const loadMore = () => {
     if (canLoadMore && !isValidating) {
       setSize(size + 1);
@@ -99,63 +100,64 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
 export function useMovies(filters: MovieFilters | null = {}) {
   // If filters is null, don't make any request
   const shouldFetch = filters !== null;
-  const queryString = shouldFetch ? buildQueryString(filters, 1) : '';
-  const url = shouldFetch ? `/api/movies?${queryString}` : null;
-  
-  const { data, error, mutate } = useSWR<YTSListMoviesResponse>(
-    url,
-    fetcher,
-    {
+  const queryString = buildQueryString(filters, 1);
+  const { data, error, mutate, isLoading } = useSwr({
+    key: `movies?${queryString}`,
+    execute: shouldFetch,
+    swrOptions: {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 5 * 60 * 1000, // 5 minutes
     }
-  );
+  });
+
+
 
   return {
     data,
     error,
-    isLoading: shouldFetch ? (!data && !error) : false,
+    isLoading,
     mutate,
     movies: data?.data?.movies || [],
   };
 }
 
 export function useMovieDetails(movieId: number) {
-  const { data, error, mutate } = useSWR<YTSMovieDetailsResponse>(
-    movieId ? `/api/movies/${movieId}` : null,
-    fetcher,
-    {
+  const { data, error, mutate, isLoading } = useSwr({
+    key: `movies/${movieId}`,
+    execute: !!movieId,
+    swrOptions: {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 10 * 60 * 1000, // 10 minutes
     }
-  );
-
+  })
   return {
     data,
     error,
-    isLoading: !data && !error,
+    isLoading,
     mutate,
     movie: data?.data?.movie,
   };
 }
 
 export function useMovieSuggestions(movieId: number) {
-  const { data, error, mutate } = useSWR<YTSListMoviesResponse>(
-    movieId ? `/api/movies/${movieId}/suggestions` : null,
-    fetcher,
-    {
+  const { data, error, mutate, isLoading } = useSwr({
+    key: `movies/${movieId}/suggestions`,
+    execute: !!movieId,
+    swrOptions: {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 10 * 60 * 1000, // 10 minutes
     }
+  }
+
   );
 
   return {
     data,
     error,
-    isLoading: !data && !error,
+    isLoading,
     mutate,
     movies: data?.data?.movies || [],
   };
@@ -178,23 +180,7 @@ export function useTrendingMoviesInfinite() {
   });
 }
 
-export function useActionMovies() {
-  return useMovies({
-    genre: 'action',
-    sort_by: 'rating',
-    order_by: 'desc',
-    limit: 20
-  });
-}
 
-export function useActionMoviesInfinite() {
-  return useMoviesInfinite({
-    genre: 'action',
-    sort_by: 'rating',
-    order_by: 'desc',
-    limit: 20
-  });
-}
 
 export function useHighRatedMovies() {
   return useMovies({
@@ -258,54 +244,7 @@ export function useSearchMoviesInfinite(query: string, filters: MovieFilters = {
   });
 }
 
-// All genre hooks
-export function useSciFiMovies() {
-  return useMoviesByGenre('Sci-Fi');
-}
 
-export function useComedyMovies() {
-  return useMoviesByGenre('Comedy');
-}
-
-export function useAdventureMovies() {
-  return useMoviesByGenre('Adventure');
-}
-
-export function useCrimeMovies() {
-  return useMoviesByGenre('Crime');
-}
-
-export function useFantasyMovies() {
-  return useMoviesByGenre('Fantasy');
-}
-
-export function useMysteryMovies() {
-  return useMoviesByGenre('Mystery');
-}
-
-export function useDramaMovies() {
-  return useMoviesByGenre('Drama');
-}
-
-export function useHorrorMovies() {
-  return useMoviesByGenre('Horror');
-}
-
-export function useRomanceMovies() {
-  return useMoviesByGenre('Romance');
-}
-
-export function useWarMovies() {
-  return useMoviesByGenre('War');
-}
-
-export function useThrillerMovies() {
-  return useMoviesByGenre('Thriller');
-}
-
-export function useAnimationMovies() {
-  return useMoviesByGenre('Animation');
-}
 
 // Magnet link generation (unchanged)
 export async function generateMagnetLink(movie: YTSMovie, torrent: Torrent): Promise<string> {
@@ -314,16 +253,16 @@ export async function generateMagnetLink(movie: YTSMovie, torrent: Torrent): Pro
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ 
-      hash: torrent.hash, 
-      title: movie.title 
+    body: JSON.stringify({
+      hash: torrent.hash,
+      title: movie.title
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to generate magnet link');
   }
-  
+
   const data = await response.json();
   return data.magnetLink;
 }

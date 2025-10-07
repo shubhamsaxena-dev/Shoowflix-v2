@@ -32,8 +32,8 @@ export default function MovieDetail() {
   const { id, slug } = router.query;
   const movieId = parseInt((id as string) || '0');
   const { toast } = useToast();
-  const { isFavorite, addToFavorites, removeFromFavorites,favorites } = useFavorites();
-console.log(favorites)
+  const { isFavorite, addToFavorites, removeFromFavorites, favorites } = useFavorites();
+  console.log(favorites)
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
@@ -59,8 +59,9 @@ console.log(favorites)
   useEffect(() => {
     if (movie && movie.torrents && movie.torrents.length > 0 && !selectedTorrent) {
       // Find 720p torrent first
+      { /*@ts-ignore*/ }
       const torrent720p = movie.torrents.find(t => t.quality === "720p");
-      
+
       if (torrent720p) {
         setSelectedTorrent(torrent720p);
       } else {
@@ -156,7 +157,7 @@ console.log(favorites)
     if (!movie) return
 
     setFavoriteLoading(true)
-    
+
     try {
       if (isFavorite(movie.id)) {
         const success = await removeFromFavorites(movie.id)
@@ -191,11 +192,11 @@ console.log(favorites)
 
     try {
       const magnet = await generateMagnetLink(movie, torrent);
-      
+
       // Create a downloadable .magnet file
       const blob = new Blob([magnet], { type: 'application/x-magnet' });
       const url = URL.createObjectURL(blob);
-      
+
       // Create temporary download link
       const link = document.createElement('a');
       link.href = url;
@@ -203,10 +204,10 @@ console.log(favorites)
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the blob URL
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Download started",
         description: `${movie.title} magnet file downloaded successfully.`,
@@ -224,9 +225,9 @@ console.log(favorites)
   const handleMovieClick = (movie: YTSMovie) => {
     // Set loading state for this movie
     setLoadingMovieId(movie.id);
-    
+
     const movieSlug = createSlug(movie.title);
-    
+
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
       router.push(`/movie/${movie.id}/${movieSlug}`);
@@ -266,7 +267,7 @@ console.log(favorites)
           <Skeleton className="h-64 w-full" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
         </div>
-        
+
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-6">
             <Skeleton className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 flex-shrink-0 mx-auto lg:mx-0" />
@@ -291,43 +292,41 @@ console.log(favorites)
         <title>
           {movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Loading Movie | Shoowflix'}
         </title>
-        <meta 
-          name="description" 
-          content={movie ? `Watch ${movie.title} (${movie.year}) online in HD quality on Shoowflix. ${movie.description_full || movie.summary || `${movie.title} - High quality movie streaming.`} Stream now with multiple quality options.` : 'Loading movie details...'} 
+        <meta
+          name="description"
+          content={movie
+            ? movie.description_full?.substring(0, 160) || movie.synopsis?.substring(0, 160) || `${movie.title} - Stream in HD quality on Shoowflix.`
+            : 'Loading movie details...'
+          }
         />
-        
-        {/* Open Graph Meta Tags */}
+
+        {/* Open Graph */}
         <meta property="og:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online | Shoowflix` : 'Movie Details | Shoowflix'} />
-        <meta property="og:description" content={movie ? `Watch ${movie.title} online in HD quality. ${movie.description_full?.substring(0, 150) || movie.synopsis?.substring(0, 150) || `${movie.title} - Watch in HD quality`}` : 'Watch movies online in HD quality on Shoowflix.'} />
+        <meta property="og:description" content={movie ? movie.description_full?.substring(0, 150) || movie.synopsis?.substring(0, 150) : 'Watch movies online in HD quality on Shoowflix.'} />
         <meta property="og:image" content={movie?.large_cover_image || '/og-image.jpg'} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={movie ? `${movie.title} (${movie.year}) Movie Poster` : 'Shoowflix Movie Poster'} />
+        <meta property="og:image:alt" content={movie ? `${movie.title} (${movie.year}) Poster` : 'Shoowflix Movie Poster'} />
         <meta property="og:type" content="video.movie" />
         <meta property="og:site_name" content="Shoowflix" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:url" content={movie ? `${typeof window !== 'undefined' ? window.location.origin : ''}/movie/${movie.id}/${createSlug(movie.title)}` : typeof window !== 'undefined' ? window.location.origin : ''} />
-        
-        {/* Twitter Card Meta Tags */}
+
+        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@shoowflix" />
         <meta name="twitter:creator" content="@shoowflix" />
         <meta name="twitter:title" content={movie ? `${movie.title} (${movie.year}) - Stream Online` : 'Movie Details'} />
-        <meta name="twitter:description" content={movie ? `Watch ${movie.title} online in HD quality on Shoowflix.` : 'Watch movies online in HD quality.'} />
+        <meta name="twitter:description" content={movie ? movie.description_full?.substring(0, 150) || movie.synopsis?.substring(0, 150) : 'Watch movies online in HD quality on Shoowflix.'} />
         <meta name="twitter:image" content={movie?.large_cover_image || '/og-image.jpg'} />
-        <meta name="twitter:image:alt" content={movie ? `${movie.title} (${movie.year}) Movie Poster` : 'Shoowflix Movie Poster'} />
-        
-        {/* Additional Meta Tags */}
+        <meta name="twitter:image:alt" content={movie ? `${movie.title} (${movie.year}) Poster` : 'Shoowflix Movie Poster'} />
+
+        {/* Canonical URL */}
         {movie && (
-          <>
-            <meta property="video:release_date" content={movie.year?.toString()} />
-            <meta property="video:duration" content={movie.runtime?.toString()} />
-            <meta name="keywords" content={`${movie.title}, ${movie.year}, ${movie.genres?.join(', ')}, watch online, stream, HD, Shoowflix`} />
-            <link rel="canonical" href={`${typeof window !== 'undefined' ? window.location.origin : ''}/movie/${movie.id}/${createSlug(movie.title)}`} />
-          </>
+          <link rel="canonical" href={`${typeof window !== 'undefined' ? window.location.origin : ''}/movie/${movie.id}/${createSlug(movie.title)}`} />
         )}
-        
-        {/* JSON-LD Structured Data for Movie */}
+
+        {/* JSON-LD Structured Data */}
         {movie && (
           <script
             type="application/ld+json"
@@ -337,7 +336,7 @@ console.log(favorites)
                 "@type": "Movie",
                 "name": movie.title,
                 "description": movie.description_full || movie.synopsis,
-                "image": movie.large_cover_image,
+                "image": movie.large_cover_image || movie.medium_cover_image,
                 "datePublished": movie.year?.toString(),
                 "duration": movie.runtime ? `PT${movie.runtime}M` : undefined,
                 "genre": movie.genres,
@@ -348,10 +347,6 @@ console.log(favorites)
                   "bestRating": 10,
                   "worstRating": 1
                 } : undefined,
-                "director": {
-                  "@type": "Person",
-                  "name": "Director"
-                },
                 "url": `https://shoowflix.com/movie/${movie.id}/${createSlug(movie.title)}`,
                 "potentialAction": {
                   "@type": "WatchAction",
@@ -365,277 +360,278 @@ console.log(favorites)
           />
         )}
       </Head>
-      
+
       <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="fixed top-0 w-full z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center space-x-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm" data-testid="back-to-home">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Home
-              </Button>
-            </Link>
-            <h1 className="text-lg sm:text-xl font-semibold truncate" data-testid="movie-detail-header-title">
-              {movie.title || 'Untitled Movie'}
-            </h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Movie backdrop */}
-      <div className="relative h-64 overflow-hidden mt-16">
-        {(movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? (
-          <img 
-            src={movie.background_image_original || movie.large_cover_image || movie.medium_cover_image}
-            alt={`${movie.title || 'Movie'} backdrop`}
-            className="w-full h-full object-cover"
-            width={1920}
-            height={1080}
-            loading="eager"
-            decoding="async"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const fallback = target.nextElementSibling as HTMLElement;
-              if (fallback) fallback.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        <div className="w-full h-full bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center" style={{ display: (movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? 'none' : 'flex' }}>
-          <div className="text-center text-muted-foreground">
-            <div className="text-4xl mb-2">🎬</div>
-            <p className="text-lg font-medium">{movie.title || 'Untitled Movie'}</p>
-          </div>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 to-transparent"></div>
-      </div>
-
-      {/* Movie details */}
-      <div className="container mx-auto px-4 py-8 -mt-16 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
-          <div className="flex-shrink-0 mx-auto lg:mx-0">
-            {movie.medium_cover_image || movie.large_cover_image ? (
-              <img 
-                src={movie.medium_cover_image || movie.large_cover_image}
-                alt={`${movie.title || 'Movie'} poster`}
-                className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
-                width={300}
-                height={450}
-                loading="lazy"
-                decoding="async"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const fallback = target.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'flex';
-                }}
-                data-testid="movie-detail-poster"
-              />
-            ) : null}
-            <div className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 bg-gradient-to-br from-muted/50 to-muted/80 rounded-lg shadow-lg flex flex-col items-center justify-center text-center" style={{ display: (movie.medium_cover_image || movie.large_cover_image) ? 'none' : 'flex' }} data-testid="movie-detail-poster-fallback">
-              <div className="text-3xl sm:text-4xl mb-2">🎬</div>
-              <p className="text-sm font-medium text-muted-foreground px-2">{movie.title || 'Untitled Movie'}</p>
-              {movie.year && <p className="text-xs text-muted-foreground">({movie.year})</p>}
+        {/* Header */}
+        <header className="fixed top-0 w-full z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center space-x-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" data-testid="back-to-home">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+              <h1 className="text-lg sm:text-xl font-semibold truncate" data-testid="movie-detail-header-title">
+                {movie.title || 'Untitled Movie'}
+              </h1>
             </div>
           </div>
-          
-          <div className="flex-1 text-center lg:text-left">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4" data-testid="movie-detail-title">
-              {movie.title || 'Untitled Movie'}
-            </h1>
-            
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 lg:gap-6 mb-6 text-muted-foreground">
-              <div className="flex items-center space-x-1" data-testid="movie-detail-year">
-                <Calendar className="h-4 w-4" />
-                <span>{movie.year}</span>
+        </header>
+
+        {/* Movie backdrop */}
+        <div className="relative h-64 overflow-hidden mt-16">
+          {(movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? (
+            <img
+              src={movie.background_image_original || movie.large_cover_image || movie.medium_cover_image}
+              alt={`${movie.title || 'Movie'} backdrop`}
+              className="w-full h-full object-cover"
+              width={1920}
+              height={1080}
+              loading="eager"
+              decoding="async"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className="w-full h-full bg-gradient-to-br from-muted/50 to-muted/80 flex items-center justify-center" style={{ display: (movie.background_image_original || movie.large_cover_image || movie.medium_cover_image) ? 'none' : 'flex' }}>
+            <div className="text-center text-muted-foreground">
+              <div className="text-4xl mb-2">🎬</div>
+              <p className="text-lg font-medium">{movie.title || 'Untitled Movie'}</p>
+            </div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 to-transparent"></div>
+        </div>
+
+        {/* Movie details */}
+        <div className="container mx-auto px-4 py-8 -mt-16 relative z-10">
+          <div className="flex flex-col lg:flex-row gap-6 mb-8">
+            <div className="flex-shrink-0 mx-auto lg:mx-0">
+              {movie.medium_cover_image || movie.large_cover_image ? (
+                <img
+                  src={movie.medium_cover_image || movie.large_cover_image}
+                  alt={`${movie.title || 'Movie'} poster`}
+                  className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 object-cover rounded-lg shadow-lg"
+                  width={300}
+                  height={450}
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallback = target.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                  data-testid="movie-detail-poster"
+                />
+              ) : null}
+              <div className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 bg-gradient-to-br from-muted/50 to-muted/80 rounded-lg shadow-lg flex flex-col items-center justify-center text-center" style={{ display: (movie.medium_cover_image || movie.large_cover_image) ? 'none' : 'flex' }} data-testid="movie-detail-poster-fallback">
+                <div className="text-3xl sm:text-4xl mb-2">🎬</div>
+                <p className="text-sm font-medium text-muted-foreground px-2">{movie.title || 'Untitled Movie'}</p>
+                {movie.year && <p className="text-xs text-muted-foreground">({movie.year})</p>}
               </div>
-              {movie.runtime && (
-                <div className="flex items-center space-x-1" data-testid="movie-detail-runtime">
-                  <Clock className="h-4 w-4" />
-                  <span>{movie.runtime} min</span>
+            </div>
+
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4" data-testid="movie-detail-title">
+                {movie.title || 'Untitled Movie'}
+              </h1>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 lg:gap-6 mb-6 text-muted-foreground">
+                <div className="flex items-center space-x-1" data-testid="movie-detail-year">
+                  <Calendar className="h-4 w-4" />
+                  <span>{movie.year}</span>
+                </div>
+                {movie.runtime && (
+                  <div className="flex items-center space-x-1" data-testid="movie-detail-runtime">
+                    <Clock className="h-4 w-4" />
+                    <span>{movie.runtime} min</span>
+                  </div>
+                )}
+                <div className="flex items-center space-x-1" data-testid="movie-detail-rating">
+                  <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                  <span>{movie.rating}</span>
+                </div>
+              </div>
+
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  { /*@ts-ignore*/}
+                  {movie.genres.map((genre, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      data-testid={`movie-detail-genre-${index}`}
+                    >
+                      {genre}
+                    </Badge>
+                  ))}
                 </div>
               )}
-              <div className="flex items-center space-x-1" data-testid="movie-detail-rating">
-                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                <span>{movie.rating}</span>
-              </div>
-            </div>
-            
-            {movie.genres && movie.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {movie.genres.map((genre, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary"
-                    data-testid={`movie-detail-genre-${index}`}
-                  >
-                    {genre}
-                  </Badge>
-                ))}
-              </div>
-            )}
-            
-            {movie.description_full && (
-              <p className="text-muted-foreground mb-8 leading-relaxed" data-testid="movie-detail-description">
-                {movie.description_full}
-              </p>
-            )}
-            
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <Button 
-                variant="outline"
-                onClick={handleFavoriteToggle}
-                disabled={favoriteLoading}
-                data-testid="movie-detail-favorite"
-              >
-                {favoriteLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Heart className={`mr-2 h-4 w-4 ${
-                    session && isFavorite(movie.id) 
-                      ? 'fill-red-500 text-red-500' 
-                      : ''
-                  }`} />
-                )}
-                {session ? (
-                  isFavorite(movie.id) ? 'Remove from Favorites' : 'Add to Favorites'
-                ) : 'Favourite'}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={handleShare}
-                data-testid="movie-detail-share"
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </Button>
-            </div>
-            
-            {/* Quick Play - Default 720p - Only show for authenticated users */}
-            {session && selectedTorrent && movie.torrents && movie.torrents.length > 0 && (
-              <div className="mb-8">
-                <Button 
-                  size="lg"
-                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg py-3 px-8"
-                  onClick={() => handlePlayMovie(selectedTorrent)}
-                  data-testid="movie-detail-play-now"
+
+              {movie.description_full && (
+                <p className="text-muted-foreground mb-8 leading-relaxed" data-testid="movie-detail-description">
+                  {movie.description_full}
+                </p>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <Button
+                  variant="outline"
+                  onClick={handleFavoriteToggle}
+                  disabled={favoriteLoading}
+                  data-testid="movie-detail-favorite"
                 >
-                  <Play className="mr-2 h-5 w-5" />
-                  Play Now ({selectedTorrent.quality})
+                  {favoriteLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Heart className={`mr-2 h-4 w-4 ${session && isFavorite(movie.id)
+                        ? 'fill-red-500 text-red-500'
+                        : ''
+                      }`} />
+                  )}
+                  {session ? (
+                    isFavorite(movie.id) ? 'Remove from Favorites' : 'Add to Favorites'
+                  ) : 'Favourite'}
                 </Button>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Default quality: {selectedTorrent.quality} • {selectedTorrent.size}
-                </p>
-              </div>
-            )}
-
-            {/* Sign in prompt for non-authenticated users */}
-            {!session && (
-              <div className="mb-8 p-6 bg-muted rounded-lg text-center">
-                <h3 className="font-semibold mb-2">Sign in to watch movies</h3>
-                <p className="text-muted-foreground mb-4">
-                  Create an account or sign in to stream movies and save your favorites
-                </p>
-                <Button onClick={() => router.push('/auth/signin')} data-testid="movie-detail-signin-prompt">
-                  <Heart className="mr-2 h-4 w-4" />
-                  Sign In to Continue
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  data-testid="movie-detail-share"
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share
                 </Button>
               </div>
-            )}
 
-            {/* No torrents available message */}
-            {(!movie.torrents || movie.torrents.length === 0) && (
-              <div className="mb-8 p-4 bg-muted rounded-lg">
-                <p className="text-muted-foreground text-center" data-testid="movie-detail-no-torrents">
-                  No streaming links available for this movie at the moment.
-                </p>
-              </div>
-            )}
-
-            {/* Available qualities - Only show for authenticated users */}
-            {session && movie.torrents && movie.torrents.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-4" data-testid="movie-detail-qualities-title">
-                  All Available Qualities
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {movie.torrents.map((torrent, index) => {
-                    const isSelected = selectedTorrent?.quality === torrent.quality;
-                    return (
-                      <Card key={index} className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-medium flex items-center gap-2" data-testid={`torrent-quality-${index}`}>
-                              {torrent.quality}
-                              {isSelected && <Badge variant="default">Default</Badge>}
-                            </h4>
-                            <p className="text-sm text-muted-foreground" data-testid={`torrent-size-${index}`}>
-                              {torrent.size}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm" data-testid={`torrent-seeds-${index}`}>
-                              {torrent.seeds} seeds
-                            </p>
-                            <p className="text-sm text-muted-foreground" data-testid={`torrent-peers-${index}`}>
-                              {torrent.peers} peers
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            className="flex-1 bg-primary hover:bg-primary/90"
-                            onClick={() => handlePlayMovie(torrent)}
-                            data-testid={`torrent-stream-${index}`}
-                          >
-                            <Play className="mr-2 h-4 w-4" />
-                            Stream
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            className="flex-1"
-                            onClick={() => handleDownload(torrent)}
-                            data-testid={`torrent-download-${index}`}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            Download
-                          </Button>
-                        </div>
-                      </Card>
-                    );
-                  })}
+              {/* Quick Play - Default 720p - Only show for authenticated users */}
+              {session && selectedTorrent && movie.torrents && movie.torrents.length > 0 && (
+                <div className="mb-8">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg py-3 px-8"
+                    onClick={() => handlePlayMovie(selectedTorrent)}
+                    data-testid="movie-detail-play-now"
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    Play Now ({selectedTorrent.quality})
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Default quality: {selectedTorrent.quality} • {selectedTorrent.size}
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Sign in prompt for non-authenticated users */}
+              {!session && (
+                <div className="mb-8 p-6 bg-muted rounded-lg text-center">
+                  <h3 className="font-semibold mb-2">Sign in to watch movies</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create an account or sign in to stream movies and save your favorites
+                  </p>
+                  <Button onClick={() => router.push('/auth/signin')} data-testid="movie-detail-signin-prompt">
+                    <Heart className="mr-2 h-4 w-4" />
+                    Sign In to Continue
+                  </Button>
+                </div>
+              )}
+
+              {/* No torrents available message */}
+              {(!movie.torrents || movie.torrents.length === 0) && (
+                <div className="mb-8 p-4 bg-muted rounded-lg">
+                  <p className="text-muted-foreground text-center" data-testid="movie-detail-no-torrents">
+                    No streaming links available for this movie at the moment.
+                  </p>
+                </div>
+              )}
+
+              {/* Available qualities - Only show for authenticated users */}
+              {session && movie.torrents && movie.torrents.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-4" data-testid="movie-detail-qualities-title">
+                    All Available Qualities
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    { /*@ts-ignore*/}
+                    {movie.torrents.map((torrent, index) => {
+                      const isSelected = selectedTorrent?.quality === torrent.quality;
+                      return (
+                        <Card key={index} className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''}`}>
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h4 className="font-medium flex items-center gap-2" data-testid={`torrent-quality-${index}`}>
+                                {torrent.quality}
+                                {isSelected && <Badge variant="default">Default</Badge>}
+                              </h4>
+                              <p className="text-sm text-muted-foreground" data-testid={`torrent-size-${index}`}>
+                                {torrent.size}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm" data-testid={`torrent-seeds-${index}`}>
+                                {torrent.seeds} seeds
+                              </p>
+                              <p className="text-sm text-muted-foreground" data-testid={`torrent-peers-${index}`}>
+                                {torrent.peers} peers
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              className="flex-1 bg-primary hover:bg-primary/90"
+                              onClick={() => handlePlayMovie(torrent)}
+                              data-testid={`torrent-stream-${index}`}
+                            >
+                              <Play className="mr-2 h-4 w-4" />
+                              Stream
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => handleDownload(torrent)}
+                              data-testid={`torrent-download-${index}`}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </Button>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Cast information not available from YTS API */}
+
+          {/* Similar movies */}
+          {(suggestionsLoading || (suggestions && suggestions.length > 0)) && (
+            <MovieSection
+              title="You might also like"
+              movies={suggestions}
+              isLoading={suggestionsLoading}
+              onMovieClick={handleMovieClick}
+              loadingMovieId={loadingMovieId}
+            />
+          )}
         </div>
 
-        {/* Cast information not available from YTS API */}
-
-        {/* Similar movies */}
-        {(suggestionsLoading || (suggestions && suggestions.length > 0)) && (
-          <MovieSection
-            title="You might also like"
-            movies={suggestions}
-            isLoading={suggestionsLoading}
-            onMovieClick={handleMovieClick}
-            loadingMovieId={loadingMovieId}
-          />
-        )}
+        {/* Video Player */}
+        <VideoPlayer
+          isOpen={showVideoPlayer}
+          movie={movie}
+          selectedTorrent={selectedTorrent}
+          magnetLink={magnetLink}
+          onClose={handleCloseVideoPlayer}
+        />
       </div>
-
-      {/* Video Player */}
-      <VideoPlayer
-        isOpen={showVideoPlayer}
-        movie={movie}
-        selectedTorrent={selectedTorrent}
-        magnetLink={magnetLink}
-        onClose={handleCloseVideoPlayer}
-      />
-    </div>
     </>
   );
 }

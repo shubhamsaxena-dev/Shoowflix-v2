@@ -11,31 +11,17 @@ import MovieSection from "@/components/movie-section";
 import UserProfileDropdown from "@/components/user-profile-dropdown";
 import VideoPlayer from "@/components/video-player";
 import SearchOverlay from "@/components/search-overlay";
-import { 
-  useTrendingMovies, 
-  useActionMovies, 
-  useHighRatedMovies, 
+import {
+  useTrendingMovies,
+  useHighRatedMovies,
   useRecentMovies,
-  useSearchMoviesInfinite,
-  useSciFiMovies,
-  useComedyMovies,
-  useAdventureMovies,
-  useCrimeMovies,
-  useFantasyMovies,
-  useMysteryMovies,
-  useDramaMovies,
-  useHorrorMovies,
-  useRomanceMovies,
-  useWarMovies,
-  useThrillerMovies,
-  useAnimationMovies,
   generateMagnetLink
 } from "@/hooks/use-movies";
 import type { YTSMovie, Torrent } from "@/types/movie";
-import type { MovieFilters } from "@/lib/types";
 
 const genres = [
   'Sci-Fi',
+  'Action',
   'Comedy',
   'Adventure',
   'Crime',
@@ -64,28 +50,15 @@ export default function Home() {
 
   // Data fetching with SWR
   const { movies: trendingMovies, isLoading: trendingLoading, error: trendingError } = useTrendingMovies();
-  const { movies: actionMovies, isLoading: actionLoading, error: actionError } = useActionMovies();
   const { movies: highRatedMovies, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
   const { movies: recentMovies, isLoading: recentLoading, error: recentError } = useRecentMovies();
-  
-  // Genre-specific movie data
-  const { movies: sciFiMovies, isLoading: sciFiLoading } = useSciFiMovies();
-  const { movies: comedyMovies, isLoading: comedyLoading } = useComedyMovies();
-  const { movies: adventureMovies, isLoading: adventureLoading } = useAdventureMovies();
-  const { movies: crimeMovies, isLoading: crimeLoading } = useCrimeMovies();
-  const { movies: fantasyMovies, isLoading: fantasyLoading } = useFantasyMovies();
-  const { movies: mysteryMovies, isLoading: mysteryLoading } = useMysteryMovies();
-  const { movies: dramaMovies, isLoading: dramaLoading } = useDramaMovies();
-  const { movies: horrorMovies, isLoading: horrorLoading } = useHorrorMovies();
-  const { movies: romanceMovies, isLoading: romanceLoading } = useRomanceMovies();
-  const { movies: warMovies, isLoading: warLoading } = useWarMovies();
-  const { movies: thrillerMovies, isLoading: thrillerLoading } = useThrillerMovies();
-  const { movies: animationMovies, isLoading: animationLoading } = useAnimationMovies();
+
+
 
   // Get featured movies for slideshow (random 5 from trending movies)
   const featuredMovies = useMemo(() => {
     if (!trendingMovies || trendingMovies.length === 0) return [];
-    
+
     // Shuffle trending movies and take first 5
     const shuffled = [...trendingMovies].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 5);
@@ -101,10 +74,10 @@ export default function Home() {
   const handleMovieClick = (movie: YTSMovie) => {
     // Set loading state for this movie
     setLoadingMovieId(movie.id);
-    
+
     // Navigate to movie detail page with proper router
     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
-    
+
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
       window.location.href = `/movie/${movie.id}/${movieSlug}`;
@@ -116,7 +89,7 @@ export default function Home() {
       setLoadingPlay(true);
       setSelectedMovie(movie);
       setSelectedTorrent(torrent);
-      
+
       // Generate magnet link
       const magnet = await generateMagnetLink(movie, torrent);
       setMagnetLink(magnet);
@@ -130,7 +103,7 @@ export default function Home() {
 
   const handleViewAll = (genre: string) => {
     setLoadingViewAll(genre);
-    
+
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
       window.location.href = `/genre/${genre}`;
@@ -155,7 +128,7 @@ export default function Home() {
         <meta name="twitter:title" content="Shoowflix - Stream Movies Online in HD Quality" />
         <meta name="twitter:description" content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more." />
         <link rel="canonical" href="https://shoowflix.com" />
-        
+
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
@@ -183,224 +156,109 @@ export default function Home() {
           }}
         />
       </Head>
-      
+
       <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-primary">Shoowflix</h1>
-            </div>
-            
-            <div className="flex-1 max-w-md mx-4">
-              <SearchBar onSearch={handleSearch} />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              {session ? (
-                <UserProfileDropdown />
-              ) : (
-                <Button variant="outline" size="sm" onClick={() => router.push('/auth/signin')} data-testid="button-signin">
-                  <User className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              )}
+        {/* Navigation Header */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-shrink-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-primary">Shoowflix</h1>
+              </div>
+
+              <div className="flex-1 max-w-md mx-4">
+                <SearchBar onSearch={handleSearch} />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {session ? (
+                  <UserProfileDropdown />
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => router.push('/auth/signin')} data-testid="button-signin">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Hero Section */}
-      {featuredMovies && featuredMovies.length > 0 && (
-        <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} isAuthenticated={!!session} />
-      )}
+        {/* Hero Section */}
+        {featuredMovies && featuredMovies.length > 0 && (
+          <HeroSection movies={featuredMovies} onPlayMovie={handlePlayMovie} isLoadingPlay={loadingPlay} isAuthenticated={!!session} />
+        )}
 
-      {/* Movie Sections */}
-      <main className="relative z-10 -mt-32 space-y-12 pb-20">
-        <MovieSection
-          title="Trending Now"
-          movies={trendingMovies}
-          isLoading={trendingLoading}
-          onMovieClick={handleMovieClick}
-          loadingMovieId={loadingMovieId}
-        />
+        {/* Movie Sections */}
+        <main className="relative z-10 -mt-32 space-y-12 pb-20">
+          <MovieSection
+            title="Trending Now"
+            movies={trendingMovies}
+            isLoading={trendingLoading}
+            onMovieClick={handleMovieClick}
+            loadingMovieId={loadingMovieId}
+          />
 
-        <MovieSection
-          title="Action Movies"
-          movies={actionMovies}
-          isLoading={actionLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("action")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "action"}
-        />
 
-        <MovieSection
-          title="High Rated Movies"
-          movies={highRatedMovies}
-          isLoading={highRatedLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("high-rated")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "high-rated"}
-        />
 
-        <MovieSection
-          title="Recently Added"
-          movies={recentMovies}
-          isLoading={recentLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("recent")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "recent"}
-        />
+          <MovieSection
+            title="High Rated Movies"
+            movies={highRatedMovies}
+            isLoading={highRatedLoading}
+            onMovieClick={handleMovieClick}
+            onViewAll={() => handleViewAll("high-rated")}
+            loadingMovieId={loadingMovieId}
+            loadingViewAll={loadingViewAll === "high-rated"}
+          />
 
-        <MovieSection
-          title="Sci-Fi Movies"
-          movies={sciFiMovies}
-          isLoading={sciFiLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("sci-fi")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "sci-fi"}
-        />
+          <MovieSection
+            title="Recently Added"
+            movies={recentMovies}
+            isLoading={recentLoading}
+            onMovieClick={handleMovieClick}
+            onViewAll={() => handleViewAll("recent")}
+            loadingMovieId={loadingMovieId}
+            loadingViewAll={loadingViewAll === "recent"}
+          />
 
-        <MovieSection
-          title="Comedy Movies"
-          movies={comedyMovies}
-          isLoading={comedyLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("comedy")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "comedy"}
-        />
+          {genres.map(genre => {
+            return <MovieSection
+              key={genre}
+              genre={genre}
+              onMovieClick={handleMovieClick}
+              onViewAll={() => handleViewAll(genre)}
+              loadingMovieId={loadingMovieId}
+              loadingViewAll={loadingViewAll === genre}
+            />
+          })}
 
-        <MovieSection
-          title="Adventure Movies"
-          movies={adventureMovies}
-          isLoading={adventureLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("adventure")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "adventure"}
-        />
 
-        <MovieSection
-          title="Crime Movies"
-          movies={crimeMovies}
-          isLoading={crimeLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("crime")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "crime"}
-        />
+        </main>
 
-        <MovieSection
-          title="Fantasy Movies"
-          movies={fantasyMovies}
-          isLoading={fantasyLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("fantasy")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "fantasy"}
-        />
+        {/* Overlays and Modals */}
+        {showSearchOverlay && (
+          <SearchOverlay
+            isOpen={showSearchOverlay}
+            onClose={() => {
+              setShowSearchOverlay(false);
+              setInitialSearchQuery("");
+            }}
+            onMovieClick={handleMovieClick}
+            initialQuery={initialSearchQuery}
+            loadingMovieId={loadingMovieId}
+          />
+        )}
 
-        <MovieSection
-          title="Mystery Movies"
-          movies={mysteryMovies}
-          isLoading={mysteryLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("mystery")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "mystery"}
-        />
-
-        <MovieSection
-          title="Drama Movies"
-          movies={dramaMovies}
-          isLoading={dramaLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("drama")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "drama"}
-        />
-
-        <MovieSection
-          title="Horror Movies"
-          movies={horrorMovies}
-          isLoading={horrorLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("horror")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "horror"}
-        />
-
-        <MovieSection
-          title="Romance Movies"
-          movies={romanceMovies}
-          isLoading={romanceLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("romance")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "romance"}
-        />
-
-        <MovieSection
-          title="War Movies"
-          movies={warMovies}
-          isLoading={warLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("war")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "war"}
-        />
-
-        <MovieSection
-          title="Thriller Movies"
-          movies={thrillerMovies}
-          isLoading={thrillerLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("thriller")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "thriller"}
-        />
-
-        <MovieSection
-          title="Animation Movies"
-          movies={animationMovies}
-          isLoading={animationLoading}
-          onMovieClick={handleMovieClick}
-          onViewAll={() => handleViewAll("animation")}
-          loadingMovieId={loadingMovieId}
-          loadingViewAll={loadingViewAll === "animation"}
-        />
-      </main>
-
-      {/* Overlays and Modals */}
-      {showSearchOverlay && (
-        <SearchOverlay
-          isOpen={showSearchOverlay}
-          onClose={() => {
-            setShowSearchOverlay(false);
-            setInitialSearchQuery("");
-          }}
-          onMovieClick={handleMovieClick}
-          initialQuery={initialSearchQuery}
-          loadingMovieId={loadingMovieId}
-        />
-      )}
-
-      {showVideoPlayer && selectedMovie && magnetLink && (
-        <VideoPlayer
-          isOpen={showVideoPlayer}
-          movie={selectedMovie}
-          selectedTorrent={selectedTorrent}
-          magnetLink={magnetLink}
-          onClose={handleCloseVideoPlayer}
-        />
-      )}
-    </div>
+        {showVideoPlayer && selectedMovie && magnetLink && (
+          <VideoPlayer
+            isOpen={showVideoPlayer}
+            movie={selectedMovie}
+            selectedTorrent={selectedTorrent}
+            magnetLink={magnetLink}
+            onClose={handleCloseVideoPlayer}
+          />
+        )}
+      </div>
     </>
   );
 }

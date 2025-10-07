@@ -143,7 +143,7 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                     Found {searchData.data.movies.length} results for "{debouncedTerm}"
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                    {searchData.data.movies.map((movie) => (
+                    {searchData.data.movies.map((movie:any) => (
                       <MovieCardWithFavorites
                         key={movie.id}
                         movie={movie}
