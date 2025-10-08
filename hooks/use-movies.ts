@@ -62,6 +62,7 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
     movies,
     error,
     isLoading: !data && !error,
+    //@ts-ignore
     isLoadingMore: isValidating && data?.length > 0,
     canLoadMore,
     loadMore,
@@ -73,7 +74,7 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
 
 // ---------------- Regular Movies Hook ----------------
 export function useMovies(filters: MovieFilters | null = {}) {
-  const key = useMemo(() => getQueryParams('/movies', filters), [filters]);
+  const key = useMemo(() => getQueryParams('/movies', filters as any), [filters]);
 
   const { data, error, mutate, isLoading } = useSwr({ key });
 
