@@ -16,7 +16,7 @@ import {
 import type { YTSMovie } from '@/types/movie'
 import { useFavorites } from '@/hooks/use-favorites'
 import { useMovieDetails } from '@/hooks/use-movies'
-
+import { useRouter } from 'next/router'
 const FavList = ({ movieId, handleMovieClick }: any) => {
 
   const { data: movieData, isLoading: movieLoading, } = useMovieDetails(movieId);
@@ -51,10 +51,10 @@ const FavList = ({ movieId, handleMovieClick }: any) => {
 export default function UserProfileDropdown() {
   const { data: session } = useSession()
   const { favorites, loading: loadingFavorites } = useFavorites()
-
+  const router = useRouter()
   const handleMovieClick = (movie: YTSMovie) => {
     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-    window.location.href = `/movie/${movie.id}/${movieSlug}`
+    router.push(`/movie/${movie.id}/${movieSlug}`)
   }
 
   if (!session) {

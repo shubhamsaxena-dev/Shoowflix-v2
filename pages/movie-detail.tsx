@@ -33,7 +33,6 @@ export default function MovieDetail() {
   const movieId = parseInt((id as string) || '0');
   const { toast } = useToast();
   const { isFavorite, addToFavorites, removeFromFavorites, favorites } = useFavorites();
-  console.log(favorites)
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
   const [magnetLink, setMagnetLink] = useState<string | null>(null);

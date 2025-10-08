@@ -3,11 +3,12 @@ import MovieCard from "./movie-card";
 import { YTSMovie } from "@/types/movie";
 import { Skeleton } from "./ui/skeleton";
 import { useState } from "react";
-
+import { useRouter } from "next/router";
 export interface FavoriteCardProps {
     movieId: number
 }
 const FavoriteCard = ({ movieId }: FavoriteCardProps) => {
+  const router=useRouter()
     const [loadingMovieId,setLoadingMovieId]=useState(false)
     const { data: movieData, isLoading: movieLoading,  } = useMovieDetails(movieId);
     const movie = movieData?.data?.movie as YTSMovie;
@@ -21,7 +22,8 @@ const FavoriteCard = ({ movieId }: FavoriteCardProps) => {
         
         // Use timeout to show loading state briefly before navigation
         setTimeout(() => {
-          window.location.href = `/movie/${movie.id}/${movieSlug}`;
+              router.push(`/movie/${movie.id}/${movieSlug}`)
+
         }, 150);
       };
 

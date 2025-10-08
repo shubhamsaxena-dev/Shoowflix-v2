@@ -19,7 +19,7 @@ export const useSwr = ({ key, swrOptions, execute = true }: UseSwrProps) => {
     }
   }
 
-  const url = `/api/${key}` // changed to /api/
+  const url = `/api${key}` // changed to /api/
   const swrKeyValue = execute ? [url] : null
   const { data, error, isLoading, isValidating, mutate } = useSWRImmutable(
     swrKeyValue,

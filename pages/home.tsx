@@ -77,10 +77,9 @@ export default function Home() {
 
     // Navigate to movie detail page with proper router
     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
-
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
-      window.location.href = `/movie/${movie.id}/${movieSlug}`;
+      router.push(`/movie/${movie.id}/${movieSlug}`)
     }, 150);
   };
 
@@ -106,7 +105,7 @@ export default function Home() {
 
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
-      window.location.href = `/genre/${genre}`;
+      router.push(`/genre/${genre}`);
     }, 150);
   };
 

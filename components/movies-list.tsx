@@ -1,6 +1,7 @@
 import MovieSection from "./movie-section";
 import { useMoviesByGenre } from "@/hooks/use-movies";
 import type { YTSMovie } from "@/types/movie";
+import { useRouter } from "next/router";
 
 interface MoviesListProps {
   genre: string;
@@ -8,10 +9,12 @@ interface MoviesListProps {
 }
 
 export default function MoviesList({ genre, onMovieClick }: MoviesListProps) {
+  const router=useRouter()
   const { data, isLoading, error } = useMoviesByGenre(genre);
 
   const handleViewAll = () => {
-    window.location.href = `/genre/${genre.toLowerCase().replace(/\s+/g, '-')}`;
+    router.push(`/genre/${genre.toLowerCase().replace(/\s+/g, '-')}`)
+
   };
 
   return (

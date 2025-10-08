@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,102 +35,136 @@ export default function VideoPlayer({
     peers: 0,
   });
 
-  const playerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerIdRef = useRef<string>("");
   const initializedRef = useRef(false);
   const observerRef = useRef<MutationObserver | null>(null);
 
+  // 🎯 Center the play button
+  const centerPlayButton = () => {
+    const container = containerRef.current?.querySelector(`#${playerIdRef.current}`);
+    if (!container) return;
+
+    const candidates = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        "button, div[role='button'], [class*='play'], .webtor-play-button"
+      )
+    );
+
+    if (candidates.length === 0) return;
+
+    candidates.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 10 && rect.height > 10) {
+        el.style.position = "absolute";
+        el.style.top = "50%";
+        el.style.left = "50%";
+        el.style.transform = "translate(-50%, -50%)";
+        el.style.zIndex = "9999";
+      }
+    });
+
+    // Stop observing once a button is centered
+    if (observerRef.current) {
+      const button = container.querySelector(".webtor-play-button");
+      if (button) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    }
+  };
+
+  const initializePlayer = () => {
+    if (initializedRef.current || !magnetLink) return;
+    initializedRef.current = true;
+
+    const uniqueId = `webtor-player-${Date.now()}`;
+    playerIdRef.current = uniqueId;
+
+    const playerDiv = document.createElement("div");
+    playerDiv.id = uniqueId;
+    playerDiv.style.width = "100%";
+    playerDiv.style.height = "100%";
+    playerDiv.style.position = "relative";
+
+    if (containerRef.current) {
+      containerRef.current.innerHTML = "";
+      containerRef.current.appendChild(playerDiv);
+    }
+
+    if (!window.webtor) window.webtor = [];
+
+    const config = {
+      id: uniqueId,
+      magnet: magnetLink,
+      imdbId: movie?.imdb_code || "",
+      poster: movie?.large_cover_image || movie?.medium_cover_image,
+      width: "100%",
+      height: "100%",
+      features: { download: true, fullscreen: false, chromecast: true, autoplay: true },
+      on: (e: any) => {
+        if (e.name === window.webtor.INITED) {
+          e.player.play();
+          setIsLoading(false);
+
+          // Observe container for play button
+          if (containerRef.current && !observerRef.current) {
+            observerRef.current = new MutationObserver(centerPlayButton);
+            observerRef.current.observe(containerRef.current, {
+              childList: true,
+              subtree: true,
+              attributes: true,
+            });
+          }
+
+          // Center immediately in case button exists
+          centerPlayButton();
+        }
+
+        if (e.name === window.webtor.TORRENT_FETCHED) {
+          setIsLoading(false);
+          setTorrentStatus({ downloaded: e.data.downloaded, peers: e.data.peers });
+        }
+
+        if (e.name === window.webtor.TORRENT_ERROR) {
+          setError("Failed to load movie stream. Please try a different quality.");
+          setIsLoading(false);
+          setShowVPNNotice(true);
+        }
+
+        if (e.name === window.webtor.STAT) {
+          setTorrentStatus({
+            downloaded: e.data.downloaded || torrentStatus.downloaded,
+            peers: e.data.peers || 0,
+          });
+        }
+      },
+    };
+
+    window.webtor.push(config);
+  };
+
+  const waitForWebtor = () => {
+    if (!window.webtor || !window.webtor.INITED) {
+      setTimeout(waitForWebtor, 100);
+    } else {
+      initializePlayer();
+    }
+  };
+
   useEffect(() => {
-    if (!isOpen || !movie || !magnetLink || !playerRef.current) return;
+    if (!isOpen || !movie || !magnetLink) return;
 
     setIsLoading(true);
     setError(null);
     initializedRef.current = false;
 
-    // Clear previous content
-    playerRef.current.innerHTML = "";
-    playerRef.current.style.display = "block";
-
-    const centerElements = () => {
-      if (!playerRef.current) return;
-      const container = playerRef.current;
-
-      const candidates = Array.from(
-        container.querySelectorAll<HTMLElement>(
-          "button, div[role='button'], [class*='play'], .webtor-play-button"
-        )
-      );
-
-      candidates.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.width > 10 && rect.height > 10) {
-          el.style.position = "absolute";
-          el.style.top = "50%";
-          el.style.left = "50%";
-          el.style.transform = "translate(-50%, -50%)";
-          el.style.zIndex = "9999";
-        }
-      });
-    };
-
-    const initializePlayer = () => {
-      if (initializedRef.current) return;
-      initializedRef.current = true;
-
-      if (!window.webtor) window.webtor = [];
-
-      const config = {
-        id: "webtor-player",
-        magnet: magnetLink,
-        imdbId: movie.imdb_code || "",
-        poster: movie.large_cover_image || movie.medium_cover_image,
-        width: "100%",
-        height: "100%",
-        features: { download: true, fullscreen: false, chromecast: true, autoplay: true },
-        on: (e: any) => {
-          if (e.name === window.webtor.INITED) {
-            e.player.play();
-            setIsLoading(false);
-
-            // Center play buttons
-            centerElements();
-
-            // Observe dynamic elements
-            if (playerRef.current && !observerRef.current) {
-              observerRef.current = new MutationObserver(centerElements);
-              observerRef.current.observe(playerRef.current, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-              });
-            }
-          }
-
-          if (e.name === window.webtor.TORRENT_FETCHED) {
-            setIsLoading(false);
-            setTorrentStatus({ downloaded: e.data.downloaded, peers: e.data.peers });
-          }
-
-          if (e.name === window.webtor.TORRENT_ERROR) {
-            setError("Failed to load movie stream. Please try a different quality.");
-            setIsLoading(false);
-            setShowVPNNotice(true);
-          }
-
-          if (e.name === window.webtor.STAT) {
-            // Example: update warming up / peers dynamically
-            setTorrentStatus({ downloaded: e.data.downloaded || torrentStatus.downloaded, peers: e.data.peers || 0 });
-          }
-        },
-      };
-
-      window.webtor.push(config);
-    };
-
     if (typeof window !== "undefined") {
       const existingScript = document.querySelector('script[src*="webtor"]');
+
       if (!existingScript) {
         const script = document.createElement("script");
-        script.src = "https://cdn.webtor.io/webtor.min.js";
+        script.src = "https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js/dist/index.min.js";
         script.async = true;
         script.onload = () => setTimeout(initializePlayer, 300);
         script.onerror = () => {
@@ -137,18 +173,17 @@ export default function VideoPlayer({
         };
         document.head.appendChild(script);
       } else {
-        initializePlayer();
+        waitForWebtor();
       }
     }
 
     return () => {
-      if (playerRef.current) playerRef.current.innerHTML = "";
-      if (window.webtor) window.webtor = [];
-      initializedRef.current = false;
+      if (containerRef.current) containerRef.current.innerHTML = "";
       if (observerRef.current) {
         observerRef.current.disconnect();
         observerRef.current = null;
       }
+      initializedRef.current = false;
     };
   }, [isOpen, movie, magnetLink]);
 
@@ -162,9 +197,8 @@ export default function VideoPlayer({
     setError(null);
     setIsLoading(true);
     initializedRef.current = false;
-    if (playerRef.current) playerRef.current.innerHTML = "";
-    if (window.webtor) window.webtor = [];
-    window.location.reload();
+    if (containerRef.current) containerRef.current.innerHTML = "";
+    initializePlayer();
   };
 
   if (!isOpen) return null;
@@ -238,18 +272,13 @@ export default function VideoPlayer({
               </div>
               <div className="space-y-4">
                 <p className="text-muted-foreground leading-relaxed">
-                  For the best streaming experience, we recommend using a VPN for enhanced privacy and better quality access to content.
+                  For the best streaming experience, we recommend using a VPN.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button onClick={() => setShowVPNNotice(false)} className="flex-1">Got It</Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowVPNNotice(false);
-                      handleRetry();
-                    }}
-                    className="flex-1"
-                  >
+                  <Button onClick={() => setShowVPNNotice(false)} className="flex-1">
+                    Got It
+                  </Button>
+                  <Button variant="outline" onClick={handleRetry} className="flex-1">
                     Retry Stream
                   </Button>
                 </div>
@@ -259,10 +288,12 @@ export default function VideoPlayer({
         )}
 
         <div
-          id="webtor-player"
-          ref={playerRef}
+          ref={containerRef}
           className="w-full h-full rounded-lg overflow-hidden"
-          style={{ display: isLoading || error ? "none" : "block", position: "relative" }}
+          style={{
+            display: isLoading || error ? "none" : "block",
+            position: "relative",
+          }}
         />
       </div>
     </div>

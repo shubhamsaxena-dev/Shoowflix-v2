@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import type { YTSMovie } from "@/types/movie";
+import { useRouter } from "next/router";
 
 // Import Swiper styles
 import 'swiper/css';
@@ -23,6 +24,7 @@ interface HeroSectionProps {
 export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuthenticated }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const swiperRef = useRef<SwiperType>();
+  const router=useRouter()
 
   const movie = movies?.[currentIndex];
 
@@ -227,7 +229,8 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
                 onClick={() => {
                   if (movie) {
                     const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-                    window.location.href = `/movie/${movie.id}/${movieSlug}`;
+                   router.push(`/movie/${movie.id}/${movieSlug}`)
+
                   }
                 }}
                 data-testid="hero-info-button"
