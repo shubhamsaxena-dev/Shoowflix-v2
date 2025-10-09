@@ -2,5 +2,11 @@
   "framework": "nextjs",
   "buildCommand": "npx next build",
   "devCommand": "npx next dev",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+    "crons": [
+    {
+      "path": "/api/generate-sitemap",
+      "schedule": "30 8 * * *"
+    }
+  ]
 }
