@@ -6,7 +6,7 @@
     "crons": [
     {
       "path": "/api/generate-sitemap",
-      "schedule": "30 8 * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }
