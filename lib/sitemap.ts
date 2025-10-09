@@ -17,7 +17,10 @@ export async function generateSitemap() {
     const movies = data.data?.movies || [];
     if (!movies.length) break;
 
-    movies.forEach((m: any) => urls.push(`${SITE_URL}/movie/${m.id}`));
+    movies.forEach((m: any) => {
+      const movieSlug = m.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').trim();
+      urls.push(`${SITE_URL}/movie/${m.id}/${movieSlug}`)
+    });
 
     if (movies.length < LIMIT) hasMore = false;
     page++;

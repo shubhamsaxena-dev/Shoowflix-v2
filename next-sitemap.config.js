@@ -1,3 +1,4 @@
+import { userAgent } from 'next/server';
 
 /** @type {import('next-sitemap').IConfig} */
 const SITE_URL = 'https://shoowflix.com'
@@ -13,6 +14,13 @@ const config = {
   robotsTxtOptions: {
     policies: [
       { userAgent: '*', allow: '/' },
+      { userAgent: '*', allow: '/genre' },
+      {
+        userAgent: '*', allow: '/movie'
+      },
+      { userAgent: '*', disallow: '/api/generate-sitemap' },
+      { userAgent: '*', disallow: '/api/admin' },
+      { userAgent: '*', disallow: '/api/auth' },
     ],
     additionalSitemaps: [`${SITE_URL}/api/sitemap-index`],
   },

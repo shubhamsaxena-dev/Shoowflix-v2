@@ -12,6 +12,7 @@ export default function Document() {
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="shortcut icon" href="/favicon.ico" />
+         <meta name="yandex-verification" content="36b96e1f46430665" />
         
         {/* Open Graph Meta Tags */}
         <meta property="og:title" content="Shoowflix - Stream Movies in High Quality" />
