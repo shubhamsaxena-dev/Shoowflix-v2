@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-const YTS_API_BASE = 'https://yts.mx/api/v2'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const YTS_API_BASE = process.env.MOVIES_HOST
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
