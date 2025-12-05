@@ -79,7 +79,7 @@ export default function GenrePage() {
         ...(searchQuery && { query_term: searchQuery })
       });
 
-      const response = await fetch(`/api/movies?${params}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_ROOT}/list_movies.json?${params}`);
       const data: MoviesResponse = await response.json();
       
       if (data.status === "ok" && data.data.movies) {

@@ -53,6 +53,8 @@ export default function Home() {
   const { movies: highRatedMovies, isLoading: highRatedLoading, error: highRatedError } = useHighRatedMovies();
   const { movies: recentMovies, isLoading: recentLoading, error: recentError } = useRecentMovies();
 
+  
+
 
 
   // Get featured movies for slideshow (random 5 from trending movies)

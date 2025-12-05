@@ -33,9 +33,9 @@ function buildQueryString(filters: MovieFilters | null = {}, page: number = 1): 
 // ---------------- Infinite SWR Key ----------------
 const getInfiniteKey = (filters: MovieFilters | null) => (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
   if (!filters) return null; // no request
-  if (pageIndex === 0) return `/api/movies?${buildQueryString(filters, 1)}`;
+  if (pageIndex === 0) return `/list_movies.json?${buildQueryString(filters, 1)}`;
   if (!previousPageData?.data?.movies?.length) return null; // reached end
-  return `/api/movies?${buildQueryString(filters, pageIndex + 1)}`;
+  return `/list_movies.json?${buildQueryString(filters, pageIndex + 1)}`;
 };
 
 // ---------------- Infinite Movies Hook ----------------
@@ -74,9 +74,10 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
 
 // ---------------- Regular Movies Hook ----------------
 export function useMovies(filters: MovieFilters | null = {}) {
-  const key = useMemo(() => getQueryParams('/movies', filters as any), [filters]);
+  const key = useMemo(() => getQueryParams('/list_movies.json', filters as any), [filters]);
 
   const { data, error, mutate, isLoading } = useSwr({ key });
+  console.log(data)
 
   return {
     data,
@@ -89,7 +90,7 @@ export function useMovies(filters: MovieFilters | null = {}) {
 
 // ---------------- Movie Details ----------------
 export function useMovieDetails(movieId: number) {
-  const key = useMemo(() => `/movies/${movieId}`, [movieId]);
+  const key = useMemo(() => `/movie_details.json/?movie_id=${movieId}`, [movieId]);
   const { data, error, mutate, isLoading } = useSwr({ key });
 
   return {
@@ -103,7 +104,7 @@ export function useMovieDetails(movieId: number) {
 
 // ---------------- Movie Suggestions ----------------
 export function useMovieSuggestions(movieId: number) {
-  const key = useMemo(() => `/movies/${movieId}/suggestions`, [movieId]);
+  const key = useMemo(() => `/movie_suggestions.json/?movie_id=${movieId}`, [movieId]);
   const { data, error, mutate, isLoading } = useSwr({ key });
 
   return {
