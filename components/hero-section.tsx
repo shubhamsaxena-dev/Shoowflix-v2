@@ -36,6 +36,8 @@ export default function HeroSection({
   const router = useRouter();
 
   const movie = movies?.[currentIndex];
+  const fullBleedClass =
+    "relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden mt-16";
 
   const handleSlideChange = (swiper: SwiperType) => {
     setCurrentIndex(swiper.activeIndex);
@@ -51,7 +53,7 @@ export default function HeroSection({
   if (!movies || movies.length === 0) {
     return (
       <section
-        className="relative overflow-hidden mt-16"
+        className={fullBleedClass}
         style={{ height: "100vh", minHeight: "600px" }}
       >
         <div className="absolute inset-0" style={{ aspectRatio: "16/9" }}>
@@ -78,7 +80,7 @@ export default function HeroSection({
 
   if (!movies || movies.length === 0) {
     return (
-      <section className="relative h-screen overflow-hidden mt-16">
+      <section className={fullBleedClass} style={{ height: "100vh" }}>
         <div className="absolute inset-0 bg-muted">
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
@@ -101,7 +103,7 @@ export default function HeroSection({
 
   return (
     <section
-      className="relative overflow-hidden mt-16"
+      className={fullBleedClass}
       style={{
         height: "100vh",
         minHeight: "600px",

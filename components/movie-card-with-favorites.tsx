@@ -63,7 +63,7 @@ export default function MovieCardWithFavorites({
 
   return (
     <div
-      className={`movie-card flex-shrink-0 w-36 sm:w-48 cursor-pointer ${className}`}
+      className={`movie-card w-full cursor-pointer ${className}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}

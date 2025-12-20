@@ -62,8 +62,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     };
   } catch (error) {
-    console.error("Error fetching movie details:", error);
-
     // Return error page
     return {
       notFound: true,

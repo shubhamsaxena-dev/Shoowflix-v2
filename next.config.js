@@ -2,7 +2,15 @@
 
 // Extract hostname from environment variable
 const getImageDomains = () => {
-  const domains = new Set();
+  // Default YTS hosts so images always work even if env is missing or stale
+  const domains = new Set([
+    "yts.mx",
+    "yts.lt",
+    "img.yts.mx",
+    "img.yts.lt",
+    "st.yts.mx",
+    "st.yts.lt",
+  ]);
 
   // Add MOVIES_HOST and its variants
   if (process.env.MOVIES_HOST) {

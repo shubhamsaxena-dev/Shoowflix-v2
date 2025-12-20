@@ -122,7 +122,6 @@ export default function MovieDetail({
         description: `Loading ${movie.title} in ${torrent.quality}`,
       });
     } catch (error) {
-      console.error("Error starting stream:", error);
       toast({
         title: "Stream failed",
         description: "Unable to start streaming. Please try again.",
@@ -169,7 +168,6 @@ export default function MovieDetail({
         });
       }
     } catch (error) {
-      console.error("Error sharing:", error);
       // Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(movieUrl);
@@ -252,7 +250,6 @@ export default function MovieDetail({
         description: `${movie.title} magnet file downloaded successfully.`,
       });
     } catch (error) {
-      console.error("Error generating download link:", error);
       toast({
         title: "Download failed",
         description: "Unable to generate download link.",
