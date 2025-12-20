@@ -83,13 +83,14 @@ export default function MovieDetail() {
       !selectedTorrent
     ) {
       // Find 720p torrent first
-      const torrent720p = movie.torrents.find((t: any) => t.quality === "720p");
+      /*@ts-ignore*/
+      const torrent720p = movie.torrents.find((t) => t.quality === "720p");
 
       if (torrent720p) {
         setSelectedTorrent(torrent720p);
       } else {
         // Fallback to highest quality available
-        const sortedTorrents = [...movie.torrents].sort((a: any, b: any) => {
+        const sortedTorrents = [...movie.torrents].sort((a, b) => {
           const qualityOrder = { "2160p": 4, "1080p": 3, "720p": 2, "480p": 1 };
           const aValue =
             qualityOrder[a.quality as keyof typeof qualityOrder] || 0;
@@ -910,7 +911,7 @@ export default function MovieDetail() {
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6">Cast</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
-                {movie.cast.slice(0, 12).map((actor, index) => (
+                {movie.cast.map((actor: any, index: number) => (
                   <div key={index} className="text-center group">
                     <div className="relative mb-2 overflow-hidden rounded-full aspect-square max-w-24 mx-auto">
                       {actor.url_small_image ? (
