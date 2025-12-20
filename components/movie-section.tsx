@@ -20,10 +20,10 @@ interface MovieSectionProps {
   onViewAll?: () => void;
   loadingMovieId?: number | null;
   loadingViewAll?: boolean;
-  error?:any
+  error?: any;
 }
 
-const MovieSection=({
+const MovieSection = ({
   title,
   genre,
   movies: propMovies,
@@ -32,19 +32,31 @@ const MovieSection=({
   onViewAll,
   loadingMovieId,
   loadingViewAll,
-}: MovieSectionProps) =>{
+}: MovieSectionProps) => {
   // Fetch if genre is provided and movies prop is not
-  const { movies: fetchedMovies = [], isLoading: fetchedLoading, error } =
-    !propMovies && genre ? useMoviesByGenre(genre) : { movies: [], isLoading: false, error: null };
+  const {
+    movies: fetchedMovies = [],
+    isLoading: fetchedLoading,
+    error,
+  } = !propMovies && genre
+    ? useMoviesByGenre(genre)
+    : { movies: [], isLoading: false, error: null };
 
   const isLoading = propMovies ? propLoading : fetchedLoading;
-  const movies = propMovies ? propMovies.slice(0, 20) : fetchedMovies.slice(0, 20);
+  const movies = propMovies
+    ? propMovies.slice(0, 20)
+    : fetchedMovies.slice(0, 20);
   const displayTitle = title || (genre ? `${genre} Movies` : "Movies");
 
   return (
     <section
       className="container mx-auto px-2 sm:px-4 group"
-      style={{ minHeight: "380px", paddingBottom: "2rem" }}
+      style={{
+        minHeight: "420px",
+        paddingBottom: "2rem",
+        contain: "layout style paint",
+        willChange: "auto",
+      }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -107,7 +119,7 @@ const MovieSection=({
               1280: { slidesPerView: 6.5, spaceBetween: 24 },
             }}
           >
-            {movies.map((movie:any) => (
+            {movies.map((movie: any) => (
               <SwiperSlide key={movie.id} className="!w-auto">
                 <MovieCard
                   movie={movie}
@@ -119,13 +131,14 @@ const MovieSection=({
           </Swiper>
         ) : (
           <div className="text-center py-8 w-full">
-            <p className="text-muted-foreground">No movies found in this section.</p>
+            <p className="text-muted-foreground">
+              No movies found in this section.
+            </p>
           </div>
         )}
       </div>
     </section>
   );
-}
+};
 
-
-export default memo(MovieSection)
+export default memo(MovieSection);

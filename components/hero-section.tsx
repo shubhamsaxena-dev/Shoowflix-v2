@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Play, Info, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
 import type { YTSMovie } from "@/types/movie";
 import { useRouter } from "next/router";
 
 // Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 
 interface HeroSectionProps {
   movies: YTSMovie[];
@@ -21,10 +22,18 @@ interface HeroSectionProps {
   isAuthenticated?: boolean;
 }
 
-export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuthenticated }: HeroSectionProps) {
+export default function HeroSection({
+  movies,
+  onPlayMovie,
+  isLoadingPlay,
+  isAuthenticated,
+}: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState<{ [key: number]: boolean }>(
+    {}
+  );
   const swiperRef = useRef<SwiperType>();
-  const router=useRouter()
+  const router = useRouter();
 
   const movie = movies?.[currentIndex];
 
@@ -41,12 +50,15 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
   };
   if (!movies || movies.length === 0) {
     return (
-      <section className="relative overflow-hidden mt-16" style={{ height: '100vh', minHeight: '600px' }}>
-        <div className="absolute inset-0" style={{ aspectRatio: '16/9' }}>
+      <section
+        className="relative overflow-hidden mt-16"
+        style={{ height: "100vh", minHeight: "600px" }}
+      >
+        <div className="absolute inset-0" style={{ aspectRatio: "16/9" }}>
           <div className="w-full h-full bg-gray-800"></div>
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
-        
+
         <div className="relative z-10 h-full flex items-center">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="max-w-xl sm:max-w-2xl">
@@ -70,11 +82,13 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
         <div className="absolute inset-0 bg-muted">
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
-        
+
         <div className="relative z-10 h-full flex items-center">
           <div className="container mx-auto px-2 sm:px-4">
             <div className="max-w-xl sm:max-w-2xl">
-              <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4">Welcome to Shoowflix</h1>
+              <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4">
+                Welcome to Shoowflix
+              </h1>
               <p className="text-base sm:text-lg mb-8 leading-relaxed text-muted-foreground">
                 Discover and stream your favorite movies in high quality.
               </p>
@@ -86,7 +100,16 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
   }
 
   return (
-    <section className="relative overflow-hidden mt-16" style={{ height: '100vh', minHeight: '600px' }} data-testid="hero-section">
+    <section
+      className="relative overflow-hidden mt-16"
+      style={{
+        height: "100vh",
+        minHeight: "600px",
+        aspectRatio: "16/9",
+        contain: "layout style paint",
+      }}
+      data-testid="hero-section"
+    >
       {movies && movies.length > 0 ? (
         <Swiper
           modules={[Autoplay, EffectFade]}
@@ -101,52 +124,68 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
           autoplay={{
             delay: 4000,
             disableOnInteraction: false,
-            pauseOnMouseEnter: true
+            pauseOnMouseEnter: true,
           }}
           effect="fade"
           fadeEffect={{
-            crossFade: true
+            crossFade: true,
           }}
           navigation={false}
           pagination={false}
           className="h-full w-full"
         >
-          {movies.map((movieItem) => (
-            <SwiperSlide key={movieItem.id}>
-              <div className="absolute inset-0">
-                <div className="relative w-full h-full">
-                  <img 
-                    src={movieItem?.background_image_original || movieItem?.large_cover_image || movieItem?.medium_cover_image || '/placeholder-backdrop.jpg'}
-                    alt={`${movieItem?.title} backdrop`}
-                    className="w-full h-full object-cover"
-                    width={1920}
-                    height={1080}
-                    loading={movieItem === movies[0] ? 'eager' : 'lazy'}
-                    decoding="async"
+          {movies.map((movieItem, index) => {
+            // Generate a unique solid color based on movie id for loading state
+            const hue = (movieItem.id * 137.5) % 360;
+            const solidColor = `hsl(${hue}, 40%, 18%)`;
+
+            return (
+              <SwiperSlide key={movieItem.id}>
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    aspectRatio: "16/9",
+                    backgroundColor: solidColor,
+                  }}
+                >
+                  <div
+                    className="relative w-full h-full"
                     style={{
-                      aspectRatio: '16/9',
-                      ...(movieItem === movies[0] ? { 
-                        // @ts-ignore
-                        fetchPriority: 'high' 
-                      } : {})
+                      aspectRatio: "16/9",
+                      backgroundColor: solidColor,
+                      contentVisibility: "auto",
                     }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-backdrop.jpg';
-                    }}
-                  />
+                  >
+                    <Image
+                      src={
+                        movieItem?.background_image_original ||
+                        movieItem?.large_cover_image ||
+                        movieItem?.medium_cover_image ||
+                        "/placeholder-backdrop.jpg"
+                      }
+                      alt={`${movieItem?.title} backdrop`}
+                      fill
+                      priority
+                      fetchPriority="high"
+                      sizes="100vw"
+                      quality={90}
+                      className="object-cover"
+                      style={{ transform: "translateZ(0)" }}
+                    />
+
+                    <div className="absolute inset-0 hero-gradient"></div>
+                  </div>
                 </div>
-                <div className="absolute inset-0 hero-gradient"></div>
-              </div>
-            </SwiperSlide>
-          ))}
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       ) : (
         <div className="absolute inset-0 bg-muted">
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
       )}
-      
+
       {/* Custom Navigation arrows */}
       {movies && movies.length > 1 && (
         <>
@@ -170,19 +209,21 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
           </Button>
         </>
       )}
-      
+
       <div className="absolute inset-0 z-20 h-full flex items-center">
         <div className="container mx-auto px-2 sm:px-4">
           <div className="max-w-xl sm:max-w-2xl">
-            <h1 
+            <h1
               className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4"
               data-testid="hero-title"
             >
               {movie?.title}
             </h1>
             <p className="text-base sm:text-xl mb-2 text-muted-foreground">
-              <span data-testid="hero-year">{movie?.year}</span> • 
-              <span data-testid="hero-rating" className="ml-2">{movie?.rating} ⭐</span>
+              <span data-testid="hero-year">{movie?.year}</span> •
+              <span data-testid="hero-rating" className="ml-2">
+                {movie?.rating} ⭐
+              </span>
               {movie?.runtime && (
                 <>
                   <span className="mx-2">•</span>
@@ -190,22 +231,28 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
                 </>
               )}
             </p>
-            
+
             {movie?.synopsis && (
-              <p 
+              <p
                 className="text-sm sm:text-lg mb-8 leading-relaxed text-muted-foreground line-clamp-3"
                 data-testid="hero-synopsis"
+                style={{
+                  contentVisibility: "auto",
+                  containIntrinsicSize: "0 80px",
+                }}
               >
                 {movie.synopsis}
               </p>
             )}
-            
+
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {isAuthenticated && (
-                <Button 
+                <Button
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
-                  onClick={() => movie && onPlayMovie?.(movie, movie.torrents?.[0])}
+                  onClick={() =>
+                    movie && onPlayMovie?.(movie, movie.torrents?.[0])
+                  }
                   disabled={isLoadingPlay}
                   data-testid="hero-play-button"
                 >
@@ -222,15 +269,17 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
                   )}
                 </Button>
               )}
-              <Button 
+              <Button
                 variant="secondary"
                 size="lg"
                 className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 sm:px-8 py-2 sm:py-3 font-semibold flex items-center justify-center space-x-2 w-full sm:w-auto transform hover:scale-105 transition-transform"
                 onClick={() => {
                   if (movie) {
-                    const movieSlug = movie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-                   router.push(`/movie/${movie.id}/${movieSlug}`)
-
+                    const movieSlug = movie.title
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, "-")
+                      .replace(/^-+|-+$/g, "");
+                    router.push(`/movie/${movie.id}/${movieSlug}`);
                   }
                 }}
                 data-testid="hero-info-button"
@@ -242,7 +291,7 @@ export default function HeroSection({ movies, onPlayMovie, isLoadingPlay, isAuth
           </div>
         </div>
       </div>
-      
+
       {/* Custom Pagination */}
       {movies && movies.length > 1 && (
         <div className="hero-pagination absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2"></div>
