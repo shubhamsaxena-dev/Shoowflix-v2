@@ -17,9 +17,11 @@ export default function AISuggestOverlay({
   onClose,
   onMovieClick,
 }: AISuggestOverlayProps) {
-  const [prompt, setPrompt] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [movies, setMovies] = useState<YTSMovie[]>([]);
+  const [usedAI, setUsedAI] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -27,19 +29,23 @@ export default function AISuggestOverlay({
   }, [isOpen]);
 
   const runSuggest = async () => {
-    if (!prompt.trim()) return;
+    if (!inputValue.trim()) return;
+    setSearchQuery(inputValue);
     setLoading(true);
     setMovies([]);
+    setUsedAI(false);
     try {
       const res = await fetch("/api/ai/suggest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: inputValue }),
       });
       const data = await res.json();
       setMovies(data?.movies || []);
+      setUsedAI(data?.usedAI || false);
     } catch {
       setMovies([]);
+      setUsedAI(false);
     } finally {
       setLoading(false);
     }
@@ -78,8 +84,8 @@ export default function AISuggestOverlay({
                   ref={inputRef}
                   type="text"
                   placeholder="Describe what you want to watch (e.g., 'a movie with Tom Hanks' or 'sci-fi thriller from the 2000s')"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
                   className="flex-1 h-10 sm:h-12"
                 />
                 <Button
@@ -95,7 +101,7 @@ export default function AISuggestOverlay({
 
             {/* Results */}
             <div className="bg-card rounded-lg border p-4 sm:p-6">
-              {!prompt && (
+              {movies.length === 0 && !loading && (!searchQuery || !usedAI) && (
                 <div className="text-center py-16">
                   <Sparkles className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">
@@ -111,7 +117,7 @@ export default function AISuggestOverlay({
                 <div>
                   <div className="flex items-center gap-2 mb-6">
                     <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <span>Finding picks for "{prompt}"...</span>
+                    <span>Finding picks for "{inputValue}"...</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                     {Array.from({ length: 10 }).map((_, index) => (
@@ -127,7 +133,7 @@ export default function AISuggestOverlay({
               {!loading && movies.length > 0 && (
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">
-                    AI picks for "{prompt}"
+                    AI picks for "{searchQuery}"
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 items-stretch">
                     {movies.map((movie: any) => (
@@ -140,7 +146,7 @@ export default function AISuggestOverlay({
                   </div>
                 </div>
               )}
-              {!loading && prompt && movies.length === 0 && (
+              {!loading && prompt && usedAI && movies.length === 0 && (
                 <div className="text-center py-16">
                   <h3 className="text-xl font-semibold mb-2">
                     No movies found
