@@ -146,7 +146,7 @@ export default function AISuggestOverlay({
                   </div>
                 </div>
               )}
-              {!loading && prompt && usedAI && movies.length === 0 && (
+              {!loading && searchQuery && usedAI && movies.length === 0 && (
                 <div className="text-center py-16">
                   <h3 className="text-xl font-semibold mb-2">
                     No movies found
