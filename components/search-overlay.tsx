@@ -15,7 +15,13 @@ interface SearchOverlayProps {
   loadingMovieId?: number | null;
 }
 
-export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQuery, loadingMovieId }: SearchOverlayProps) {
+export default function SearchOverlay({
+  isOpen,
+  onClose,
+  onMovieClick,
+  initialQuery,
+  loadingMovieId,
+}: SearchOverlayProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedTerm, setDebouncedTerm] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +52,7 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
   const searchFilters = {
     query_term: debouncedTerm,
     limit: 20,
-    sort_by: "rating" as const
+    sort_by: "rating" as const,
   };
 
   const { data: searchData, isLoading: searchLoading } = useMovies(
@@ -73,11 +79,11 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
       onClick={handleClose}
     >
-      <div 
+      <div
         className="absolute inset-0 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -96,7 +102,7 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              
+
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 <Input
@@ -116,9 +122,9 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
               {!debouncedTerm ? (
                 <div className="text-center py-16">
                   <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Start searching</h3>
+                  <h3 className="text-xl font-semibold mb-2">Find a movie</h3>
                   <p className="text-muted-foreground">
-                    Type a movie title to find your favorite films
+                    Type a title to see matching results.
                   </p>
                 </div>
               ) : searchLoading ? (
@@ -137,13 +143,15 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
                     ))}
                   </div>
                 </div>
-              ) : searchData?.data?.movies && searchData.data.movies.length > 0 ? (
+              ) : searchData?.data?.movies &&
+                searchData.data.movies.length > 0 ? (
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6">
-                    Found {searchData.data.movies.length} results for "{debouncedTerm}"
+                    Found {searchData.data.movies.length} results for "
+                    {debouncedTerm}"
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                    {searchData.data.movies.map((movie:any) => (
+                    {searchData.data.movies.map((movie: any) => (
                       <MovieCardWithFavorites
                         key={movie.id}
                         movie={movie}
@@ -156,7 +164,9 @@ export default function SearchOverlay({ isOpen, onClose, onMovieClick, initialQu
               ) : debouncedTerm ? (
                 <div className="text-center py-16">
                   <div className="text-6xl mb-4">🎬</div>
-                  <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No movies found
+                  </h3>
                   <p className="text-muted-foreground">
                     Try searching for a different movie title
                   </p>

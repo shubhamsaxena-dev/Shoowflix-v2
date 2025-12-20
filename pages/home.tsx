@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { User, Heart } from "lucide-react";
+import { User, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/search-bar";
 import HeroSection from "@/components/hero-section";
@@ -11,6 +11,7 @@ import MovieSection from "@/components/movie-section";
 import UserProfileDropdown from "@/components/user-profile-dropdown";
 import VideoPlayer from "@/components/video-player";
 import SearchOverlay from "@/components/search-overlay";
+import AISuggestOverlay from "@/components/ai-suggest-overlay";
 import {
   useTrendingMovies,
   useHighRatedMovies,
@@ -39,6 +40,7 @@ export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const [showAiOverlay, setShowAiOverlay] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
   const [selectedTorrent, setSelectedTorrent] = useState<Torrent | null>(null);
@@ -208,6 +210,17 @@ export default function Home() {
               </div>
 
               <div className="flex items-center space-x-2">
+                {/* Show AI Picks in header only on >= sm screens */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowAiOverlay(true)}
+                  data-testid="button-ai-picks"
+                  className="hidden sm:inline-flex"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI Picks
+                </Button>
                 {session ? (
                   <UserProfileDropdown />
                 ) : (
@@ -216,9 +229,10 @@ export default function Home() {
                     size="sm"
                     onClick={() => router.push("/auth/signin")}
                     data-testid="button-signin"
+                    className="gap-2"
                   >
-                    <User className="h-4 w-4 mr-2" />
-                    Sign In
+                    <User className="h-4 w-4 mr-0 sm:mr-2" />
+                    <span className="hidden sm:inline">Sign In</span>
                   </Button>
                 )}
               </div>
@@ -228,10 +242,7 @@ export default function Home() {
 
         {/* Hero Section */}
         {trendingLoading || !featuredMovies || featuredMovies.length === 0 ? (
-          <section
-            className="relative overflow-hidden mt-16"
-            style={{ height: "100vh", minHeight: "600px" }}
-          >
+          <section className="relative overflow-hidden mt-16 mb-4 sm:mb-12 h-[50vh] sm:h-screen min-h-[360px] sm:min-h-[600px]">
             <div
               className="absolute inset-0"
               style={{ aspectRatio: "16/9", backgroundColor: "#1a1a1a" }}
@@ -337,7 +348,25 @@ export default function Home() {
             onClose={handleCloseVideoPlayer}
           />
         )}
+
+        {showAiOverlay && (
+          <AISuggestOverlay
+            isOpen={showAiOverlay}
+            onClose={() => setShowAiOverlay(false)}
+            onMovieClick={handleMovieClick}
+          />
+        )}
       </div>
+      {/* Floating AI Picks button for mobile (mid-right viewport, outside contained wrapper) */}
+      <Button
+        onClick={() => setShowAiOverlay(true)}
+        aria-label="AI Picks"
+        data-testid="fab-ai-picks"
+        className="fixed right-4 z-[1000] sm:hidden rounded-full h-12 w-12 p-0 shadow-lg"
+        style={{ bottom: "max(env(safe-area-inset-bottom), 1rem)" }}
+      >
+        <Sparkles className="h-6 w-6" />
+      </Button>
     </>
   );
 }

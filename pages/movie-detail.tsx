@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,7 +22,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import VideoPlayer from "@/components/video-player";
 import MovieSection from "@/components/movie-section";
-import { useMovieSuggestions, generateMagnetLink } from "@/hooks/use-movies";
+import {
+  useMovieSuggestions,
+  generateMagnetLink,
+  useMovieDetails,
+} from "@/hooks/use-movies";
 import { useFavorites } from "@/hooks/use-favorites";
 import type { YTSMovie, Torrent } from "@/types/movie";
 
@@ -38,18 +41,11 @@ function createSlug(title: string | null | undefined): string {
     .replace(/^-+|-+$/g, "");
 }
 
-interface MovieDetailProps {
-  initialMovieData: { data: { movie: YTSMovie } } | null;
-  movieId: number;
-}
-
-export default function MovieDetail({
-  initialMovieData,
-  movieId,
-}: MovieDetailProps) {
+export default function MovieDetail() {
   const router = useRouter();
   const { data: session } = useSession();
-  const { slug } = router.query;
+  const { id, slug } = router.query;
+  const movieId = parseInt((id as string) || "0");
   const { toast } = useToast();
   const { isFavorite, addToFavorites, removeFromFavorites, favorites } =
     useFavorites();
@@ -58,20 +54,22 @@ export default function MovieDetail({
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
   const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-
-  // Use SSR data as initial state
-  const movie = initialMovieData?.data?.movie || null;
+  // Client-side fetch of movie details
+  const { data: movieDetailsData } = useMovieDetails(movieId);
+  const movie = movieDetailsData?.data?.movie || null;
   const { data: suggestionsData, isLoading: suggestionsLoading } =
     useMovieSuggestions(movieId);
   const suggestions = suggestionsData?.data?.movies;
 
-  // Redirect to proper URL with movie name slug if missing
+  // Ensure correct slug in URL client-side
   useEffect(() => {
-    if (movie && movie.title && !slug) {
-      const movieSlug = createSlug(movie.title);
-      router.replace(`/movie/${movie.id}/${movieSlug}`, undefined, {
-        shallow: true,
-      });
+    if (movie && movie.title) {
+      const correctSlug = createSlug(movie.title);
+      if (!slug || slug !== correctSlug) {
+        router.replace(`/movie/${movie.id}/${correctSlug}`, undefined, {
+          shallow: true,
+        });
+      }
     }
   }, [movie, slug, router]);
 

@@ -8,7 +8,11 @@ interface SearchBarProps {
   className?: string;
 }
 
-export default function SearchBar({ onSearch, placeholder = "Search movies...", className = "" }: SearchBarProps) {
+export default function SearchBar({
+  onSearch,
+  placeholder = "Search by title",
+  className = "",
+}: SearchBarProps) {
   const [query, setQuery] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -19,12 +23,12 @@ export default function SearchBar({ onSearch, placeholder = "Search movies...", 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    
+
     // Debounced search - search after user stops typing for 500ms
     const timer = setTimeout(() => {
       onSearch(value);
     }, 500);
-    
+
     return () => clearTimeout(timer);
   };
 

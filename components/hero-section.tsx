@@ -37,7 +37,7 @@ export default function HeroSection({
 
   const movie = movies?.[currentIndex];
   const fullBleedClass =
-    "relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden mt-16";
+    "relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden mt-16 mb-4 sm:mb-12 h-[50vh] sm:h-screen min-h-[360px] sm:min-h-[600px]";
 
   const handleSlideChange = (swiper: SwiperType) => {
     setCurrentIndex(swiper.activeIndex);
@@ -52,10 +52,7 @@ export default function HeroSection({
   };
   if (!movies || movies.length === 0) {
     return (
-      <section
-        className={fullBleedClass}
-        style={{ height: "100vh", minHeight: "600px" }}
-      >
+      <section className={fullBleedClass}>
         <div className="absolute inset-0" style={{ aspectRatio: "16/9" }}>
           <div className="w-full h-full bg-gray-800"></div>
           <div className="absolute inset-0 hero-gradient"></div>
@@ -80,7 +77,7 @@ export default function HeroSection({
 
   if (!movies || movies.length === 0) {
     return (
-      <section className={fullBleedClass} style={{ height: "100vh" }}>
+      <section className={fullBleedClass}>
         <div className="absolute inset-0 bg-muted">
           <div className="absolute inset-0 hero-gradient"></div>
         </div>
@@ -105,8 +102,6 @@ export default function HeroSection({
     <section
       className={fullBleedClass}
       style={{
-        height: "100vh",
-        minHeight: "600px",
         aspectRatio: "16/9",
         contain: "layout style paint",
       }}
@@ -146,14 +141,12 @@ export default function HeroSection({
                 <div
                   className="absolute inset-0"
                   style={{
-                    aspectRatio: "16/9",
                     backgroundColor: solidColor,
                   }}
                 >
                   <div
                     className="relative w-full h-full"
                     style={{
-                      aspectRatio: "16/9",
                       backgroundColor: solidColor,
                       contentVisibility: "auto",
                     }}
