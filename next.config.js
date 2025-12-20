@@ -13,10 +13,11 @@ const getImageDomains = () => {
   ]);
 
   // Add MOVIES_HOST and its variants
-  if (process.env.MOVIES_HOST) {
-    const host = process.env.MOVIES_HOST.replace(/^https?:\/\//, "").split(
-      "/"
-    )[0];
+  if (process.env.NEXT_PUBLIC_API_ROOT) {
+    const host = process.env.NEXT_PUBLIC_API_ROOT.replace(
+      /^https?:\/\//,
+      ""
+    ).split("/")[0];
     domains.add(host);
     domains.add(`img.${host}`);
   }

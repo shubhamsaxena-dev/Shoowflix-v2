@@ -127,7 +127,7 @@ async function callOpenAI(prompt: string) {
 async function fetchYtsMovies(
   params: Record<string, string | number | undefined>
 ) {
-  const base = process.env.MOVIES_HOST || "https://yts.lt/api/v2";
+  const base = process.env.NEXT_PUBLIC_API_ROOT || "https://yts.lt/api/v2";
   const url = new URL(`${base}/list_movies.json`);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));

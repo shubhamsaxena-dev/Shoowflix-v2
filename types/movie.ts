@@ -25,6 +25,14 @@ export interface YTSMovie {
   torrents: Torrent[];
   date_uploaded: string;
   date_uploaded_unix: number;
+  cast?: Cast[];
+}
+
+export interface Cast {
+  name: string;
+  character_name: string;
+  url_small_image: string;
+  imdb_code: string;
 }
 
 export interface Torrent {

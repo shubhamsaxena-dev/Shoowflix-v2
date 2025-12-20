@@ -102,7 +102,8 @@ export default function AISuggestOverlay({
                     Discover movies with AI
                   </h3>
                   <p className="text-muted-foreground">
-                    Describe actors, genres, moods, or themes and let AI find the perfect movies for you.
+                    Describe actors, genres, moods, or themes and let AI find
+                    the perfect movies for you.
                   </p>
                 </div>
               )}
@@ -141,9 +142,12 @@ export default function AISuggestOverlay({
               )}
               {!loading && prompt && movies.length === 0 && (
                 <div className="text-center py-16">
-                  <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No movies found
+                  </h3>
                   <p className="text-muted-foreground">
-                    AI couldn't find any movies matching your description. Try being more specific or use different keywords.
+                    AI couldn't find any movies matching your description. Try
+                    being more specific or use different keywords.
                   </p>
                 </div>
               )}

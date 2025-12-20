@@ -55,7 +55,8 @@ export default function MovieDetail() {
   const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   // Client-side fetch of movie details
-  const { data: movieDetailsData } = useMovieDetails(movieId);
+  const { data: movieDetailsData, isLoading: movieLoading } =
+    useMovieDetails(movieId);
   const movie = movieDetailsData?.data?.movie || null;
   const { data: suggestionsData, isLoading: suggestionsLoading } =
     useMovieSuggestions(movieId);
@@ -82,16 +83,13 @@ export default function MovieDetail() {
       !selectedTorrent
     ) {
       // Find 720p torrent first
-      {
-        /*@ts-ignore*/
-      }
-      const torrent720p = movie.torrents.find((t) => t.quality === "720p");
+      const torrent720p = movie.torrents.find((t: any) => t.quality === "720p");
 
       if (torrent720p) {
         setSelectedTorrent(torrent720p);
       } else {
         // Fallback to highest quality available
-        const sortedTorrents = [...movie.torrents].sort((a, b) => {
+        const sortedTorrents = [...movie.torrents].sort((a: any, b: any) => {
           const qualityOrder = { "2160p": 4, "1080p": 3, "720p": 2, "480p": 1 };
           const aValue =
             qualityOrder[a.quality as keyof typeof qualityOrder] || 0;
@@ -274,7 +272,109 @@ export default function MovieDetail() {
     setMagnetLink(null);
   };
 
-  // Handle case when movie is not found (shouldn't happen with SSR, but for safety)
+  // Show loading state while fetching movie
+  if (movieLoading || !router.isReady) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header skeleton */}
+        <header className="fixed top-0 w-full z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-9 w-32" />
+              <Skeleton className="h-6 w-48" />
+            </div>
+          </div>
+        </header>
+
+        {/* Backdrop skeleton */}
+        <div className="relative h-64 overflow-hidden mt-16">
+          <Skeleton className="absolute inset-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 to-transparent"></div>
+        </div>
+
+        {/* Content skeleton */}
+        <div className="container mx-auto px-4 py-8 -mt-16 relative z-10">
+          <div className="flex flex-col lg:flex-row gap-6 mb-8">
+            {/* Poster skeleton */}
+            <div className="flex-shrink-0 mx-auto lg:mx-0">
+              <Skeleton className="w-32 h-48 sm:w-40 sm:h-60 lg:w-48 lg:h-72 rounded-lg" />
+            </div>
+
+            {/* Details skeleton */}
+            <div className="flex-1 text-center lg:text-left">
+              <Skeleton className="h-10 w-3/4 mb-4 mx-auto lg:mx-0" />
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+              <div className="flex flex-wrap gap-2 mb-6 justify-center lg:justify-start">
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-16" />
+              </div>
+              <Skeleton className="h-24 w-full mb-8" />
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </div>
+          </div>
+
+          {/* Torrents section skeleton */}
+          <div className="mb-12">
+            <Skeleton className="h-8 w-48 mb-6" />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32 rounded-lg" />
+              ))}
+            </div>
+          </div>
+
+          {/* Trailer skeleton */}
+          <div className="mb-12">
+            <Skeleton className="h-8 w-32 mb-6" />
+            <div className="max-w-3xl">
+              <Skeleton
+                className="w-full rounded-lg"
+                style={{ paddingBottom: "56.25%" }}
+              />
+            </div>
+          </div>
+
+          {/* Cast skeleton */}
+          <div className="mb-12">
+            <Skeleton className="h-8 w-24 mb-6" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="text-center">
+                  <Skeleton className="w-full aspect-square rounded-full mb-2 max-w-24 mx-auto" />
+                  <Skeleton className="h-4 w-full mb-1" />
+                  <Skeleton className="h-3 w-3/4 mx-auto" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Suggestions skeleton */}
+          <div>
+            <Skeleton className="h-8 w-56 mb-6" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i}>
+                  <Skeleton className="aspect-[2/3] w-full rounded-lg mb-2" />
+                  <Skeleton className="h-4 w-full mb-1" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle case when movie is not found
   if (!movie) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -784,7 +884,60 @@ export default function MovieDetail() {
             </div>
           </div>
 
-          {/* Cast information not available from YTS API */}
+          {/* Trailer Section */}
+          {movie.yt_trailer_code && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">Trailer</h2>
+              <div className="max-w-3xl">
+                <div
+                  className="relative w-full"
+                  style={{ paddingBottom: "56.25%" }}
+                >
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full rounded-lg"
+                    src={`https://www.youtube.com/embed/${movie.yt_trailer_code}`}
+                    title={`${movie.title} Trailer`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Cast Section */}
+          {movie.cast && movie.cast.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">Cast</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
+                {movie.cast.slice(0, 12).map((actor, index) => (
+                  <div key={index} className="text-center group">
+                    <div className="relative mb-2 overflow-hidden rounded-full aspect-square max-w-24 mx-auto">
+                      {actor.url_small_image ? (
+                        <Image
+                          src={actor.url_small_image}
+                          alt={actor.name}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-110"
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <span className="text-4xl">👤</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-semibold text-sm truncate">
+                      {actor.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {actor.character_name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Similar movies */}
           {(suggestionsLoading || (suggestions && suggestions.length > 0)) && (

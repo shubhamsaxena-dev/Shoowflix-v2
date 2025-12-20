@@ -18,7 +18,7 @@ export default function App({
     <>
       <Head>
         <link rel="canonical" href={`${SITE_URL}${router.asPath}`} />
-        <link rel="preconnect" href={process.env.MOVIES_HOST} />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_ROOT} />
         <link rel="preconnect" href="https://img.yts.mx" />
         <link rel="preconnect" href="https://yts.lt" />
         <link rel="preconnect" href="https://yts.mx" />
