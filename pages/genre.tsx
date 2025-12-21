@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,20 +10,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Filter, Search } from "lucide-react";
-import MovieCard from "@/components/movie-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import type { YTSMovie } from "@/types/movie";
-
-interface MoviesResponse {
-  status: string;
-  data: {
-    movies: YTSMovie[];
-    movie_count: number;
-  };
-}
-
-const ITEMS_PER_PAGE = 20;
+import { InfiniteScrollMovies } from "@/components/infinite-scroll-movies";
+import type { MovieFilters } from "@/lib/types";
 
 const qualityOptions = [
   { value: "all", label: "All Quality" },
@@ -51,15 +39,7 @@ const ratingOptions = [
 
 export default function GenrePage() {
   const router = useRouter();
-  const { toast } = useToast();
   const { genre = "" } = router.query as { genre?: string };
-
-  const [movies, setMovies] = useState<YTSMovie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
-  const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
 
   // Filters
   const [quality, setQuality] = useState("all");
@@ -67,113 +47,26 @@ export default function GenrePage() {
   const [minRating, setMinRating] = useState("0");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const genreTitle =
-    genre?.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) || "";
-
-  const fetchMovies = useCallback(
-    async (pageNum: number, reset = false) => {
-      if (loading) return;
-
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          genre: genreTitle,
-          limit: ITEMS_PER_PAGE.toString(),
-          page: pageNum.toString(),
-          sort_by: sortBy,
-          minimum_rating: minRating,
-          ...(quality !== "all" && { quality }),
-          ...(searchQuery && { query_term: searchQuery }),
-        });
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_ROOT}/list_movies.json?${params}`
-        );
-        const data: MoviesResponse = await response.json();
-
-        if (data.status === "ok" && data.data.movies) {
-          if (reset) {
-            setMovies(data.data.movies);
-          } else {
-            setMovies((prev) => [...prev, ...data.data.movies]);
-          }
-          setHasMore(data.data.movies.length === ITEMS_PER_PAGE);
-        } else {
-          setHasMore(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch movies:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load movies. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [genreTitle, quality, sortBy, minRating, searchQuery, loading, toast]
-  );
-
-  // Reset and fetch when filters change
-  useEffect(() => {
-    setMovies([]);
-    setPage(1);
-    setHasMore(true);
-    fetchMovies(1, true);
-  }, [quality, sortBy, minRating, searchQuery, genreTitle]);
-
-  // Load more movies
-  const loadMore = () => {
-    if (hasMore && !loading) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchMovies(nextPage);
-    }
-  };
-
-  // Infinite scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 1000 &&
-        hasMore &&
-        !loading
-      ) {
-        loadMore();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loading, page]);
-
-  const handleMovieClick = (movie: YTSMovie) => {
-    // Set loading state for this movie
-    setLoadingMovieId(movie.id);
-
-    // Create URL-friendly slug from movie title
-    const createSlug = (title: string) => {
-      return title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
-    };
-
-    const slug = createSlug(movie.title);
-
-    // Use timeout to show loading state briefly before navigation
-    setTimeout(() => {
-      router.push(`/movie/${movie.id}/${slug}`);
-    }, 150);
-  };
+  const genreTitle = genre;
 
   const goBack = () => {
-    window.history.back();
+    router.back();
   };
+
+  // Build filters object for InfiniteScrollMovies
+  let filters: MovieFilters = {
+    genre: genreTitle,
+    quality: quality !== "all" ? quality : undefined,
+    sort_by: sortBy,
+    minimum_rating: minRating !== "0" ? minRating : undefined,
+    query_term: searchQuery || undefined,
+  } as any;
+
+  if (genreTitle.includes("rated")) {
+    filters = { limit: 20, order_by: "desc", sort_by: "rating" };
+  } else if (genreTitle.includes("recent")) {
+    filters = { limit: 20, order_by: "desc", sort_by: "year" };
+  }
 
   return (
     <div className="min-h-screen bg-background pt-20">
@@ -254,69 +147,33 @@ export default function GenrePage() {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Clear Filters Button */}
+            {(quality !== "all" ||
+              sortBy !== "date_added" ||
+              minRating !== "0" ||
+              searchQuery) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setQuality("all");
+                  setSortBy("date_added");
+                  setMinRating("0");
+                  setSearchQuery("");
+                }}
+                className="text-xs"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Movies Grid */}
+      {/* Movies Grid with Infinite Scroll */}
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
-          {movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onClick={handleMovieClick}
-              isLoading={loadingMovieId === movie.id}
-            />
-          ))}
-
-          {/* Loading skeletons */}
-          {loading &&
-            Array.from({ length: 12 }).map((_, index) => (
-              <div key={`skeleton-${index}`} className="space-y-2">
-                <Skeleton className="h-48 sm:h-64 lg:h-72 w-full rounded-lg" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            ))}
-        </div>
-
-        {/* Load More Button */}
-        {!loading && hasMore && movies.length > 0 && (
-          <div className="text-center mb-8">
-            <Button onClick={loadMore} variant="outline">
-              Load More Movies
-            </Button>
-          </div>
-        )}
-
-        {/* No more movies */}
-        {!hasMore && movies.length > 0 && (
-          <div className="text-center text-muted-foreground mb-8">
-            <p>You've reached the end of {genreTitle} movies!</p>
-          </div>
-        )}
-
-        {/* No movies found */}
-        {!loading && movies.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">
-              No {genreTitle} movies found with the current filters.
-            </p>
-            <Button
-              onClick={() => {
-                setQuality("all");
-                setSortBy("date_added");
-                setMinRating("0");
-                setSearchQuery("");
-              }}
-              variant="outline"
-              className="mt-4"
-            >
-              Clear Filters
-            </Button>
-          </div>
-        )}
+        <InfiniteScrollMovies filters={filters} />
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ interface Provider {
 
 interface SignInProps {
   providers: Record<string, Provider>;
+  callbackUrl: string | null;
 }
 
 export default function SignIn({ providers, callbackUrl }: SignInProps) {

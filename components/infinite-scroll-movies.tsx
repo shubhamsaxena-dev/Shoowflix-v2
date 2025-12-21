@@ -1,15 +1,18 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { useMoviesInfinite } from '@/hooks/use-movies'
-import MovieCard from '@/components/movie-card'
-import { Skeleton } from '@/components/ui/skeleton'
-import type { MovieFilters } from '@/lib/types'
+import { useEffect, useRef, useCallback } from "react";
+import { useMoviesInfinite } from "@/hooks/use-movies";
+import MovieCard from "@/components/movie-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { MovieFilters } from "@/lib/types";
 
 interface InfiniteScrollMoviesProps {
-  filters?: MovieFilters
-  className?: string
+  filters?: MovieFilters;
+  className?: string;
 }
 
-export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteScrollMoviesProps) {
+export function InfiniteScrollMovies({
+  filters = {},
+  className = "",
+}: InfiniteScrollMoviesProps) {
   const {
     movies,
     error,
@@ -17,36 +20,41 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
     isLoadingMore,
     canLoadMore,
     loadMore,
-    isEmpty
-  } = useMoviesInfinite(filters)
+    isEmpty,
+  } = useMoviesInfinite(filters);
 
-  const observerRef = useRef<IntersectionObserver>()
-  const loadMoreRef = useRef<HTMLDivElement>(null)
+  const observerRef = useRef<IntersectionObserver>();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const lastMovieElementRef = useCallback((node: HTMLDivElement) => {
-    if (isLoadingMore) return
-    if (observerRef.current) observerRef.current.disconnect()
-    
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && canLoadMore) {
-        loadMore()
-      }
-    })
-    
-    if (node) observerRef.current.observe(node)
-  }, [isLoadingMore, canLoadMore, loadMore])
+  const lastMovieElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isLoadingMore) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && canLoadMore) {
+          loadMore();
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [isLoadingMore, canLoadMore, loadMore]
+  );
 
   if (error) {
     return (
       <div className="text-center py-8">
         <p className="text-red-500">Failed to load movies: {error.message}</p>
       </div>
-    )
+    );
   }
 
   if (isLoading) {
     return (
-      <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 ${className}`}>
+      <div
+        className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 ${className}`}
+      >
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="space-y-2">
             <Skeleton className="h-48 sm:h-64 lg:h-72 w-full" />
@@ -55,7 +63,7 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   if (isEmpty) {
@@ -63,14 +71,14 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
       <div className="text-center py-8">
         <p className="text-gray-500">No movies found</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {movies.map((movie, index) => {
-          const isLast = index === movies.length - 1
+          const isLast = index === movies.length - 1;
           return (
             <div
               key={movie.id}
@@ -79,7 +87,7 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
             >
               <MovieCard movie={movie} onClick={() => {}} />
             </div>
-          )
+          );
         })}
       </div>
 
@@ -117,5 +125,5 @@ export function InfiniteScrollMovies({ filters = {}, className = "" }: InfiniteS
         </div>
       )}
     </div>
-  )
+  );
 }
