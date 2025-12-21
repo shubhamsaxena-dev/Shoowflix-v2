@@ -8,6 +8,8 @@ export default async function handler(
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+  res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300");
+  res.setHeader("Surrogate-Control", "max-age=300");
 
   try {
     const {
