@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "wouter";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Filter, Search } from "lucide-react";
 import MovieCard from "@/components/movie-card";
@@ -25,7 +30,7 @@ const qualityOptions = [
   { value: "2160p", label: "4K (2160p)" },
   { value: "1080p", label: "HD (1080p)" },
   { value: "720p", label: "HD (720p)" },
-  { value: "480p", label: "SD (480p)" }
+  { value: "480p", label: "SD (480p)" },
 ];
 
 const sortOptions = [
@@ -33,7 +38,7 @@ const sortOptions = [
   { value: "rating", label: "Rating" },
   { value: "year", label: "Year" },
   { value: "title", label: "Title" },
-  { value: "download_count", label: "Downloads" }
+  { value: "download_count", label: "Downloads" },
 ];
 
 const ratingOptions = [
@@ -41,68 +46,74 @@ const ratingOptions = [
   { value: "9", label: "9+ Stars" },
   { value: "8", label: "8+ Stars" },
   { value: "7", label: "7+ Stars" },
-  { value: "6", label: "6+ Stars" }
+  { value: "6", label: "6+ Stars" },
 ];
 
 export default function GenrePage() {
-  const { genre } = useParams<{ genre: string }>();
   const router = useRouter();
   const { toast } = useToast();
-  
+  const { genre = "" } = router.query as { genre?: string };
+
   const [movies, setMovies] = useState<YTSMovie[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<YTSMovie | null>(null);
   const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
-  
+
   // Filters
   const [quality, setQuality] = useState("all");
   const [sortBy, setSortBy] = useState("date_added");
   const [minRating, setMinRating] = useState("0");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const genreTitle = genre?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '';
+  const genreTitle =
+    genre?.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()) || "";
 
-  const fetchMovies = useCallback(async (pageNum: number, reset = false) => {
-    if (loading) return;
-    
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        genre: genreTitle,
-        limit: ITEMS_PER_PAGE.toString(),
-        page: pageNum.toString(),
-        sort_by: sortBy,
-        minimum_rating: minRating,
-        ...(quality !== "all" && { quality }),
-        ...(searchQuery && { query_term: searchQuery })
-      });
+  const fetchMovies = useCallback(
+    async (pageNum: number, reset = false) => {
+      if (loading) return;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_ROOT}/list_movies.json?${params}`);
-      const data: MoviesResponse = await response.json();
-      
-      if (data.status === "ok" && data.data.movies) {
-        if (reset) {
-          setMovies(data.data.movies);
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          genre: genreTitle,
+          limit: ITEMS_PER_PAGE.toString(),
+          page: pageNum.toString(),
+          sort_by: sortBy,
+          minimum_rating: minRating,
+          ...(quality !== "all" && { quality }),
+          ...(searchQuery && { query_term: searchQuery }),
+        });
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_ROOT}/list_movies.json?${params}`
+        );
+        const data: MoviesResponse = await response.json();
+
+        if (data.status === "ok" && data.data.movies) {
+          if (reset) {
+            setMovies(data.data.movies);
+          } else {
+            setMovies((prev) => [...prev, ...data.data.movies]);
+          }
+          setHasMore(data.data.movies.length === ITEMS_PER_PAGE);
         } else {
-          setMovies(prev => [...prev, ...data.data.movies]);
+          setHasMore(false);
         }
-        setHasMore(data.data.movies.length === ITEMS_PER_PAGE);
-      } else {
-        setHasMore(false);
+      } catch (error) {
+        console.error("Failed to fetch movies:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load movies. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch movies:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load movies. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [genreTitle, quality, sortBy, minRating, searchQuery, loading, toast]);
+    },
+    [genreTitle, quality, sortBy, minRating, searchQuery, loading, toast]
+  );
 
   // Reset and fetch when filters change
   useEffect(() => {
@@ -125,34 +136,35 @@ export default function GenrePage() {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop
-        >= document.documentElement.offsetHeight - 1000 &&
-        hasMore && !loading
+        window.innerHeight + document.documentElement.scrollTop >=
+          document.documentElement.offsetHeight - 1000 &&
+        hasMore &&
+        !loading
       ) {
         loadMore();
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, loading, page]);
 
   const handleMovieClick = (movie: YTSMovie) => {
     // Set loading state for this movie
     setLoadingMovieId(movie.id);
-    
+
     // Create URL-friendly slug from movie title
     const createSlug = (title: string) => {
       return title
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
     };
 
     const slug = createSlug(movie.title);
-    
+
     // Use timeout to show loading state briefly before navigation
     setTimeout(() => {
       router.push(`/movie/${movie.id}/${slug}`);
@@ -177,7 +189,9 @@ export default function GenrePage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold">{genreTitle} Movies</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {genreTitle} Movies
+          </h1>
         </div>
 
         {/* Search and Filters */}
@@ -194,52 +208,52 @@ export default function GenrePage() {
               data-testid="genre-search-input"
             />
           </div>
-          
+
           {/* Filters */}
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-start sm:items-center p-4 bg-card rounded-lg border">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <span className="text-sm font-medium">Filters:</span>
             </div>
-          
-          <Select value={quality} onValueChange={setQuality}>
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <SelectValue placeholder="Quality" />
-            </SelectTrigger>
-            <SelectContent>
-              {qualityOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select value={quality} onValueChange={setQuality}>
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Quality" />
+              </SelectTrigger>
+              <SelectContent>
+                {qualityOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <Select value={minRating} onValueChange={setMinRating}>
-            <SelectTrigger className="w-full sm:w-[140px]">
-              <SelectValue placeholder="Rating" />
-            </SelectTrigger>
-            <SelectContent>
-              {ratingOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={minRating} onValueChange={setMinRating}>
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Rating" />
+              </SelectTrigger>
+              <SelectContent>
+                {ratingOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -255,15 +269,16 @@ export default function GenrePage() {
               isLoading={loadingMovieId === movie.id}
             />
           ))}
-          
+
           {/* Loading skeletons */}
-          {loading && Array.from({ length: 12 }).map((_, index) => (
-            <div key={`skeleton-${index}`} className="space-y-2">
-              <Skeleton className="h-48 sm:h-64 lg:h-72 w-full rounded-lg" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          ))}
+          {loading &&
+            Array.from({ length: 12 }).map((_, index) => (
+              <div key={`skeleton-${index}`} className="space-y-2">
+                <Skeleton className="h-48 sm:h-64 lg:h-72 w-full rounded-lg" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            ))}
         </div>
 
         {/* Load More Button */}
@@ -288,7 +303,7 @@ export default function GenrePage() {
             <p className="text-muted-foreground text-lg">
               No {genreTitle} movies found with the current filters.
             </p>
-            <Button 
+            <Button
               onClick={() => {
                 setQuality("all");
                 setSortBy("date_added");

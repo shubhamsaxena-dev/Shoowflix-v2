@@ -47,10 +47,9 @@ const getInfiniteKey =
   (filters: MovieFilters | null) =>
   (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
     if (!filters) return null; // no request
-    if (pageIndex === 0)
-      return `/list_movies.json?${buildQueryString(filters, 1)}`;
+    if (pageIndex === 0) return `api/movies?${buildQueryString(filters, 1)}`;
     if (!previousPageData?.data?.movies?.length) return null; // reached end
-    return `/list_movies.json?${buildQueryString(filters, pageIndex + 1)}`;
+    return `api/movies?${buildQueryString(filters, pageIndex + 1)}`;
   };
 
 // ---------------- Infinite Movies Hook ----------------
@@ -95,12 +94,11 @@ export function useMoviesInfinite(filters: MovieFilters | null = {}) {
 // ---------------- Regular Movies Hook ----------------
 export function useMovies(filters: MovieFilters | null = {}) {
   const key = useMemo(
-    () => getQueryParams("/list_movies.json", filters as any),
+    () => getQueryParams("/movies", filters as any),
     [filters]
   );
 
   const { data, error, mutate, isLoading } = useSwr({ key });
-  console.log(data);
 
   return {
     data,
@@ -114,8 +112,7 @@ export function useMovies(filters: MovieFilters | null = {}) {
 // ---------------- Movie Details ----------------
 export function useMovieDetails(movieId: number) {
   const key = useMemo(
-    () =>
-      `/movie_details.json?movie_id=${movieId}&with_images=true&with_cast=true`,
+    () => `/movies/${movieId}?with_images=true&with_cast=true`,
     [movieId]
   );
   const execute = Number.isFinite(movieId) && movieId > 0;
@@ -132,10 +129,7 @@ export function useMovieDetails(movieId: number) {
 
 // ---------------- Movie Suggestions ----------------
 export function useMovieSuggestions(movieId: number) {
-  const key = useMemo(
-    () => `/movie_suggestions.json/?movie_id=${movieId}`,
-    [movieId]
-  );
+  const key = useMemo(() => `/movies/${movieId}/suggestions`, [movieId]);
   const { data, error, mutate, isLoading } = useSwr({ key });
 
   return {
@@ -187,11 +181,13 @@ export function useRecentMoviesInfinite() {
 export function useMoviesByGenre(genre: string) {
   return useMovies({ genre, sort_by: "rating", order_by: "desc", limit: 20 });
 }
-export function useMoviesByGenreInfinite(genre: string) {
+export function useMoviesByGenreInfinite(
+  genre: string,
+  params: MovieFilters = {}
+) {
   return useMoviesInfinite({
     genre,
-    sort_by: "rating",
-    order_by: "desc",
+    ...params,
     limit: 20,
   });
 }
