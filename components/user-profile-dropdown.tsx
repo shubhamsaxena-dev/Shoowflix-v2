@@ -19,9 +19,24 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { useMovieDetails } from "@/hooks/use-movies";
 import { useRouter } from "next/router";
 const FavList = ({ movieId, handleMovieClick }: any) => {
-  const { data: movieData, isLoading: movieLoading } = useMovieDetails(movieId);
-  const movie = movieData?.data?.movie as YTSMovie;
-  if (movieLoading) return null;
+  const { data: movieData, isLoading: movieLoading } = useMovieDetails(
+    +movieId
+  );
+  const movie = movieData?.data?.movie as YTSMovie | undefined;
+
+  // Show skeleton while loading or if movie is absent
+  if (movieLoading || !movie) {
+    return (
+      <div className="flex items-center space-x-3 p-2">
+        <Skeleton className="h-12 w-8 rounded" />
+        <div className="flex-1">
+          <Skeleton className="h-3 w-full mb-1" />
+          <Skeleton className="h-2 w-16" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       key={movieId}
@@ -31,15 +46,15 @@ const FavList = ({ movieId, handleMovieClick }: any) => {
     >
       <div className="relative h-12 w-8 flex-shrink-0">
         <Image
-          src={movie.small_cover_image || "/placeholder-movie.jpg"}
-          alt={movie.title}
+          src={movie.small_cover_image ?? "/placeholder-movie.jpg"}
+          alt={movie.title ?? "Movie"}
           fill
           className="object-cover rounded"
           sizes="32px"
           quality={75}
           onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = "/placeholder-movie.jpg";
+            const img = e.currentTarget as HTMLImageElement;
+            img.src = "/placeholder-movie.jpg";
           }}
         />
       </div>
@@ -163,6 +178,7 @@ export default function UserProfileDropdown() {
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {favorites.slice(0, 5).map((favorite) => (
                 <FavList
+                  key={favorite}
                   movieId={favorite}
                   handleMovieClick={handleMovieClick}
                 />

@@ -184,7 +184,9 @@ export default function MovieDetail() {
 
   const handleFavoriteToggle = async () => {
     if (!session) {
-      router.push("/auth/signin");
+      router.push(
+        "/auth/signin?callbackUrl=" + encodeURIComponent(router.asPath)
+      );
       return;
     }
 
@@ -782,7 +784,12 @@ export default function MovieDetail() {
                     favorites
                   </p>
                   <Button
-                    onClick={() => router.push("/auth/signin")}
+                    onClick={() =>
+                      router.push(
+                        "/auth/signin?callbackUrl=" +
+                          encodeURIComponent(router.asPath)
+                      )
+                    }
                     data-testid="movie-detail-signin-prompt"
                   >
                     <Heart className="mr-2 h-4 w-4" />
