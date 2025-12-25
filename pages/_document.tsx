@@ -40,6 +40,7 @@ export default function Document() {
         <link rel="shortcut icon" href="/favicon.ico" />
         <meta name="yandex-verification" content="36b96e1f46430665" />
 
+        
         {/* Verification Meta Tags (placeholder for future use) */}
         <meta name="google-site-verification" content="" />
         <meta name="msvalidate.01" content="" />
