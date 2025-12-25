@@ -65,6 +65,7 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
 
     const result = await signIn(providerId, {
       callbackUrl: normalizeCallbackUrl(),
+      redirect: false,
     });
 
     if (result?.error) {
