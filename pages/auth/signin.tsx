@@ -43,6 +43,8 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
   });
   const router = useRouter();
   const { toast } = useToast();
+  console.log("NEXTAUTH_URL =", process.env.NEXTAUTH_URL);
+  console.log("VERCEL_URL =", process.env.VERCEL_URL);
 
   const handleSignIn = async (providerId: string) => {
     setLoading(providerId);
