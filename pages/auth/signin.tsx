@@ -43,24 +43,29 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
   });
   const router = useRouter();
   const { toast } = useToast();
-  console.log("NEXTAUTH_URL =", process.env.NEXTAUTH_URL);
-  console.log("VERCEL_URL =", process.env.VERCEL_URL);
 
   const handleSignIn = async (providerId: string) => {
     setLoading(providerId);
     try {
-      const redirectUrl = callbackUrl || process.env.NEXTAUTH_URL || "/";
+      const redirectUrl = callbackUrl || "/";
       const result = await signIn(providerId, {
-        redirect: false, // Disable auto-redirect
+        callbackUrl: redirectUrl,
+        redirect: false, // Use returned URL for navigation
       });
 
-      if (result?.ok) {
-        // Manually redirect after successful sign-in
-        router.push(redirectUrl);
+      if (result?.url) {
+        router.push(result.url);
+      } else if (result?.error) {
+        toast({
+          title: "Error",
+          description: result.error || "Sign in failed",
+          variant: "destructive",
+        });
+        setLoading(null);
       } else {
         toast({
           title: "Error",
-          description: result?.error || "Sign in failed",
+          description: "Unable to start provider sign-in",
           variant: "destructive",
         });
         setLoading(null);

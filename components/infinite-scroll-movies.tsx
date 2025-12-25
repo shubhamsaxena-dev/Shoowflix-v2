@@ -1,8 +1,10 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useMoviesInfinite } from "@/hooks/use-movies";
 import MovieCard from "@/components/movie-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { MovieFilters } from "@/lib/types";
+import { YTSMovie } from "@/types/movie";
+import { useRouter } from "next/router";
 
 interface InfiniteScrollMoviesProps {
   filters?: MovieFilters;
@@ -22,10 +24,26 @@ export function InfiniteScrollMovies({
     loadMore,
     isEmpty,
   } = useMoviesInfinite(filters);
+  const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
+  const router = useRouter();
 
   const observerRef = useRef<IntersectionObserver>();
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const handleMovieClick = (movie: YTSMovie) => {
+    // Set loading state for this movie
+    setLoadingMovieId(movie.id);
 
+    // Navigate to movie detail page with proper router
+    const movieSlug = movie.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
+    // Use timeout to show loading state briefly before navigation
+    setTimeout(() => {
+      router.push(`/movie/${movie.id}/${movieSlug}`);
+    }, 150);
+  };
   const lastMovieElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoadingMore) return;
@@ -85,7 +103,11 @@ export function InfiniteScrollMovies({
               ref={isLast ? lastMovieElementRef : null}
               data-testid={`movie-card-${movie.id}`}
             >
-              <MovieCard movie={movie} onClick={() => {}} />
+              <MovieCard
+                movie={movie}
+                onClick={() => handleMovieClick(movie)}
+                isLoading={loadingMovieId === movie.id}
+              />
             </div>
           );
         })}
