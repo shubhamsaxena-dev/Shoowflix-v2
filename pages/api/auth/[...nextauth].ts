@@ -139,8 +139,8 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ baseUrl }) {
-      return baseUrl; // always https://shoowflix.com
+    async redirect() {
+      return "https://shoowflix.com"; // always https://shoowflix.com
     },
   },
 
