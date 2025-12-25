@@ -5,8 +5,6 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
-  //@ts-ignore
-  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -138,9 +136,6 @@ export const authOptions: NextAuthOptions = {
         session.user.image = token.picture as string;
       }
       return session;
-    },
-    async redirect() {
-      return "https://shoowflix.com"; // always https://shoowflix.com
     },
   },
 

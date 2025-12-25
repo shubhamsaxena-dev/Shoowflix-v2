@@ -35,6 +35,7 @@ interface SignInProps {
 /* -------------------------------- page -------------------------------- */
 
 export default function SignIn({ providers, callbackUrl }: SignInProps) {
+  console.log("🚀 ~ SignIn ~ callbackUrl:", callbackUrl);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -57,6 +58,10 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
     if (callbackUrl.startsWith("/")) return callbackUrl;
     return "/";
   };
+  console.log(
+    "🚀 ~ normalizeCallbackUrl ~ normalizeCallbackUrl:",
+    normalizeCallbackUrl()
+  );
 
   /* ----------------------------- OAuth ----------------------------- */
 
@@ -65,7 +70,6 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
 
     const result = await signIn(providerId, {
       callbackUrl: normalizeCallbackUrl(),
-      redirect: false,
     });
 
     if (result?.error) {
