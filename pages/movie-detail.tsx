@@ -141,6 +141,7 @@ export default function MovieDetail() {
         "Stream in HD quality"
       }...`,
       url: movieUrl,
+      icon: movie.large_cover_image || "https://shoowflix.com/og-image.jpg",
     };
 
     try {
@@ -406,6 +407,12 @@ export default function MovieDetail() {
   }
 
   // Movie data is available from SSR, render the page
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://shoowflix.com";
+  const movieUrl = `${baseUrl}/movie/${movie.id}/${createSlug(movie.title)}`;
+
   return (
     <>
       <Head>
@@ -436,7 +443,9 @@ export default function MovieDetail() {
         />
         <meta
           property="og:image"
-          content={movie.large_cover_image || "/og-image.jpg"}
+          content={
+            movie.large_cover_image || "https://shoowflix.com/og-image.jpg"
+          }
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -447,18 +456,7 @@ export default function MovieDetail() {
         <meta property="og:type" content="video.movie" />
         <meta property="og:site_name" content="Shoowflix" />
         <meta property="og:locale" content="en_US" />
-        <meta
-          property="og:url"
-          content={
-            movie
-              ? `${
-                  typeof window !== "undefined" ? window.location.origin : ""
-                }/movie/${movie.id}/${createSlug(movie.title)}`
-              : typeof window !== "undefined"
-              ? window.location.origin
-              : ""
-          }
-        />
+        <meta property="og:url" content={movieUrl} />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -466,83 +464,63 @@ export default function MovieDetail() {
         <meta name="twitter:creator" content="@shoowflix" />
         <meta
           name="twitter:title"
-          content={
-            movie
-              ? `${movie.title} (${movie.year}) - Stream Online`
-              : "Movie Details"
-          }
+          content={`${movie.title} (${movie.year}) - Stream Online`}
         />
         <meta
           name="twitter:description"
           content={
-            movie
-              ? movie.description_full?.substring(0, 150) ||
-                movie.synopsis?.substring(0, 150)
-              : "Watch movies online in HD quality on Shoowflix."
+            movie.description_full?.substring(0, 150) ||
+            movie.synopsis?.substring(0, 150) ||
+            "Watch movies online in HD quality on Shoowflix."
           }
         />
         <meta
           name="twitter:image"
-          content={movie?.large_cover_image || "/og-image.jpg"}
+          content={
+            movie.large_cover_image || "https://shoowflix.com/og-image.jpg"
+          }
         />
         <meta
           name="twitter:image:alt"
-          content={
-            movie
-              ? `${movie.title} (${movie.year}) Poster`
-              : "Shoowflix Movie Poster"
-          }
+          content={`${movie.title} (${movie.year}) Poster`}
         />
 
         {/* Canonical URL */}
-        {movie && (
-          <link
-            rel="canonical"
-            href={`${
-              typeof window !== "undefined" ? window.location.origin : ""
-            }/movie/${movie.id}/${createSlug(movie.title)}`}
-          />
-        )}
+        <link rel="canonical" href={movieUrl} />
 
         {/* JSON-LD Structured Data */}
-        {movie && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Movie",
-                name: movie.title,
-                description: movie.description_full || movie.synopsis,
-                image: movie.large_cover_image || movie.medium_cover_image,
-                datePublished: movie.year?.toString(),
-                duration: movie.runtime ? `PT${movie.runtime}M` : undefined,
-                genre: movie.genres,
-                aggregateRating: movie.rating
-                  ? {
-                      "@type": "AggregateRating",
-                      ratingValue: movie.rating,
-                      ratingCount: 100,
-                      bestRating: 10,
-                      worstRating: 1,
-                    }
-                  : undefined,
-                url: `https://shoowflix.com/movie/${movie.id}/${createSlug(
-                  movie.title
-                )}`,
-                potentialAction: {
-                  "@type": "WatchAction",
-                  target: {
-                    "@type": "EntryPoint",
-                    urlTemplate: `https://shoowflix.com/movie/${
-                      movie.id
-                    }/${createSlug(movie.title)}`,
-                  },
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Movie",
+              name: movie.title,
+              description: movie.description_full || movie.synopsis,
+              image: movie.large_cover_image || movie.medium_cover_image,
+              datePublished: movie.year?.toString(),
+              duration: movie.runtime ? `PT${movie.runtime}M` : undefined,
+              genre: movie.genres,
+              aggregateRating: movie.rating
+                ? {
+                    "@type": "AggregateRating",
+                    ratingValue: movie.rating,
+                    ratingCount: 100,
+                    bestRating: 10,
+                    worstRating: 1,
+                  }
+                : undefined,
+              url: movieUrl,
+              potentialAction: {
+                "@type": "WatchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: movieUrl,
                 },
-              }),
-            }}
-          />
-        )}
+              },
+            }),
+          }}
+        />
       </Head>
 
       <div className="min-h-screen bg-background">
