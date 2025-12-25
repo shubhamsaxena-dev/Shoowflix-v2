@@ -51,7 +51,10 @@ export default function Document() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Shoowflix" />
-        <meta property="og:image" content="/og-image.jpg" />
+        <meta
+          property="og:image"
+          content="https://shoowflix.com/og-image.jpg"
+        />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
@@ -73,7 +76,10 @@ export default function Document() {
           name="twitter:description"
           content="Discover and stream your favorite movies in high quality with Shoowflix. Browse trending, action, comedy, and more genres."
         />
-        <meta name="twitter:image" content="/og-image.jpg" />
+        <meta
+          name="twitter:image"
+          content="https://shoowflix.com/og-image.jpg"
+        />
         <meta
           name="twitter:image:alt"
           content="Shoowflix - Movie Streaming Platform"
