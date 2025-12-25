@@ -48,13 +48,24 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
     setLoading(providerId);
     try {
       const redirectUrl = callbackUrl || "/";
+      console.log(
+        "[SignIn] handleSignIn called for:",
+        providerId,
+        "redirectUrl:",
+        redirectUrl
+      );
+
       const result = await signIn(providerId, {
         callbackUrl: redirectUrl,
-        redirect: false, // Use returned URL for navigation
+        redirect: false,
       });
 
+      console.log("[SignIn] signIn result:", result);
+
       if (result?.url) {
-        router.push(result.url);
+        console.log("[SignIn] Redirecting to OAuth provider:", result.url);
+        // For OAuth providers, we need to redirect to external auth page
+        window.location.href = result.url;
       } else if (result?.error) {
         toast({
           title: "Error",
@@ -105,9 +116,16 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
             title: "Success",
             description: "Signed in successfully",
           });
-          // Manually redirect after successful sign-in
-          const redirectUrl = callbackUrl || "/";
-          router.push(redirectUrl);
+          console.log(
+            "[SignIn] Credentials sign-in successful, redirecting to:",
+            callbackUrl || "/"
+          );
+          // Wait a moment for session to be established, then redirect
+          setTimeout(() => {
+            const redirectUrl = callbackUrl || "/";
+            console.log("[SignIn] Performing redirect to:", redirectUrl);
+            router.push(redirectUrl);
+          }, 500);
         }
       } else {
         // Register new user
