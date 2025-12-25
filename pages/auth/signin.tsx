@@ -63,9 +63,23 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
   const handleOAuthSignIn = async (providerId: string) => {
     setLoading(providerId);
 
-    await signIn(providerId, {
+    const result = await signIn(providerId, {
       callbackUrl: normalizeCallbackUrl(),
     });
+
+    if (result?.error) {
+      toast({
+        title: "Error",
+        description: result.error || "OAuth sign-in failed",
+        variant: "destructive",
+      });
+    } else {
+      router.push(normalizeCallbackUrl());
+      toast({
+        title: "Success",
+        description: "Redirecting...",
+      });
+    }
     // IMPORTANT:
     // Do NOT handle redirect manually
     // NextAuth handles OAuth redirects internally
