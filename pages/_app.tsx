@@ -26,50 +26,6 @@ export default function App({
         <link rel="dns-prefetch" href="https://img.yts.mx" />
         <link rel="dns-prefetch" href="https://yts.lt" />
         <link rel="dns-prefetch" href="https://yts.mx" />
-        {/* Open Graph Meta Tags */}
-        <meta
-          property="og:title"
-          content="Shoowflix - Stream Movies in High Quality"
-        />
-        <meta
-          property="og:description"
-          content="Discover and stream your favorite movies in high quality with Shoowflix. Browse trending, action, comedy, and more genres with a Netflix-like experience."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Shoowflix" />
-        <meta
-          property="og:image"
-          content="https://shoowflix.com/og-image.jpg"
-        />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta
-          property="og:image:alt"
-          content="Shoowflix - Movie Streaming Platform"
-        />
-        <meta property="og:locale" content="en_US" />
-        <meta property="fb:app_id" content="" />
-
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@shoowflix" />
-        <meta name="twitter:creator" content="@shoowflix" />
-        <meta
-          name="twitter:title"
-          content="Shoowflix - Stream Movies in High Quality"
-        />
-        <meta
-          name="twitter:description"
-          content="Discover and stream your favorite movies in high quality with Shoowflix. Browse trending, action, comedy, and more genres."
-        />
-        <meta
-          name="twitter:image"
-          content="https://shoowflix.com/og-image.jpg"
-        />
-        <meta
-          name="twitter:image:alt"
-          content="Shoowflix - Movie Streaming Platform"
-        />
 
         {/* Additional Meta Tags */}
         <meta

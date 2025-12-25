@@ -136,27 +136,51 @@ export default function Home() {
     <>
       <Head>
         <title>Shoowflix - Stream Movies Online in HD Quality</title>
-        <meta
-          name="description"
-          content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more on Shoowflix - your premium movie streaming platform."
-        />
+        {/* Open Graph Meta Tags */}
         <meta
           property="og:title"
-          content="Shoowflix - Stream Movies Online in HD Quality"
+          content="Shoowflix - Stream Movies in High Quality"
         />
         <meta
           property="og:description"
-          content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more on Shoowflix."
+          content="Discover and stream your favorite movies in high quality with Shoowflix. Browse trending, action, comedy, and more genres with a Netflix-like experience."
         />
-        <meta property="og:url" content="https://shoowflix.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Shoowflix" />
+        <meta
+          property="og:image"
+          content="https://shoowflix.com/og-image.jpg"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="Shoowflix - Movie Streaming Platform"
+        />
+        <meta property="og:locale" content="en_US" />
+        <meta property="fb:app_id" content="" />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@shoowflix" />
+        <meta name="twitter:creator" content="@shoowflix" />
         <meta
           name="twitter:title"
-          content="Shoowflix - Stream Movies Online in HD Quality"
+          content="Shoowflix - Stream Movies in High Quality"
         />
         <meta
           name="twitter:description"
-          content="Stream the latest movies online in HD quality. Discover trending films, action movies, comedies, and more."
+          content="Discover and stream your favorite movies in high quality with Shoowflix. Browse trending, action, comedy, and more genres."
         />
+        <meta
+          name="twitter:image"
+          content="https://shoowflix.com/og-image.jpg"
+        />
+        <meta
+          name="twitter:image:alt"
+          content="Shoowflix - Movie Streaming Platform"
+        />
+
         <link rel="canonical" href="https://shoowflix.com" />
 
         {/* JSON-LD Structured Data */}
