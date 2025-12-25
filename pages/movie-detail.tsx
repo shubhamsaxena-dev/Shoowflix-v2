@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -41,11 +42,18 @@ function createSlug(title: string | null | undefined): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export default function MovieDetail() {
+interface MovieDetailProps {
+  initialMovie: YTSMovie | null;
+  movieId: number;
+}
+
+export default function MovieDetail({
+  initialMovie,
+  movieId,
+}: MovieDetailProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const { id, slug } = router.query;
-  const movieId = parseInt((id as string) || "0");
   const { toast } = useToast();
   const { isFavorite, addToFavorites, removeFromFavorites, favorites } =
     useFavorites();
@@ -54,10 +62,11 @@ export default function MovieDetail() {
   const [magnetLink, setMagnetLink] = useState<string | null>(null);
   const [loadingMovieId, setLoadingMovieId] = useState<number | null>(null);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-  // Client-side fetch of movie details
-  const { data: movieDetailsData, isLoading: movieLoading } =
-    useMovieDetails(movieId);
-  const movie = movieDetailsData?.data?.movie || null;
+
+  // Use initial movie from SSR, fallback to client-side fetch if needed
+  const { data: movieDetailsData } = useMovieDetails(movieId);
+  const movie = initialMovie || movieDetailsData?.data?.movie || null;
+
   const { data: suggestionsData, isLoading: suggestionsLoading } =
     useMovieSuggestions(movieId);
   const suggestions = suggestionsData?.data?.movies;
@@ -276,8 +285,8 @@ export default function MovieDetail() {
     setMagnetLink(null);
   };
 
-  // Show loading state while fetching movie
-  if (movieLoading || !router.isReady) {
+  // Show loading state only if we don't have movie data yet (shouldn't happen with SSR)
+  if (!movie) {
     return (
       <div className="min-h-screen bg-background">
         {/* Header skeleton */}
@@ -378,35 +387,7 @@ export default function MovieDetail() {
     );
   }
 
-  // Handle case when movie is not found
-  if (!movie) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <h1
-            className="text-2xl font-bold mb-4"
-            data-testid="movie-error-title"
-          >
-            Movie Not Found
-          </h1>
-          <p
-            className="text-muted-foreground mb-6"
-            data-testid="movie-error-message"
-          >
-            The movie you're looking for could not be found.
-          </p>
-          <Link href="/">
-            <Button data-testid="movie-error-home-link">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </Card>
-      </div>
-    );
-  }
-
-  // Movie data is available from SSR, render the page
+  // Movie data is available, render the page
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -949,3 +930,75 @@ export default function MovieDetail() {
     </>
   );
 }
+
+// Server-side data fetching for SEO and Open Graph
+export const getServerSideProps: GetServerSideProps<MovieDetailProps> = async (
+  context
+) => {
+  try {
+    const { id } = context.params || {};
+
+    if (!id) {
+      console.error("[getServerSideProps] No id param provided");
+      return { notFound: true };
+    }
+
+    const movieId = parseInt(id as string);
+
+    if (isNaN(movieId)) {
+      console.error("[getServerSideProps] Invalid movie ID:", id);
+      return { notFound: true };
+    }
+
+    // Fetch movie data from YTS API server-side
+    const YTS_API_BASE =
+      process.env.NEXT_PUBLIC_API_ROOT || "https://yts.mx/api/v2";
+    const ytsUrl = `${YTS_API_BASE}/movie_details.json?movie_id=${movieId}&with_images=true&with_cast=true`;
+
+    console.log("[getServerSideProps] Fetching movie:", ytsUrl);
+
+    const response = await fetch(ytsUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; Shoowflix/1.0)",
+      },
+    });
+
+    console.log("[getServerSideProps] Response status:", response.status);
+
+    if (!response.ok) {
+      console.error(
+        "[getServerSideProps] API returned error:",
+        response.status,
+        response.statusText
+      );
+      return { notFound: true };
+    }
+
+    const data = await response.json();
+
+    console.log(
+      "[getServerSideProps] Data received:",
+      data?.data?.movie?.id,
+      data?.data?.movie?.title
+    );
+
+    if (!data.data?.movie) {
+      console.error("[getServerSideProps] No movie in response");
+      return { notFound: true };
+    }
+
+    console.log("[getServerSideProps] Success:", movieId);
+
+    return {
+      props: {
+        initialMovie: data.data.movie,
+        movieId,
+      },
+    };
+  } catch (error) {
+    console.error("[getServerSideProps] Error:", error);
+    return {
+      notFound: true,
+    };
+  }
+};
