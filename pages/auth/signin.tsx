@@ -47,7 +47,7 @@ export default function SignIn({ providers, callbackUrl }: SignInProps) {
   const handleSignIn = async (providerId: string) => {
     setLoading(providerId);
     try {
-      const redirectUrl = callbackUrl || "/";
+      const redirectUrl = callbackUrl || process.env.NEXTAUTH_URL || "/";
       const result = await signIn(providerId, {
         redirect: false, // Disable auto-redirect
       });
