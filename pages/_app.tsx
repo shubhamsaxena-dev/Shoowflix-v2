@@ -15,6 +15,7 @@ export default function App({
   const getLayout = (Component as any).getLayout || ((page: any) => page);
   const router = useRouter();
   const SITE_URL = "https://www.shoowflix.com";
+  const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
   return (
     <>
       <Head>
@@ -53,6 +54,18 @@ export default function App({
         <meta name="distribution" content="global" />
 
         {/* Additional Social Media Meta Tags */}
+        <meta property="og:site_name" content="Shoowflix" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}${router.asPath}`} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="Shoowflix - Movie Streaming Platform"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={OG_IMAGE} />
         <meta
           property="article:publisher"
           content="https://facebook.com/shoowflix"
