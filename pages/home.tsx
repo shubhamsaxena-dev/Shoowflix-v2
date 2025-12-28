@@ -1,17 +1,15 @@
 import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { User, Heart, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import SearchBar from "@/components/search-bar";
+import { Sparkles } from "lucide-react";
+import { AppHeader } from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import MovieSection from "@/components/movie-section";
-import UserProfileDropdown from "@/components/user-profile-dropdown";
 import VideoPlayer from "@/components/video-player";
 import SearchOverlay from "@/components/search-overlay";
 import AISuggestOverlay from "@/components/ai-suggest-overlay";
+import { Button } from "@/components/ui/button";
 import {
   useTrendingMovies,
   useHighRatedMovies,
@@ -216,53 +214,12 @@ export default function Home() {
         className="min-h-screen bg-background text-foreground"
         style={{ contain: "layout style paint" }}
       >
-        {/* Navigation Header */}
-        <header
-          className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300"
-          style={{ contain: "layout style" }}
-        >
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-shrink-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-primary">
-                  Shoowflix
-                </h1>
-              </div>
-
-              <div className="flex-1 max-w-md mx-4">
-                <SearchBar onSearch={handleSearch} />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                {/* Show AI Picks in header only on >= sm screens */}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowAiOverlay(true)}
-                  data-testid="button-ai-picks"
-                  className="hidden sm:inline-flex"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Picks
-                </Button>
-                {session ? (
-                  <UserProfileDropdown />
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push("/auth/signin")}
-                    data-testid="button-signin"
-                    className="gap-2"
-                  >
-                    <User className="h-4 w-4 mr-0 sm:mr-2" />
-                    <span className="hidden sm:inline">Sign In</span>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        <AppHeader
+          session={session}
+          onSearch={handleSearch}
+          onAiClick={() => setShowAiOverlay(true)}
+          onSignIn={() => router.push("/auth/signin")}
+        />
 
         {/* Hero Section */}
         {trendingLoading || !featuredMovies || featuredMovies.length === 0 ? (
@@ -308,6 +265,15 @@ export default function Home() {
           }}
         >
           <MovieSection
+            title="Recently Added"
+            movies={recentMovies}
+            isLoading={recentLoading}
+            onMovieClick={handleMovieClick}
+            onViewAll={() => handleViewAll("recent")}
+            loadingMovieId={loadingMovieId}
+            loadingViewAll={loadingViewAll === "recent"}
+          />
+          <MovieSection
             title="Trending Now"
             movies={trendingMovies}
             isLoading={trendingLoading}
@@ -323,16 +289,6 @@ export default function Home() {
             onViewAll={() => handleViewAll("high-rated")}
             loadingMovieId={loadingMovieId}
             loadingViewAll={loadingViewAll === "high-rated"}
-          />
-
-          <MovieSection
-            title="Recently Added"
-            movies={recentMovies}
-            isLoading={recentLoading}
-            onMovieClick={handleMovieClick}
-            onViewAll={() => handleViewAll("recent")}
-            loadingMovieId={loadingMovieId}
-            loadingViewAll={loadingViewAll === "recent"}
           />
 
           {genres.map((genre) => {
