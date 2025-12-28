@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/microfrontends.json",
+  "applications": {
+    "shoowflix-v2": {
+      "development": {
+        "fallback": "shoowflix.com"
+      }
+    }
+  }
+}
