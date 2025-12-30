@@ -1,5 +1,6 @@
-import { Sparkles, User } from "lucide-react";
+import { Sparkles, Tv2, User } from "lucide-react";
 import { Session } from "next-auth";
+import Link from "next/link";
 import UserProfileDropdown from "@/components/user-profile-dropdown";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +17,12 @@ export default function HeaderActions({
 }: HeaderActionsProps) {
   return (
     <div className="flex items-center space-x-2">
+      <Button asChild variant="ghost" size="sm" className="inline-flex">
+        <Link href="/live" className="gap-2">
+          <Tv2 className="h-4 w-4" />
+          Live
+        </Link>
+      </Button>
       <Button
         variant="secondary"
         size="sm"
