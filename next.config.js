@@ -1,36 +1,21 @@
 import withPWA from "next-pwa";
 
-const getImageDomains = () => {
-  const domains = new Set([
-    "yts.mx",
-    "yts.lt",
-    "img.yts.mx",
-    "img.yts.lt",
-    "st.yts.mx",
-    "st.yts.lt",
-  ]);
-
-  if (process.env.NEXT_PUBLIC_API_ROOT) {
-    const host = process.env.NEXT_PUBLIC_API_ROOT.replace(
-      /^https?:\/\//,
-      ""
-    ).split("/")[0];
-    domains.add(host);
-    domains.add(`img.${host}`);
-  }
-
-  if (process.env.IMAGE_DOMAINS) {
-    process.env.IMAGE_DOMAINS.split(",").forEach((d) => domains.add(d.trim()));
-  }
-
-  return Array.from(domains).filter(Boolean);
-};
-
 const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: getImageDomains(),
+    // ✅ Allow ALL image domains (dynamic 3rd party)
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 365,
   },
@@ -47,9 +32,14 @@ export default withPWA({
   register: true,
   skipWaiting: true,
 
-  // 🔥 CRITICAL: never cache auth routes
   runtimeCaching: [
     {
+      // ❌ Do NOT cache Next image optimizer
+      urlPattern: /^\/_next\/image.*/i,
+      handler: "NetworkOnly",
+    },
+    {
+      // ❌ Do NOT cache auth APIs
       urlPattern: /^\/api\/auth\/.*/i,
       handler: "NetworkOnly",
     },
