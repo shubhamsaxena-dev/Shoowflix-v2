@@ -118,3 +118,20 @@ model Subscription {
   auth      String
   createdAt DateTime @default(now())
 }
+
+/// Per-user playback progress for "Continue watching" (synced from the player).
+model WatchProgress {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  movieId   Int
+  quality   String?
+  position  Float    // seconds
+  duration  Float    // seconds
+  title     String
+  poster    String?
+  backdrop  String?
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, movieId])
+  @@index([userId, updatedAt])
+}

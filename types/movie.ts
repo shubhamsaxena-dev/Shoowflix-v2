@@ -25,13 +25,15 @@ export interface YTSMovie {
   torrents: Torrent[];
   date_uploaded: string;
   date_uploaded_unix: number;
+  like_count?: number;
+  download_count?: number;
   cast?: Cast[];
 }
 
 export interface Cast {
   name: string;
   character_name: string;
-  url_small_image: string;
+  url_small_image?: string;
   imdb_code: string;
 }
 
@@ -40,6 +42,7 @@ export interface Torrent {
   hash: string;
   quality: string;
   type: string;
+  video_codec?: string;
   seeds: number;
   peers: number;
   size: string;
@@ -55,14 +58,59 @@ export interface YTSListMoviesResponse {
     movie_count: number;
     limit: number;
     page_number: number;
-    movies: YTSMovie[];
+    movies?: YTSMovie[];
   };
 }
 
 export interface YTSMovieDetailsResponse {
   status: string;
   status_message: string;
-  data: {
-    movie: YTSMovie;
-  };
+  data: { movie: YTSMovie };
 }
+
+export type SortBy =
+  | "title"
+  | "year"
+  | "rating"
+  | "peers"
+  | "seeds"
+  | "download_count"
+  | "like_count"
+  | "date_added";
+
+export interface MovieFilters {
+  query_term?: string;
+  genre?: string;
+  quality?: string;
+  minimum_rating?: number;
+  sort_by?: SortBy;
+  order_by?: "asc" | "desc";
+  limit?: number;
+  page?: number;
+}
+
+export const GENRES = [
+  "action",
+  "adventure",
+  "animation",
+  "biography",
+  "comedy",
+  "crime",
+  "documentary",
+  "drama",
+  "family",
+  "fantasy",
+  "history",
+  "horror",
+  "music",
+  "musical",
+  "mystery",
+  "romance",
+  "sci-fi",
+  "sport",
+  "thriller",
+  "war",
+  "western",
+] as const;
+
+export type Genre = (typeof GENRES)[number];

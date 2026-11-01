@@ -1,15 +1,7 @@
-import { cn } from "@/lib/utils"
+import type { CSSProperties } from "react";
+import { cx } from "@/lib/movie-utils";
+import styles from "./skeleton.module.css";
 
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
-      {...props}
-    />
-  )
+export function Skeleton({ className, style }: { className?: string; style?: CSSProperties }) {
+  return <span aria-hidden className={cx(styles.skeleton, className)} style={style} />;
 }
-
-export { Skeleton }
