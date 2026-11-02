@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { preconnect, prefetchDNS, preload } from "react-dom";
 import { getMovie } from "@/lib/yts";
 import { backdropSrc, buildMagnet, movieHref, pickStreamTorrent, posterSrc, sortTorrents } from "@/lib/movie-utils";
@@ -35,7 +36,14 @@ export default async function WatchPage({ params, searchParams }: { params: Para
   preconnect("https://webtor.io");
   prefetchDNS("https://webtor.io");
 
-  const [{ id: rawId }, query] = await Promise.all([params, searchParams]);
+  const [{ id: rawId }, query, session] = await Promise.all([params, searchParams, auth()]);
+  // Watching is for signed-in members. proxy.ts redirects first; this keeps the page safe on its own.
+  if (!session?.user?.id) {
+    const qs = new URLSearchParams(
+      Object.entries(query).flatMap(([k, v]) => (Array.isArray(v) ? v.map((x) => [k, x]) : v ? [[k, v]] : [])),
+    ).toString();
+    redirect(`/signin?callbackUrl=${encodeURIComponent(`/watch/${rawId}${qs ? `?${qs}` : ""}`)}`);
+  }
   const id = parseId(rawId);
   if (!id) notFound();
 

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
 
 /**
@@ -9,11 +10,15 @@ import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor
  * link to /watch/*, we open the connections the player needs, pull the Webtor SDK into
  * the HTTP cache, and prefetch that watch route — so pressing Play skips those round trips.
  * One delegated listener for the whole app; does nothing until a watch link is approached.
+ * Only for signed-in members, since /watch requires an account.
  */
 export function PlayerWarmup() {
   const router = useRouter();
+  // Signed-out visitors are sent to sign in, not the player — nothing to warm.
+  const { status } = useSession();
 
   useEffect(() => {
+    if (status !== "authenticated") return;
     let warmed = false;
     const prefetched = new Set<string>();
 
@@ -59,7 +64,7 @@ export function PlayerWarmup() {
       document.removeEventListener("focusin", onIntent, opts);
       document.removeEventListener("touchstart", onIntent, opts);
     };
-  }, [router]);
+  }, [router, status]);
 
   return null;
 }
