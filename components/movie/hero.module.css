@@ -65,7 +65,7 @@
   }
 }
 
-/* Blend into the page background (light theme included) at the very bottom edge. */
+/* Blend into the page background at the very bottom edge. */
 .hero::after {
   content: "";
   position: absolute;
@@ -111,9 +111,6 @@
   font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   color: var(--color-accent);
-}
-:root[data-theme="light"] .kicker {
-  color: var(--hero-accent);
 }
 .kickerDot {
   width: 6px;
