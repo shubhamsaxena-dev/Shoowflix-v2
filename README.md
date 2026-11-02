@@ -53,6 +53,7 @@ All variables live in `.env.local`. See [`.env.example`](.env.example) for the t
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | For Google sign-in | Google OAuth credentials |
 | `NEXT_PUBLIC_API_ROOT` | Yes | YTS API root, for example `https://yts.gg/api/v2` |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Public URL for canonical links, sitemap and Open Graph |
+| `NEXT_PUBLIC_WEBTOR_URL` | No | Webtor instance for the player. Defaults to `https://webtor.io`; see [Self-hosting the player](#self-hosting-the-player) |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | No | Enables model-based AI picks |
 
 ## Scripts
@@ -119,6 +120,26 @@ Webtor runs in a cross-origin iframe, so the player stage is a small state machi
 Self-hosted fonts, one preloaded hero image, image sizes matched to layouts, skeletons that match real components to avoid layout shift, streaming with Suspense, `content-visibility` for long pages, code-split client islands, a click-to-load trailer, early loading of the player script, a service worker for static assets and posters, and real-user Web Vitals reporting to `/api/vitals`.
 
 More detail on the original architecture and component contracts is in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Self-hosting the player
+
+The player is a Webtor iframe. With the default `https://webtor.io` it's a cross-site iframe, and Safari, every iOS browser and Brave block its cookies, so Webtor's CSRF check fails ("CSRF token mismatch"). On those browsers the watch page offers webtor.io in a new tab instead.
+
+Running [Webtor self-hosted](https://github.com/webtor-io/self-hosted) on a subdomain of your site makes the iframe same-site, and the player works everywhere:
+
+1. On a server with Docker and plenty of bandwidth (every stream passes through it), run the container with your subdomain:
+   ```bash
+   docker run -d -p 8080:8080 \
+     -e DOMAIN=https://stream.example.com \
+     -e ADMIN_PASSWORD=change-me \
+     -v data:/data -v pgdata:/pgdata -v storage:/storage \
+     --name webtor --restart=always ghcr.io/webtor-io/self-hosted:latest
+   ```
+2. Point `stream.example.com` at the server and serve it over HTTPS with a reverse proxy (Caddy, nginx). HTTPS is required.
+3. In the instance's profile page, add your site's domain (e.g. `www.example.com`) to the embed domain list.
+4. Set `NEXT_PUBLIC_WEBTOR_URL=https://stream.example.com` and redeploy.
+
+The server joins torrent swarms itself, so its IP address is visible to peers and its host's terms and local copyright law apply to it.
 
 ## Deployment
 

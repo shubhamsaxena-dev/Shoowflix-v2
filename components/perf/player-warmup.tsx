@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
+import { WEBTOR_ORIGIN, WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
 
 /**
  * Warms the player on intent. The first time someone hovers, focuses or touches any
@@ -31,7 +31,7 @@ export function PlayerWarmup() {
     const warm = () => {
       if (warmed) return;
       warmed = true;
-      addLink({ rel: "preconnect", href: "https://webtor.io" });
+      addLink({ rel: "preconnect", href: WEBTOR_ORIGIN });
       addLink({ rel: "preconnect", href: "https://cdn.jsdelivr.net", crossorigin: "anonymous" });
       // Same crossorigin + integrity as the player's <script>, so the cached response is reused.
       addLink({

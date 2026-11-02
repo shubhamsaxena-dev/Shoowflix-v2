@@ -7,6 +7,20 @@
  * and retry-friendly reset when loading fails.
  */
 
+/**
+ * Where the player iframe comes from. Defaults to webtor.io. Point it at a self-hosted
+ * Webtor on a subdomain of this site (e.g. https://stream.shoowflix.com): the iframe is then
+ * same-site, so Safari and iOS keep its cookies and its CSRF check passes.
+ */
+export const WEBTOR_ORIGIN = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_WEBTOR_URL || "https://webtor.io").origin;
+  } catch {
+    return "https://webtor.io";
+  }
+})();
+export const WEBTOR_HOST = new URL(WEBTOR_ORIGIN).host;
+
 export const WEBTOR_SDK_VERSION = "0.2.19";
 export const WEBTOR_SDK_URL = `https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js@${WEBTOR_SDK_VERSION}/dist/index.min.js`;
 /** Subresource integrity for the pinned build above. Update together with the version. */
@@ -48,6 +62,8 @@ export interface WebtorFeatures {
 /** Exactly one of `magnet` / `torrentUrl` (the SDK throws if both or neither are set). */
 export interface WebtorConfig {
   id: string;
+  /** Webtor instance to load the player from (SDK default: https://webtor.io). */
+  baseUrl?: string;
   magnet?: string;
   torrentUrl?: string;
   width?: string;
@@ -142,7 +158,17 @@ export function loadWebtorSdk(timeoutMs = 20_000): Promise<WebtorSdk> {
   return sdkPromise;
 }
 
-/** The stream's own page on webtor.io, where its cookies are first-party (see the player's "Open in Webtor"). */
+/** The stream's own page on the Webtor instance, where its cookies are first-party (see "Open in Webtor"). */
 export function webtorPageUrl(hash: string): string {
-  return `https://webtor.io/${hash.toLowerCase()}`;
+  return `${WEBTOR_ORIGIN}/${hash.toLowerCase()}`;
+}
+
+/**
+ * True when the Webtor instance shares this page's site (same registrable domain), so browsers
+ * treat its iframe cookies as first-party. Compares the last two host labels, which is right
+ * for domains like shoowflix.com (not for multi-part suffixes such as .co.uk).
+ */
+export function webtorIsSameSite(pageHost: string): boolean {
+  const site = (h: string) => h.split(":")[0]!.split(".").slice(-2).join(".");
+  return site(WEBTOR_HOST) === site(pageHost);
 }

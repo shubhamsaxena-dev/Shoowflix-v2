@@ -509,7 +509,7 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
             target="_blank"
             rel="noopener noreferrer"
             className={styles.tool}
-            title="Open this stream on webtor.io (use this if the player shows a CSRF or security error)"
+            title="Open this stream on the Webtor site (use this if the player shows a CSRF or security error)"
           >
             <ExternalLink size={18} aria-hidden />
             <span className={styles.toolLabel}>Open in Webtor</span>

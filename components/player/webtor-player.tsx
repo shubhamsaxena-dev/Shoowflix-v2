@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, type RefObject } from "react";
-import { loadWebtorSdk, type WebtorPlayerHandle, type WebtorSdk } from "./webtor-sdk";
+import { loadWebtorSdk, WEBTOR_ORIGIN, type WebtorPlayerHandle, type WebtorSdk } from "./webtor-sdk";
 import styles from "./webtor-player.module.css";
 
 /** Normalised signals the stage reacts to. Names are ours, not the SDK's. */
@@ -137,6 +137,7 @@ export default function WebtorPlayer({
         try {
           sdk.push({
             id: mount.id,
+            baseUrl: WEBTOR_ORIGIN,
             ...(torrentUrl ? { torrentUrl } : { magnet }),
             width: "100%",
             height: "100%",
