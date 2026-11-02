@@ -7,8 +7,8 @@
 /** Bump when the disclaimer text changes materially — everyone is asked again. */
 export const DISCLAIMER_VERSION = "2026-11";
 export const DISCLAIMER_COOKIE = "shoowflix_terms";
-/** Acceptance lasts 30 days, then visitors confirm again. */
-export const DISCLAIMER_MAX_AGE = 60 * 60 * 24 * 30;
+/** Acceptance lasts 24 hours, then visitors confirm again. */
+export const DISCLAIMER_MAX_AGE = 60 * 60 * 24;
 
 const encoder = new TextEncoder();
 

@@ -58,7 +58,7 @@ export default async function DisclaimerPage({ searchParams }: { searchParams: S
               </ul>
               <p className={styles.confirm}>
                 By continuing you confirm you&rsquo;ve read this, understand it&rsquo;s an educational project, and accept
-                these terms. We&rsquo;ll remember your choice on this device for 30 days.
+                these terms. We&rsquo;ll remember your choice on this device for 24 hours.
               </p>
             </div>
             <form method="post" action="/api/disclaimer" className={styles.actions}>
