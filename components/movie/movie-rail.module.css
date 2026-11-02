@@ -86,7 +86,6 @@
 
 /* Track bleeds to the viewport edge but its first card aligns with the container. */
 .track {
-  --inset: max(var(--gutter), calc((100vw - var(--container-max)) / 2 + var(--gutter)));
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: var(--card-w);
@@ -94,8 +93,8 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--inset);
-  padding-inline: var(--inset);
+  scroll-padding-inline: var(--rail-inset);
+  padding-inline: var(--rail-inset);
   padding-bottom: var(--space-2);
   scrollbar-width: none;
   outline: none;

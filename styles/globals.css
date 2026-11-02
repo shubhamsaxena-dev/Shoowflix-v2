@@ -92,8 +92,8 @@ p {
   text-wrap: pretty;
 }
 
-ul[role="list"],
-ol[role="list"] {
+/* :where() keeps this reset at zero specificity so component padding (e.g. rail tracks) always wins. */
+:where(ul[role="list"], ol[role="list"]) {
   list-style: none;
   padding: 0;
 }

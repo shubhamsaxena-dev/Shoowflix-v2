@@ -10,11 +10,11 @@ export function MovieCardSkeleton() {
   return (
     <div className={cardStyles.card} aria-hidden>
       <Skeleton className={cx(cardStyles.poster, styles.poster)} />
-      <div className={cardStyles.title}>
-        <Skeleton className={styles.line} style={{ width: "85%" }} />
-      </div>
       <div className={cardStyles.meta}>
         <Skeleton className={styles.line} style={{ width: "40%" }} />
+      </div>
+      <div className={cardStyles.title}>
+        <Skeleton className={styles.line} style={{ width: "85%" }} />
       </div>
     </div>
   );

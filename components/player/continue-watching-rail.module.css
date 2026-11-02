@@ -5,7 +5,7 @@
 }
 
 .heading {
-  padding-inline: var(--gutter);
+  padding-inline: var(--rail-inset);
   font-size: var(--text-2xl);
 }
 
@@ -17,8 +17,8 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--gutter);
-  padding: 0 var(--gutter) var(--space-2);
+  scroll-padding-inline: var(--rail-inset);
+  padding: 0 var(--rail-inset) var(--space-2);
   scrollbar-width: none;
 }
 .track::-webkit-scrollbar {
