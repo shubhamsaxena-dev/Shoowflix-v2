@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { WatchlistButton } from "@/components/account/watchlist-button";
 import { cx, formatRuntime, movieHref, posterSrc } from "@/lib/movie-utils";
-import type { YTSMovie } from "@/types/movie";
+import type { CardMovie } from "@/types/movie";
 import styles from "./movie-card.module.css";
 
 /** Default for rail cards; grids pass their own. Keep in sync with movie-card.module.css widths. */
@@ -16,7 +16,7 @@ export function MovieCard({
   rank,
   className,
 }: {
-  movie: YTSMovie;
+  movie: CardMovie;
   priority?: boolean;
   sizes?: string;
   /** Renders a large display numeral beside the poster (Trending rail). */

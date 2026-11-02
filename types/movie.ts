@@ -30,6 +30,12 @@ export interface YTSMovie {
   cast?: Cast[];
 }
 
+/** The fields a movie card renders. A full YTSMovie satisfies it; so does a stored snapshot. */
+export type CardMovie = Pick<
+  YTSMovie,
+  "id" | "title" | "year" | "runtime" | "rating" | "genres" | "medium_cover_image" | "large_cover_image"
+>;
+
 export interface Cast {
   name: string;
   character_name: string;

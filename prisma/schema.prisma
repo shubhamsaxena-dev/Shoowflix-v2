@@ -135,3 +135,20 @@ model WatchProgress {
   @@unique([userId, movieId])
   @@index([userId, updatedAt])
 }
+
+/// What a movie card needs, saved when a film is added to a list, so My List renders from
+/// one database query instead of one YTS request per film. Refreshed on every add.
+model MovieSnapshot {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  movieId     Int      @unique
+  title       String
+  year        Int
+  runtime     Int      @default(0)
+  rating      Float    @default(0)
+  genres      String[]
+  poster      String   @default("")
+  posterLarge String   @default("")
+  updatedAt   DateTime @updatedAt
+
+  @@map("movie_snapshots")
+}

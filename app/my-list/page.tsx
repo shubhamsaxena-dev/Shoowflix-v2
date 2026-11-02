@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getMovie } from "@/lib/yts";
+import { getCards } from "@/lib/server/movie-snapshot";
 import { MovieCard } from "@/components/movie/movie-card";
 import { GRID_CARD_SIZES } from "@/components/movie/movie-grid";
 import { EmptyList } from "@/components/account/empty-list";
-import type { YTSMovie } from "@/types/movie";
 import { MyListGrid } from "./my-list-grid";
 import styles from "./my-list.module.css";
 
@@ -25,7 +24,8 @@ export default async function MyListPage() {
   });
   // Stored newest-first by POST /api/watchlist.
   const ids = (row?.movieIds ?? []).map(Number).filter((n) => Number.isFinite(n) && n > 0);
-  const movies = (await Promise.all(ids.map((id) => getMovie(id)))).filter((m): m is YTSMovie => Boolean(m));
+  // One database query; only films saved before snapshots existed touch YTS (4 at a time, once each).
+  const movies = await getCards(ids);
 
   return (
     <div className={`container ${styles.page}`}>
