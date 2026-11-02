@@ -134,4 +134,4 @@ Film data from [YTS](https://yts.gg). Streaming by [Webtor](https://webtor.io). 
 
 ## License
 
-MIT
+[MIT](LICENSE)
