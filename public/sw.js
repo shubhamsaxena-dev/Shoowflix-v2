@@ -19,7 +19,8 @@ const IMAGE_CACHE = `shoowflix-images-${VERSION}`;
 const IMAGE_LIMIT = 160;
 
 const IMAGE_HOSTS = /(^|\.)yts\.(gg|mx|lt|am|ag|rs)$/i;
-const NETWORK_ONLY = [/^\/api\//, /^\/watch(\/|$)/, /^\/signin/, /^\/signup/, /^\/register/, /^\/auth\//];
+// /_vercel: Analytics and Speed Insights scripts and beacons must never be cached.
+const NETWORK_ONLY = [/^\/_vercel\//, /^\/api\//, /^\/watch(\/|$)/, /^\/signin/, /^\/signup/, /^\/register/, /^\/auth\//];
 
 const OFFLINE_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline · Shoowflix</title><style>html{color-scheme:dark}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#12152b;color:#eef0fb;font:16px/1.5 system-ui,sans-serif;text-align:center;padding:24px}h1{font:800 2.5rem/1 "Arial Narrow",system-ui,sans-serif;margin:0 0 8px}p{color:#a5abcb;margin:0 0 20px}button{font:inherit;background:#b7c4ff;color:#12152b;border:0;border-radius:8px;padding:10px 20px;cursor:pointer}</style></head><body><main><h1>You're offline</h1><p>Shoowflix needs a connection to stream and browse. Check your network, then try again.</p><button onclick="location.reload()">Try again</button></main></body></html>`;
 
