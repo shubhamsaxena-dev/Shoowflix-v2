@@ -44,27 +44,67 @@ export function sortTorrents(torrents: Torrent[] = []): Torrent[] {
   });
 }
 
-/** Best torrent for instant streaming: 1080p > 720p > anything, weighted by seeds. Avoids 2160p (too heavy for webtor). */
-export function pickStreamTorrent(torrents: Torrent[] = [], preferred?: string): Torrent | undefined {
-  if (preferred) {
-    const match = torrents.filter((t) => t.quality === preferred).sort((a, b) => b.seeds - a.seeds)[0];
-    if (match) return match;
-  }
-  for (const q of ["1080p", "720p", "480p", "2160p"]) {
-    const match = torrents.filter((t) => t.quality === q).sort((a, b) => b.seeds - a.seeds)[0];
-    if (match) return match;
-  }
-  return torrents[0];
+/**
+ * How well a torrent should stream in the browser, highest first.
+ * Webtor streams over HTTP from its own servers, so start-up time is driven by
+ * (1) swarm health — how fast its servers can pull pieces, and
+ * (2) how heavy the file is — bitrate to buffer, and whether it needs transcoding.
+ * x265/HEVC and 10-bit often aren't playable natively in browsers and get transcoded
+ * on the fly, which is the slowest path; 2160p and 3D are too heavy to start quickly.
+ */
+export function streamScore(t: Torrent): number {
+  const health = (t.seeds ?? 0) + 0.5 * (t.peers ?? 0);
+  if (health <= 0) return -1;
+  const codec = (t.video_codec ?? "").toLowerCase();
+  const heavyCodec = codec.includes("265") || codec.includes("hevc") || /10.?bit/i.test(t.type ?? "");
+  const qualityWeight: Record<string, number> = { "1080p": 1.25, "720p": 1, "480p": 0.6, "2160p": 0.35, "3D": 0.2 };
+  const sizeGb = (t.size_bytes ?? 0) / 1e9 || 2;
+  // Diminishing returns past ~60 seeders: a 400-seed swarm isn't 6x faster than a 60-seed one.
+  const swarm = Math.log2(1 + Math.min(health, 400)) / Math.log2(61);
+  // Lighter files start sooner; penalise above ~2.5 GB.
+  const weight = sizeGb <= 2.5 ? 1 : 2.5 / sizeGb;
+  const webRip = (t.type ?? "").toLowerCase() === "web" ? 1.05 : 1;
+  return swarm * (qualityWeight[t.quality] ?? 0.5) * weight * webRip * (heavyCodec ? 0.4 : 1);
 }
 
+/** Below this many seeds+peers a 1080p stream usually stalls; prefer a healthier 720p. */
+const MIN_HEALTH_FOR_1080 = 15;
+
+/**
+ * Best torrent to start streaming. A quality the viewer chose is respected
+ * (healthiest copy of it); otherwise the highest streamScore wins, with 1080p
+ * only when its swarm can sustain it.
+ */
+export function pickStreamTorrent(torrents: Torrent[] = [], preferred?: string): Torrent | undefined {
+  const usable = torrents.filter((t) => t.hash);
+  if (preferred) {
+    const match = usable.filter((t) => t.quality === preferred).sort((a, b) => streamScore(b) - streamScore(a))[0];
+    if (match) return match;
+  }
+  const ranked = [...usable].sort((a, b) => streamScore(b) - streamScore(a));
+  const best = ranked[0];
+  if (best?.quality === "1080p" && (best.seeds ?? 0) + (best.peers ?? 0) < MIN_HEALTH_FOR_1080) {
+    return ranked.find((t) => t.quality === "720p" && streamScore(t) > 0) ?? best;
+  }
+  return best;
+}
+
+/**
+ * Announce list appended to magnet links (the fallback when the .torrent file can't be used).
+ * Long-lived public UDP trackers; reviewed 2026-11. Dead trackers only cost time, so keep this short.
+ */
 export const TRACKERS = [
   "udp://tracker.opentrackr.org:1337/announce",
+  "udp://open.demonii.com:1337/announce",
   "udp://open.stealth.si:80/announce",
   "udp://tracker.torrent.eu.org:451/announce",
   "udp://exodus.desync.com:6969/announce",
-  "udp://tracker.openbittorrent.com:6969/announce",
-  "wss://tracker.openwebtorrent.com",
-  "wss://tracker.webtorrent.dev",
+  "udp://explodie.org:6969/announce",
+  "udp://tracker.qu.ax:6969/announce",
+  "udp://tracker.dler.org:6969/announce",
+  "udp://p4p.arenabg.com:1337/announce",
+  "udp://tracker.tiny-vps.com:6969/announce",
+  "https://tracker.tamersunion.org:443/announce",
 ];
 
 /** Pure — safe on client and server. */

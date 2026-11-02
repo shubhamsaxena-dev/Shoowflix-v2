@@ -10,7 +10,7 @@
 export const WEBTOR_SDK_VERSION = "0.2.19";
 export const WEBTOR_SDK_URL = `https://cdn.jsdelivr.net/npm/@webtor/embed-sdk-js@${WEBTOR_SDK_VERSION}/dist/index.min.js`;
 /** Subresource integrity for the pinned build above. Update together with the version. */
-const WEBTOR_SDK_INTEGRITY = "sha384-fT93IihHLfqyxkbyEznAQX6/Rd/vgXAVemfjJBzlYQKHkbxa2x6N6Yvr/Hm8b8r5";
+export const WEBTOR_SDK_INTEGRITY = "sha384-fT93IihHLfqyxkbyEznAQX6/Rd/vgXAVemfjJBzlYQKHkbxa2x6N6Yvr/Hm8b8r5";
 
 /** Commands the SDK can send into the iframe player. */
 export interface WebtorPlayerHandle {
@@ -45,9 +45,11 @@ export interface WebtorFeatures {
   autoSubtitles?: boolean;
 }
 
+/** Exactly one of `magnet` / `torrentUrl` (the SDK throws if both or neither are set). */
 export interface WebtorConfig {
   id: string;
-  magnet: string;
+  magnet?: string;
+  torrentUrl?: string;
   width?: string;
   height?: string;
   poster?: string;

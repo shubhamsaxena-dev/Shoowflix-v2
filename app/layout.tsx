@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/shell/site-footer";
 import { MobileTabBar } from "@/components/shell/mobile-tab-bar";
 import { WebVitals } from "@/components/perf/web-vitals";
 import { SwRegister } from "@/components/perf/sw-register";
+import { PlayerWarmup } from "@/components/perf/player-warmup";
 import { SITE_NAME, SITE_URL } from "@/lib/movie-utils";
 import "@/styles/globals.css";
 
@@ -90,6 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main id="main">{children}</main>
           <SiteFooter />
           <MobileTabBar />
+          <PlayerWarmup />
         </Providers>
         <WebVitals />
         <SwRegister />

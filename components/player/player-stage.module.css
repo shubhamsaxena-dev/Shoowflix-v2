@@ -112,6 +112,62 @@
   color: var(--stage-text-subtle);
 }
 
+.back,
+.heading,
+.tools > * {
+  transition: opacity var(--duration-slow) var(--ease-out), color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.close {
+  border: 1px solid var(--stage-line-strong);
+}
+.close:hover {
+  opacity: 1;
+}
+
+/* ---------- Cast help (native popover) ---------- */
+.castHelp {
+  /* The global reset zeroes margins; popovers centre via inset: 0 + margin: auto. */
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  width: min(28rem, calc(100vw - 2rem));
+  padding: var(--space-6);
+  border: 1px solid var(--stage-line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  color: var(--stage-text);
+  box-shadow: var(--shadow-lg);
+}
+.castHelp::backdrop {
+  background: rgb(var(--stage-ink-rgb) / 0.55);
+}
+.castTitle {
+  font-size: var(--text-2xl);
+}
+.castSteps {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--stage-text-muted);
+}
+.castSteps strong {
+  color: var(--stage-text);
+  font-weight: var(--weight-semibold);
+}
+.castNote {
+  margin: var(--space-4) 0 var(--space-5);
+  font-size: var(--text-xs);
+  color: var(--stage-text-muted);
+}
+
 .tools {
   display: flex;
   align-items: center;
@@ -230,10 +286,15 @@
 .idle {
   cursor: none;
 }
-.idle .topbar {
+/* The top bar's contents fade, but Close stays put (dimmed) so there's always a way out. */
+.idle .back,
+.idle .heading,
+.idle .tools > :not(.close) {
   opacity: 0;
-  transform: translateY(-6px);
   pointer-events: none;
+}
+.idle .close {
+  opacity: 0.6;
 }
 .idle .bottombar {
   opacity: 0;

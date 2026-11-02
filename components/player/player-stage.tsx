@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { preload } from "swr";
-import { ArrowLeft, Info, Keyboard, ListVideo, Maximize, Minimize } from "lucide-react";
-import { cx, watchHref } from "@/lib/movie-utils";
+import { ArrowLeft, Cast, Info, Keyboard, ListVideo, Maximize, Minimize, X } from "lucide-react";
+import { cx, streamScore, watchHref } from "@/lib/movie-utils";
+import type { Torrent } from "@/types/movie";
 import { fetcher } from "@/lib/swr";
 import { useContinueWatching } from "@/hooks/use-continue-watching";
 import { usePlayerFullscreen, usePlayerIdle } from "@/hooks/use-player-chrome";
@@ -32,8 +33,12 @@ const WebtorPlayer = dynamic(() => import("./webtor-player"), { ssr: false, load
 
 const ORDER: StreamStage[] = ["sdk", "metadata", "peers", "buffering", "playing"];
 const MAX_AUTO_RETRIES = 2;
-const STALL_MS = 45_000;
-const REVEAL_AFTER_READY_MS = 1800;
+/** No start-up progress for this long → try another source once, then show the error. */
+const STALL_MS = 20_000;
+/** The .torrent-file path gets less patience: if it stalls we fall back to the magnet on the same source. */
+const FILE_STALL_MS = 12_000;
+/** After the player reports ready, lift the curtain quickly even if autoplay was blocked. */
+const REVEAL_AFTER_READY_MS = 600;
 
 interface StreamState {
   stage: StreamStage;
@@ -41,6 +46,10 @@ interface StreamState {
   attempt: number;
   autoRetries: number;
   retryInMs: number | null;
+  /** First attempt per source uses the .torrent file; after any failure we use the magnet. */
+  useMagnet: boolean;
+  /** The file path failed once on this page → every later source starts on the magnet. */
+  fileFailed: boolean;
   revealed: boolean;
   torrentName?: string;
   lastEventAt: number;
@@ -53,7 +62,7 @@ type Action =
   | { type: "retry"; manual: boolean; now: number }
   | { type: "reset"; now: number }
   | { type: "reveal" }
-  | { type: "stall" };
+  | { type: "stall"; now: number };
 
 function advance(stage: StreamStage, to: StreamStage): StreamStage {
   if (stage === "error") return stage;
@@ -67,6 +76,8 @@ function initState(now: number): StreamState {
     attempt: 0,
     autoRetries: 0,
     retryInMs: null,
+    useMagnet: false,
+    fileFailed: false,
     revealed: false,
     lastEventAt: now,
     position: 0,
@@ -79,14 +90,25 @@ function reducer(state: StreamState, action: Action): StreamState {
     case "reveal":
       return state.stage === "error" ? state : { ...state, revealed: true };
     case "stall":
-      return { ...state, stage: "error", error: { kind: "stalled", message: "No progress for 45s" } };
+      if (!state.useMagnet) {
+        // File path made no progress: same source, magnet instead (no error screen).
+        return { ...initState(action.now), attempt: state.attempt + 1, useMagnet: true, fileFailed: true, position: state.position };
+      }
+      return { ...state, stage: "error", error: { kind: "stalled", message: "No progress for 20s" } };
     case "reset":
-      return { ...initState(action.now), attempt: state.attempt + 1 };
+      return {
+        ...initState(action.now),
+        attempt: state.attempt + 1,
+        useMagnet: state.fileFailed,
+        fileFailed: state.fileFailed,
+      };
     case "retry":
       return {
         ...initState(action.now),
         attempt: state.attempt + 1,
         autoRetries: action.manual ? 0 : state.autoRetries,
+        useMagnet: true,
+        fileFailed: state.fileFailed || !state.useMagnet,
         position: state.position,
       };
     case "signal": {
@@ -114,7 +136,9 @@ function reducer(state: StreamState, action: Action): StreamState {
         case "error": {
           const retriable = signal.kind === "torrent" && s.stage !== "playing";
           if (retriable && s.autoRetries < MAX_AUTO_RETRIES) {
-            return { ...s, autoRetries: s.autoRetries + 1, retryInMs: 1500 * 2 ** s.autoRetries };
+            // .torrent file → magnet is a different path, not a backoff: try it straight away.
+            const delay = s.useMagnet ? 1500 * 2 ** (s.autoRetries - 1) : 250;
+            return { ...s, autoRetries: s.autoRetries + 1, retryInMs: delay };
           }
           return { ...s, stage: "error", error: { kind: signal.kind, message: signal.message }, retryInMs: null };
         }
@@ -176,9 +200,9 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
   // Watchdog: no SDK event for a while before playback starts → stalled.
   useEffect(() => {
     if (!["sdk", "metadata", "peers"].includes(state.stage) || state.retryInMs != null) return;
-    const t = setTimeout(() => dispatch({ type: "stall" }), STALL_MS);
+    const t = setTimeout(() => dispatch({ type: "stall", now: Date.now() }), state.useMagnet ? STALL_MS : FILE_STALL_MS);
     return () => clearTimeout(t);
-  }, [state.stage, state.lastEventAt, state.retryInMs]);
+  }, [state.stage, state.lastEventAt, state.retryInMs, state.useMagnet]);
 
   // Once the player UI is ready, lift the curtain even if autoplay was blocked.
   useEffect(() => {
@@ -363,11 +387,26 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
 
   /* ---------- derived ---------- */
 
+  /** The other source most likely to start quickly (swarm health, weight, codec). */
   const alternative = useMemo(() => {
-    const others = sources.filter((s) => s.hash !== source.hash);
-    const lower = others.filter((s) => s.sizeBytes < source.sizeBytes).sort((a, b) => b.seeds - a.seeds)[0];
-    return lower ?? others.sort((a, b) => b.seeds - a.seeds)[0];
-  }, [sources, source.hash, source.sizeBytes]);
+    const asTorrent = (s: StageSource) =>
+      ({ quality: s.quality, type: s.type, video_codec: s.codec, size_bytes: s.sizeBytes, seeds: s.seeds, peers: s.peers }) as Torrent;
+    return sources
+      .filter((s) => s.hash !== source.hash && streamScore(asTorrent(s)) > 0)
+      .sort((a, b) => streamScore(asTorrent(b)) - streamScore(asTorrent(a)))[0];
+  }, [sources, source.hash]);
+
+  // A stalled start usually means a thin swarm: hop once to the healthiest other source
+  // before asking the viewer to choose. Only for the first stall on this page.
+  const autoSwitchedRef = useRef(false);
+  const [switchNote, setSwitchNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (state.error?.kind !== "stalled" || autoSwitchedRef.current || !alternative) return;
+    autoSwitchedRef.current = true;
+    const from = source.quality;
+    setSwitchNote(`${from} was slow to start, so we switched to ${alternative.quality} ${alternative.type ?? ""}`.trim());
+    switchSource(alternative.hash);
+  }, [state.error, alternative, source.quality, switchSource]);
 
   const statusText =
     state.stage === "error"
@@ -381,7 +420,9 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
   const retryNote =
     state.retryInMs != null
       ? `That attempt failed. Retrying (${state.autoRetries} of ${MAX_AUTO_RETRIES})…`
-      : undefined;
+      : state.stage !== "playing" && switchNote
+        ? `${switchNote}.`
+        : undefined;
 
   return (
     <div
@@ -460,8 +501,35 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
               {isFullscreen ? <Minimize size={18} aria-hidden /> : <Maximize size={18} aria-hidden />}
             </button>
           ) : null}
+          <button type="button" className={styles.tool} popoverTarget="cast-help" title="Watch on a TV">
+            <Cast size={18} aria-hidden />
+            <span className={styles.toolLabel}>Cast</span>
+          </button>
+          {/* Never auto-hides: the video is a cross-origin frame, so mouse moves over it can't wake the chrome. */}
+          <Link href={movie.href} className={cx(styles.tool, styles.close)} title="Close player (Esc)">
+            <X size={18} aria-hidden />
+            <span className={styles.toolLabel}>Close</span>
+          </Link>
         </div>
       </header>
+
+      <div id="cast-help" popover="auto" className={styles.castHelp}>
+        <h2 className={styles.castTitle}>Watch on your TV</h2>
+        <ol className={styles.castSteps}>
+          <li>
+            Start the film, then use the <strong>Cast icon in the video&rsquo;s own control bar</strong>. It appears
+            once playback starts and Chrome finds a Chromecast on your Wi-Fi.
+          </li>
+          <li>
+            No icon? Open Chrome&rsquo;s <strong>⋮ menu → Cast… → Cast tab</strong>, then pick your device. This
+            mirrors the whole player; press F for fullscreen first.
+          </li>
+        </ol>
+        <p className={styles.castNote}>Casting works in Chrome and Edge on the same network as the Chromecast.</p>
+        <button type="button" className={styles.tool} popoverTarget="cast-help" popoverTargetAction="hide">
+          Got it
+        </button>
+      </div>
 
       {/* Invisible strip that brings the chrome back while it's hidden (iframe swallows pointer events). */}
       <div className={styles.hotzone} aria-hidden />
@@ -472,6 +540,7 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
           <WebtorPlayer
             key={`${source.hash}:${state.attempt}`}
             magnet={source.magnet}
+            torrentUrl={state.useMagnet ? undefined : source.torrentUrl}
             attempt={state.attempt}
             title={movie.title}
             imdbId={movie.imdbId}

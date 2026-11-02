@@ -14,13 +14,37 @@ const POSTERS_PER_GENRE = 3;
 type Poster = Pick<YTSMovie, "id" | "title" | "medium_cover_image" | "large_cover_image">;
 
 /**
- * Three popular posters per featured genre. Films appear in several genres
- * (Avengers is action and sci-fi), so each poster is used once across the section.
+ * YTS tags films with every genre that applies (and adds "Action" to almost everything),
+ * so a genre query returns anything carrying the tag at all. To make each card *look* like
+ * its genre we rank the most-liked films by how focused their tags are:
+ * clashing tags cost 3, every other tag costs 1, ignoring the noisy "Action" tag outside
+ * the Action card. Popularity breaks ties.
  */
+const CLASHES: Record<string, string[]> = {
+  action: ["Animation", "Comedy", "Family", "Romance"],
+  comedy: ["Action", "Animation", "Horror"],
+  drama: ["Animation", "Sci-Fi", "Fantasy", "Family"],
+  horror: ["Animation", "Comedy", "Family"],
+  "sci-fi": ["Animation", "Family"],
+  thriller: ["Animation", "Comedy", "Family"],
+  animation: [],
+  romance: ["Animation", "Horror", "Sci-Fi", "Fantasy"],
+};
+
+function focusPenalty(movie: YTSMovie, genre: string): number {
+  const tags = (movie.genres ?? []).filter((t) => genre === "action" || t !== "Action");
+  const clashes = CLASHES[genre] ?? [];
+  let penalty = tags.reduce((sum, t) => sum + (clashes.includes(t) ? 3 : 1), 0);
+  // Animated features worth showing are mostly family films; live action is sometimes mis-tagged "Animation".
+  if (genre === "animation" && tags.includes("Family")) penalty -= 2;
+  return penalty;
+}
+
+/** Three well-loved posters per featured genre that read as that genre. Each film is used once. */
 async function loadPosters(): Promise<Record<string, Poster[]>> {
   const lists = await Promise.all(
     FEATURED.map((genre) =>
-      listMovies({ genre, sort_by: "download_count", order_by: "desc", minimum_rating: 6, limit: 12 })
+      listMovies({ genre, sort_by: "like_count", order_by: "desc", minimum_rating: 7, limit: 50 })
         .then((r) => r.movies)
         .catch(() => [] as YTSMovie[]),
     ),
@@ -28,10 +52,14 @@ async function loadPosters(): Promise<Record<string, Poster[]>> {
   const used = new Set<number>();
   const out: Record<string, Poster[]> = {};
   FEATURED.forEach((genre, i) => {
+    const ranked = lists[i]
+      .map((movie, order) => ({ movie, order, penalty: focusPenalty(movie, genre) }))
+      .filter(({ movie }) => movie.medium_cover_image || movie.large_cover_image)
+      .sort((a, b) => a.penalty - b.penalty || a.order - b.order);
     const picks: Poster[] = [];
-    for (const m of lists[i]) {
+    for (const { movie: m } of ranked) {
       if (picks.length === POSTERS_PER_GENRE) break;
-      if (used.has(m.id) || !(m.medium_cover_image || m.large_cover_image)) continue;
+      if (used.has(m.id)) continue;
       used.add(m.id);
       picks.push({ id: m.id, title: m.title, medium_cover_image: m.medium_cover_image, large_cover_image: m.large_cover_image });
     }

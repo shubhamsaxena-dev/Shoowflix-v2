@@ -25,6 +25,11 @@ export interface WebtorController {
 
 export interface WebtorPlayerProps {
   magnet: string;
+  /**
+   * Direct .torrent file, used when present: Webtor then already has the metadata instead of
+   * fetching it from the swarm via the magnet. The stage falls back to the magnet after a failure.
+   */
+  torrentUrl?: string;
   /** Bump to tear down and re-create the player with the same magnet (retry). */
   attempt: number;
   title: string;
@@ -53,6 +58,7 @@ function torrentName(data: unknown): string | undefined {
  */
 export default function WebtorPlayer({
   magnet,
+  torrentUrl,
   attempt,
   title,
   imdbId,
@@ -131,7 +137,7 @@ export default function WebtorPlayer({
         try {
           sdk.push({
             id: mount.id,
-            magnet,
+            ...(torrentUrl ? { torrentUrl } : { magnet }),
             width: "100%",
             height: "100%",
             title,
@@ -174,7 +180,7 @@ export default function WebtorPlayer({
       controllerRef.current = null;
       mount.remove(); // removes the iframe → stops the stream and its messages
     };
-  }, [magnet, attempt, title, imdbId, poster, baseId, controllerRef]);
+  }, [magnet, torrentUrl, attempt, title, imdbId, poster, baseId, controllerRef]);
 
   return <div ref={hostRef} className={styles.host} />;
 }

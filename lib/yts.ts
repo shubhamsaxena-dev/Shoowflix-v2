@@ -34,6 +34,7 @@ function directImage(url: string | undefined): string {
 export function normalizeMovie(movie: YTSMovie): YTSMovie {
   const out = { ...movie };
   for (const field of IMAGE_FIELDS) out[field] = directImage(movie[field]);
+  if (movie.torrents) out.torrents = movie.torrents.map((t) => ({ ...t, url: t.url?.replace(/^http:\/\//, "https://") ?? "" }));
   if (movie.cast) out.cast = movie.cast.map((c) => ({ ...c, url_small_image: directImage(c.url_small_image) || undefined }));
   return out;
 }

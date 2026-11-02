@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { preconnect, prefetchDNS } from "react-dom";
+import { preconnect, prefetchDNS, preload } from "react-dom";
 import { getMovie } from "@/lib/yts";
 import { backdropSrc, buildMagnet, movieHref, pickStreamTorrent, posterSrc, sortTorrents } from "@/lib/movie-utils";
 import { PlayerStage } from "@/components/player/player-stage";
 import { NoStream } from "@/components/player/no-stream";
 import type { StageMovie, StageSource } from "@/components/player/types";
+import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -28,6 +29,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function WatchPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   // Warm the connections the player needs before the client bundle asks for them.
+  // The SDK download starts while the HTML is still streaming, not after hydration + the player chunk.
+  preload(WEBTOR_SDK_URL, { as: "script", crossOrigin: "anonymous", integrity: WEBTOR_SDK_INTEGRITY, fetchPriority: "high" });
   preconnect("https://cdn.jsdelivr.net", { crossOrigin: "anonymous" });
   preconnect("https://webtor.io");
   prefetchDNS("https://webtor.io");
@@ -71,6 +74,7 @@ export default async function WatchPage({ params, searchParams }: { params: Para
     seeds: t.seeds ?? 0,
     peers: t.peers ?? 0,
     magnet: buildMagnet(t.hash, `${movie.title_long || movie.title} [${t.quality}]`),
+    torrentUrl: /^https:\/\//.test(t.url) ? t.url : undefined,
   }));
 
   return (

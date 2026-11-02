@@ -25,6 +25,8 @@ export interface StageSource {
   seeds: number;
   peers: number;
   magnet: string;
+  /** Direct .torrent file. Lets Webtor skip fetching metadata from peers, the slowest start-up step. */
+  torrentUrl?: string;
 }
 
 export type StreamStage = "sdk" | "metadata" | "peers" | "buffering" | "playing" | "error";
