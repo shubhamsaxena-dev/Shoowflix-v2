@@ -10,7 +10,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "node --env-file=.env.local node_modules/prisma/build/index.js db push",
+    "db:studio": "node --env-file=.env.local node_modules/prisma/build/index.js studio"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
