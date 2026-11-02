@@ -15,19 +15,19 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#12152b",
     categories: ["entertainment", "video"],
     icons: [
-      { src: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
-      { src: "/icons/icon-192x192.png", type: "image/png", sizes: "192x192", purpose: "any" },
-      { src: "/icons/icon-512x512.png", type: "image/png", sizes: "512x512", purpose: "any" },
-      { src: "/web-app-manifest-192x192.png", type: "image/png", sizes: "192x192", purpose: "maskable" },
-      { src: "/web-app-manifest-512x512.png", type: "image/png", sizes: "512x512", purpose: "maskable" },
+      { src: "/brand/icon.svg", type: "image/svg+xml", sizes: "any", purpose: "any" },
+      { src: "/brand/icon-192.png", type: "image/png", sizes: "192x192", purpose: "any" },
+      { src: "/brand/icon-512.png", type: "image/png", sizes: "512x512", purpose: "any" },
+      { src: "/brand/maskable-192.png", type: "image/png", sizes: "192x192", purpose: "maskable" },
+      { src: "/brand/maskable-512.png", type: "image/png", sizes: "512x512", purpose: "maskable" },
     ],
     screenshots: [
-      { src: "/screenshots/desktop.png", sizes: "866x545", type: "image/png", form_factor: "wide", label: "Browse the catalog" },
-      { src: "/screenshots/mobile.png", sizes: "356x760", type: "image/png", form_factor: "narrow", label: "Shoowflix on mobile" },
+      { src: "/brand/screenshot-wide.png", sizes: "1280x800", type: "image/png", form_factor: "wide", label: "Browse trending films" },
+      { src: "/brand/screenshot-narrow.png", sizes: "390x844", type: "image/png", form_factor: "narrow", label: "Shoowflix on your phone" },
     ],
     shortcuts: [
-      { name: "Browse", url: "/browse" },
-      { name: "My List", url: "/my-list" },
+      { name: "Browse", url: "/browse", icons: [{ src: "/brand/icon-96.png", sizes: "96x96" }] },
+      { name: "My List", url: "/my-list", icons: [{ src: "/brand/icon-96.png", sizes: "96x96" }] },
     ],
   };
 }

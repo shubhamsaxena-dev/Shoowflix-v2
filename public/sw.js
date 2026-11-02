@@ -1,6 +1,6 @@
 /* Shoowflix service worker — hand-written, no build step.
  *
- *  /_next/static/*, fonts, icons ...... cache-first (content-hashed / immutable)
+ *  /_next/static/*, fonts, /brand icons ...... cache-first (content-hashed / immutable)
  *  Posters & backdrops (YTS hosts,
  *    and /_next/image of them) ........ stale-while-revalidate, capped
  *  /api/*, /watch/*, auth, RSC ........ network-only (never cached)
@@ -8,7 +8,7 @@
  *
  * Bump VERSION to invalidate every cache on the next activation.
  */
-const VERSION = "v2.0.0";
+const VERSION = "v2.1.0";
 const STATIC_CACHE = `shoowflix-static-${VERSION}`;
 const IMAGE_CACHE = `shoowflix-images-${VERSION}`;
 const IMAGE_LIMIT = 160;
@@ -52,7 +52,7 @@ function isStaticAsset(url) {
   return (
     url.pathname.startsWith("/_next/static/") ||
     /\.(woff2?|ttf|otf)$/i.test(url.pathname) ||
-    url.pathname.startsWith("/icons/")
+    url.pathname.startsWith("/brand/")
   );
 }
 

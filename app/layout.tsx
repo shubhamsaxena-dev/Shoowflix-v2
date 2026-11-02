@@ -37,10 +37,11 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, "max-image-preview": "large" },
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/brand/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.ico", sizes: "48x48" },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: { url: "/brand/apple-touch-icon.png", sizes: "180x180" },
   },
   verification: { yandex: "36b96e1f46430665" },
 };
