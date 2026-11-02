@@ -1,0 +1,318 @@
+/*
+ * Asymmetric spotlight: the backdrop is pushed to the right and dissolves into ink
+ * on the left, where the title sits like a marquee card. The programme list on the
+ * right doubles as carousel controls and a projector-style progress indicator.
+ * Text over the image is always light, in both themes, because the image is dark-scrimmed.
+ */
+.hero {
+  --hero-interval: 9s;
+  --hero-ink: var(--stage-ink);
+  --hero-paper: var(--stage-paper);
+  --hero-accent: var(--color-accent);
+  --hero-rating: var(--color-rating);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+  min-height: clamp(560px, 86svh, 880px);
+  overflow: hidden;
+  background: var(--hero-ink);
+  color: var(--hero-paper);
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms var(--ease-in-out);
+}
+.active {
+  opacity: 1;
+}
+
+.backdropImg {
+  object-fit: cover;
+  object-position: 50% 25%;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(var(--stage-ink-rgb) / 0.55) 0%, rgb(var(--stage-ink-rgb) / 0) 22%),
+    linear-gradient(0deg, var(--hero-ink) 0%, rgb(var(--stage-ink-rgb) / 0.82) 34%, rgb(var(--stage-ink-rgb) / 0.15) 70%);
+}
+
+@media (min-width: 1024px) {
+  .backdrop {
+    inset: 0 0 0 auto;
+    width: 80%;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
+  }
+  .scrim {
+    background:
+      linear-gradient(180deg, rgb(var(--stage-ink-rgb) / 0.5) 0%, rgb(var(--stage-ink-rgb) / 0) 20%),
+      linear-gradient(0deg, var(--hero-ink) 0%, rgb(var(--stage-ink-rgb) / 0) 38%),
+      linear-gradient(90deg, rgb(var(--stage-ink-rgb) / 0.7) 0%, rgb(var(--stage-ink-rgb) / 0) 55%);
+  }
+}
+
+/* Blend into the page background (light theme included) at the very bottom edge. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: var(--color-bg);
+}
+
+.layout {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-10);
+  padding-block: var(--space-24) var(--space-12);
+}
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: end;
+    gap: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+}
+
+.copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  max-width: 46rem;
+  animation: copy-in 520ms var(--ease-out) both;
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+}
+:root[data-theme="light"] .kicker {
+  color: var(--hero-accent);
+}
+.kickerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgb(183 196 255 / 0.2);
+}
+
+.title {
+  font-size: var(--text-hero);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  max-width: 14ch;
+  text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
+}
+
+/* Film-slate metadata: labelled cells with hairline dividers. */
+.slate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) 0;
+  font-variant-numeric: tabular-nums;
+}
+.slate div {
+  display: grid;
+  gap: 2px;
+  padding-inline: var(--space-4);
+  border-left: 1px solid rgb(var(--stage-paper-rgb) / 0.2);
+}
+.slate div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.slate dt {
+  font-size: var(--text-2xs);
+  color: rgb(var(--stage-paper-rgb) / 0.55);
+}
+.slate dd {
+  font-size: var(--text-sm);
+}
+.rating {
+  color: var(--hero-rating);
+}
+.slateWide {
+  max-width: 100%;
+}
+@media (max-width: 479px) {
+  .slateWide {
+    flex-basis: 100%;
+    padding-left: 0 !important;
+    border-left: 0 !important;
+  }
+}
+
+.synopsis {
+  max-width: 58ch;
+  font-size: var(--text-md);
+  line-height: 1.6;
+  color: rgb(var(--stage-paper-rgb) / 0.82);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ---------- Programme / carousel controls ---------- */
+.programme {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.programmeHead {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: rgb(var(--stage-paper-rgb) / 0.6);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid rgb(var(--stage-paper-rgb) / 0.16);
+}
+
+.programmeList {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.programmeItem {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  padding-block: var(--space-2);
+  text-align: left;
+  color: rgb(var(--stage-paper-rgb) / 0.55);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.programmeItem:hover {
+  color: var(--hero-paper);
+}
+
+.programmeIndex {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.programmeTitle {
+  min-width: 0;
+  display: none;
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.programmeActive {
+  color: var(--hero-paper);
+}
+.programmeActive .programmeIndex {
+  color: var(--hero-accent);
+}
+
+/* Projector progress: the bar's animation end advances the carousel. */
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--hero-accent);
+  transform-origin: left;
+  animation: progress var(--hero-interval) linear forwards;
+}
+.hero[data-paused] .progress {
+  animation-play-state: paused;
+}
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Mobile: compact index buttons in a row. */
+@media (max-width: 1023px) {
+  .programme {
+    max-width: 320px;
+  }
+  .programmeList li {
+    flex: 1;
+  }
+  .programmeItem {
+    justify-content: center;
+    border-bottom: 1px solid rgb(var(--stage-paper-rgb) / 0.16);
+    min-height: 44px;
+    align-items: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .programmeList {
+    flex-direction: column;
+    gap: 0;
+  }
+  .programmeItem {
+    border-bottom: 1px solid rgb(var(--stage-paper-rgb) / 0.1);
+    padding-block: var(--space-3);
+  }
+  .programmeTitle {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+  .copy {
+    animation: none;
+  }
+  .backdrop {
+    transition: none;
+  }
+}

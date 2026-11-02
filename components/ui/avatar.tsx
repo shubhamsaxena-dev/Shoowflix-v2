@@ -1,50 +1,54 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import Image from "next/image";
+import { useState } from "react";
+import { cx } from "@/lib/movie-utils";
+import styles from "./avatar.module.css";
 
-import { cn } from "@/lib/utils"
+export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      className
-    )}
-    {...props}
-  />
-))
-Avatar.displayName = AvatarPrimitive.Root.displayName
+const PX: Record<AvatarSize, number> = { sm: 28, md: 36, lg: 56, xl: 96 };
 
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = AvatarPrimitive.Image.displayName
+export function initials(name?: string | null, email?: string | null): string {
+  const source = (name || email?.split("@")[0] || "").trim();
+  if (!source) return "?";
+  const parts = source.split(/[\s._-]+/).filter(Boolean);
+  const letters = parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : source.slice(0, 2);
+  return letters.toUpperCase();
+}
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
-    )}
-    {...props}
-  />
-))
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
+export interface AvatarProps {
+  name?: string | null;
+  email?: string | null;
+  src?: string | null;
+  size?: AvatarSize;
+  className?: string;
+}
 
-export { Avatar, AvatarImage, AvatarFallback }
+/** Round avatar; falls back to initials when there is no image or it fails to load. */
+export function Avatar({ name, email, src, size = "md", className }: AvatarProps) {
+  const [failed, setFailed] = useState(false);
+  const px = PX[size];
+  const label = name || email || "User";
+  return (
+    <span className={cx(styles.avatar, styles[size], className)} title={label}>
+      {src && !failed ? (
+        <Image
+          src={src}
+          alt=""
+          width={px}
+          height={px}
+          className={styles.image}
+          unoptimized
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className={styles.initials} aria-hidden>
+          {initials(name, email)}
+        </span>
+      )}
+      <span className="visually-hidden">{label}</span>
+    </span>
+  );
+}

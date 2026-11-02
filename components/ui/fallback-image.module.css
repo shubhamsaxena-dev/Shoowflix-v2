@@ -1,0 +1,11 @@
+.fade {
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+.fade[data-loaded] {
+  opacity: 1;
+}
+/* Without JS the image would stay hidden — never let that happen. */
+@media (scripting: none) {
+  .fade { opacity: 1; }
+}

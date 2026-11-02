@@ -1,0 +1,22 @@
+.wrap {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: var(--space-24) var(--gutter);
+}
+
+.title {
+  font-size: var(--text-4xl);
+}
+
+.body {
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

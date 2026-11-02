@@ -1,0 +1,21 @@
+/* Poster-billing wordmark: heavy condensed caps-height type, tight set.
+ * The double "o" is lit in the projector-beam colour — the brand's one flourish. */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.sm { font-size: 1.5rem; }
+.md { font-size: 1.875rem; }
+.lg { font-size: clamp(2.75rem, 1.6rem + 4.5vw, 4.5rem); }
+
+.reels {
+  color: var(--color-accent);
+  letter-spacing: -0.04em;
+  margin-right: 0.04em;
+}

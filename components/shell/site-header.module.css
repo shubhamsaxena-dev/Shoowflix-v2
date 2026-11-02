@@ -1,0 +1,51 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  padding-top: env(safe-area-inset-top, 0px);
+  background: color-mix(in oklab, var(--color-bg) 82%, transparent);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid var(--color-line);
+  transition:
+    background-color var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) var(--ease-out),
+    backdrop-filter var(--duration-slow) var(--ease-out);
+}
+
+/* Overlay mode: pages with a full-bleed hero mark it with [data-header-overlay]. */
+:global(body:has([data-header-overlay])) .header:not([data-scrolled]) {
+  background: linear-gradient(180deg, var(--color-overlay) 0%, transparent 100%);
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+:global(body:has([data-header-overlay])) .header {
+  margin-bottom: calc(-1 * (var(--header-height) + env(safe-area-inset-top, 0px)));
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  height: var(--header-height);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-block: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .actions { gap: var(--space-2); }
+}

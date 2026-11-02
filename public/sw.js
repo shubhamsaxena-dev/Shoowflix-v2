@@ -1,100 +1,137 @@
-/**
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/* Shoowflix service worker — hand-written, no build step.
+ *
+ *  /_next/static/*, fonts, /brand icons ...... cache-first (content-hashed / immutable)
+ *  Posters & backdrops (YTS hosts,
+ *    and /_next/image of them) ........ stale-while-revalidate, capped
+ *  /api/*, /watch/*, auth, RSC ........ network-only (never cached)
+ *  Page navigations ................... network, with a tiny offline page on failure
+ *
+ * Bump VERSION to invalidate every cache on the next activation.
  */
+const VERSION = "v2.2.0";
 
-// If the loader is already loaded, just stop.
-if (!self.define) {
-  let registry = {};
+/* Never run on localhost: dev-server chunk URLs aren't content-hashed, so cache-first
+ * would pin stale CSS/JS across edits. A worker left behind by a local production run
+ * clears its caches and unregisters itself on the next activation. */
+const IS_LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(self.location.hostname);
+const STATIC_CACHE = `shoowflix-static-${VERSION}`;
+const IMAGE_CACHE = `shoowflix-images-${VERSION}`;
+const IMAGE_LIMIT = 160;
 
-  // Used for `eval` and `importScripts` where we can't get script URL by other means.
-  // In both cases, it's safe to use a global var because those functions are synchronous.
-  let nextDefineUri;
+const IMAGE_HOSTS = /(^|\.)yts\.(gg|mx|lt|am|ag|rs)$/i;
+// /_vercel: Analytics and Speed Insights scripts and beacons must never be cached.
+const NETWORK_ONLY = [/^\/_vercel\//, /^\/api\//, /^\/watch(\/|$)/, /^\/signin/, /^\/signup/, /^\/register/, /^\/auth\//];
 
-  const singleRequire = (uri, parentUri) => {
-    uri = new URL(uri + ".js", parentUri).href;
-    return registry[uri] || (
-      
-        new Promise(resolve => {
-          if ("document" in self) {
-            const script = document.createElement("script");
-            script.src = uri;
-            script.onload = resolve;
-            document.head.appendChild(script);
-          } else {
-            nextDefineUri = uri;
-            importScripts(uri);
-            resolve();
-          }
-        })
-      
-      .then(() => {
-        let promise = registry[uri];
-        if (!promise) {
-          throw new Error(`Module ${uri} didn’t register its module`);
-        }
-        return promise;
-      })
-    );
-  };
+const OFFLINE_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline · Shoowflix</title><style>html{color-scheme:dark}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#12152b;color:#eef0fb;font:16px/1.5 system-ui,sans-serif;text-align:center;padding:24px}h1{font:800 2.5rem/1 "Arial Narrow",system-ui,sans-serif;margin:0 0 8px}p{color:#a5abcb;margin:0 0 20px}button{font:inherit;background:#b7c4ff;color:#12152b;border:0;border-radius:8px;padding:10px 20px;cursor:pointer}</style></head><body><main><h1>You're offline</h1><p>Shoowflix needs a connection to stream and browse. Check your network, then try again.</p><button onclick="location.reload()">Try again</button></main></body></html>`;
 
-  self.define = (depsNames, factory) => {
-    const uri = nextDefineUri || ("document" in self ? document.currentScript.src : "") || location.href;
-    if (registry[uri]) {
-      // Module is already loading or loaded.
-      return;
-    }
-    let exports = {};
-    const require = depUri => singleRequire(depUri, uri);
-    const specialDeps = {
-      module: { uri },
-      exports,
-      require
-    };
-    registry[uri] = Promise.all(depsNames.map(
-      depName => specialDeps[depName] || require(depName)
-    )).then(deps => {
-      factory(...deps);
-      return exports;
-    });
-  };
-}
-define(['./workbox-e43f5367'], (function (workbox) { 'use strict';
-
-  importScripts();
+self.addEventListener("install", () => {
   self.skipWaiting();
-  workbox.clientsClaim();
-  workbox.registerRoute("/", new workbox.NetworkFirst({
-    "cacheName": "start-url",
-    plugins: [{
-      cacheWillUpdate: async ({
-        request,
-        response,
-        event,
-        state
-      }) => {
-        if (response && response.type === 'opaqueredirect') {
-          return new Response(response.body, {
-            status: 200,
-            statusText: 'OK',
-            headers: response.headers
-          });
-        }
-        return response;
-      }
-    }]
-  }), 'GET');
-  workbox.registerRoute(/.*/i, new workbox.NetworkOnly({
-    "cacheName": "dev",
-    plugins: []
-  }), 'GET');
+});
 
-}));
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      if (IS_LOCAL) {
+        const all = await caches.keys();
+        await Promise.all(all.filter((k) => k.startsWith("shoowflix-")).map((k) => caches.delete(k)));
+        await self.registration.unregister();
+        return;
+      }
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((k) => k.startsWith("shoowflix-") && !k.endsWith(VERSION)).map((k) => caches.delete(k)),
+      );
+      if (self.registration.navigationPreload) await self.registration.navigationPreload.enable();
+      await self.clients.claim();
+    })(),
+  );
+});
+
+function isImageRequest(url) {
+  if (IMAGE_HOSTS.test(url.hostname)) return true;
+  if (url.origin === self.location.origin && url.pathname === "/_next/image") {
+    try {
+      return IMAGE_HOSTS.test(new URL(url.searchParams.get("url") || "", self.location.origin).hostname);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function isStaticAsset(url) {
+  if (url.origin !== self.location.origin) return false;
+  return (
+    url.pathname.startsWith("/_next/static/") ||
+    /\.(woff2?|ttf|otf)$/i.test(url.pathname) ||
+    url.pathname.startsWith("/brand/")
+  );
+}
+
+async function trimCache(name, max) {
+  const cache = await caches.open(name);
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
+}
+
+async function cacheFirst(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  const hit = await cache.match(request);
+  if (hit) return hit;
+  const res = await fetch(request);
+  if (res.ok) cache.put(request, res.clone());
+  return res;
+}
+
+async function staleWhileRevalidate(event) {
+  const { request } = event;
+  const cache = await caches.open(IMAGE_CACHE);
+  const hit = await cache.match(request);
+  const refresh = fetch(request)
+    .then(async (res) => {
+      // Opaque (no-cors) responses are fine to cache for <img>; skip errors.
+      if (res.ok || res.type === "opaque") {
+        await cache.put(request, res.clone());
+        await trimCache(IMAGE_CACHE, IMAGE_LIMIT);
+      }
+      return res;
+    })
+    .catch(() => undefined);
+  if (hit) {
+    event.waitUntil(refresh);
+    return hit;
+  }
+  return (await refresh) || Response.error();
+}
+
+async function navigate(event) {
+  try {
+    const preloaded = await event.preloadResponse;
+    if (preloaded) return preloaded;
+    return await fetch(event.request);
+  } catch {
+    return new Response(OFFLINE_HTML, { status: 503, headers: { "content-type": "text/html; charset=utf-8" } });
+  }
+}
+
+self.addEventListener("fetch", (event) => {
+  if (IS_LOCAL) return;
+  const { request } = event;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+
+  if (url.origin === self.location.origin) {
+    if (NETWORK_ONLY.some((re) => re.test(url.pathname))) return;
+    // React Server Component payloads must always be fresh.
+    if (request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")) return;
+  }
+
+  if (isStaticAsset(url)) {
+    event.respondWith(cacheFirst(request));
+  } else if (request.destination === "image" && isImageRequest(url)) {
+    event.respondWith(staleWhileRevalidate(event));
+  } else if (request.mode === "navigate" && url.origin === self.location.origin) {
+    event.respondWith(navigate(event));
+  }
+  // Everything else: browser default (network).
+});

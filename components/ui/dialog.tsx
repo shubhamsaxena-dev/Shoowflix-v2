@@ -1,122 +1,145 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
+import { X } from "lucide-react";
+import { cx } from "@/lib/movie-utils";
+import styles from "./dialog.module.css";
 
-import { cn } from "@/lib/utils"
+let lockCount = 0;
+function lockScroll() {
+  if (lockCount++ === 0) {
+    const root = document.documentElement;
+    const gap = window.innerWidth - root.clientWidth;
+    root.style.overflow = "hidden";
+    if (gap > 0) root.style.paddingRight = `${gap}px`;
+  }
+}
+function unlockScroll() {
+  if (--lockCount <= 0) {
+    lockCount = 0;
+    const root = document.documentElement;
+    root.style.overflow = "";
+    root.style.paddingRight = "";
+  }
+}
 
-const Dialog = DialogPrimitive.Root
+/**
+ * Shared behaviour for anything built on a native modal <dialog>:
+ * syncs `open` with showModal()/close(), reports Esc/close back through onOpenChange,
+ * closes on backdrop click and locks page scroll while open.
+ * Focus moves into the dialog on open and returns to the opener on close (native behaviour).
+ */
+export function useModalDialog(
+  ref: RefObject<HTMLDialogElement | null>,
+  open: boolean,
+  onOpenChange: (open: boolean) => void,
+) {
+  const onOpenChangeRef = useRef(onOpenChange);
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  });
 
-const DialogTrigger = DialogPrimitive.Trigger
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      dialog.showModal();
+      lockScroll();
+      return () => {
+        unlockScroll();
+        if (dialog.open) dialog.close();
+      };
+    }
+    if (!open && dialog.open) dialog.close();
+  }, [open, ref]);
 
-const DialogPortal = DialogPrimitive.Portal
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    // Guard: in StrictMode the dialog is closed and immediately re-opened; the queued
+    // close event must not report a close for a dialog that is open again.
+    const handleClose = () => {
+      if (!dialog.open) onOpenChangeRef.current(false);
+    };
+    // Backdrop click: the pointer landed on the <dialog> box itself, outside its content.
+    let downOnBackdrop = false;
+    const handleDown = (e: PointerEvent) => {
+      downOnBackdrop = e.target === dialog;
+    };
+    const handleClick = (e: MouseEvent) => {
+      if (downOnBackdrop && e.target === dialog) dialog.close();
+      downOnBackdrop = false;
+    };
+    dialog.addEventListener("close", handleClose);
+    dialog.addEventListener("pointerdown", handleDown);
+    dialog.addEventListener("click", handleClick);
+    return () => {
+      dialog.removeEventListener("close", handleClose);
+      dialog.removeEventListener("pointerdown", handleDown);
+      dialog.removeEventListener("click", handleClick);
+    };
+  }, [ref]);
+}
 
-const DialogClose = DialogPrimitive.Close
+export type DialogSize = "sm" | "md" | "lg" | "full";
 
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    )}
-    {...props}
-  />
-))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+export interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: ReactNode;
+  description?: ReactNode;
+  children?: ReactNode;
+  size?: DialogSize;
+  /** Visually hide the title (still announced). */
+  hideTitle?: boolean;
+  /** Optional footer row (actions). */
+  footer?: ReactNode;
+  className?: string;
+}
 
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  size = "md",
+  hideTitle,
+  footer,
+  className,
+}: DialogProps) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descId = useId();
+  useModalDialog(ref, open, onOpenChange);
+
+  return (
+    <dialog
       ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        className
-      )}
-      {...props}
+      className={cx(styles.dialog, styles[size], className)}
+      aria-labelledby={titleId}
+      aria-describedby={description ? descId : undefined}
     >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-))
-DialogContent.displayName = DialogPrimitive.Content.displayName
-
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
-    {...props}
-  />
-)
-DialogHeader.displayName = "DialogHeader"
-
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
-    )}
-    {...props}
-  />
-)
-DialogFooter.displayName = "DialogFooter"
-
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
-
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
-
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
+      {open ? (
+        <div className={styles.panel}>
+          <header className={cx(styles.header, hideTitle && "visually-hidden")}>
+            <h2 id={titleId} className={styles.title}>
+              {title}
+            </h2>
+            {description ? (
+              <p id={descId} className={styles.description}>
+                {description}
+              </p>
+            ) : null}
+          </header>
+          <div className={styles.content}>{children}</div>
+          {footer ? <footer className={styles.footer}>{footer}</footer> : null}
+          {/* Last in DOM order so initial focus lands on the content, first visually via positioning. */}
+          <button type="button" className={styles.close} aria-label="Close" onClick={() => onOpenChange(false)}>
+            <X aria-hidden />
+          </button>
+        </div>
+      ) : null}
+    </dialog>
+  );
 }

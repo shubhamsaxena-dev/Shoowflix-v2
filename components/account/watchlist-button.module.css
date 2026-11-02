@@ -1,0 +1,15 @@
+.button { position: relative; }
+
+.saved {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.icon { animation: pop var(--duration-slow) var(--ease-out); }
+@keyframes pop {
+  0% { transform: scale(0.4) rotate(-90deg); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .icon { animation: none; }
+}

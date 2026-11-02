@@ -1,0 +1,133 @@
+.rail {
+  padding-block: var(--space-8);
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.heading {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.eyebrow {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+}
+
+.title {
+  font-size: var(--text-3xl);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.seeAll {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-line-strong);
+  padding-bottom: 2px;
+  transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.seeAll svg {
+  width: 14px;
+  height: 14px;
+}
+.seeAll:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.controls {
+  display: none;
+  gap: var(--space-1);
+}
+@media (hover: hover) and (min-width: 768px) {
+  .controls {
+    display: flex;
+  }
+}
+
+.control {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-text);
+  transition: background-color var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+}
+.control svg {
+  width: 18px;
+  height: 18px;
+}
+.control:hover:not(:disabled) {
+  background: var(--color-surface-2);
+}
+.control:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Track is bounded to the page column: cards start and clip at the container content edges. */
+.track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--card-w);
+  gap: var(--space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* 6px ring room inside the scroller so focus outlines aren't clipped; cards still align to the content edge. */
+  --ring-room: 6px;
+  width: calc(var(--content-width) + 2 * var(--ring-room));
+  margin-inline: auto;
+  padding-inline: var(--ring-room);
+  scroll-padding-inline: var(--ring-room);
+  padding-top: var(--ring-room);
+  margin-top: calc(-1 * var(--ring-room));
+  padding-bottom: var(--space-2);
+  scrollbar-width: none;
+  outline: none;
+  --card-w: 42vw;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 640px) {
+  .track {
+    --card-w: 172px;
+    gap: var(--space-5);
+  }
+}
+@media (min-width: 1024px) {
+  .track {
+    --card-w: 200px;
+  }
+}
+
+.item {
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+/* Ranked rail: cards carry their numeral, so widen the column by the offset. */
+.numbered .track {
+  grid-auto-columns: calc(var(--card-w) + clamp(2.75rem, 9vw, 4.25rem));
+  gap: var(--space-2);
+}

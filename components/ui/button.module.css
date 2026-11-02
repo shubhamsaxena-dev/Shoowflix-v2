@@ -1,0 +1,64 @@
+.button {
+  --_h: 44px;
+  --_px: var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--_h);
+  padding-inline: var(--_px);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+.button:active:not(:disabled) { transform: scale(0.97); }
+.button:disabled, .button[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.button svg { width: 1.15em; height: 1.15em; flex-shrink: 0; }
+
+.sm { --_h: 34px; --_px: var(--space-3); font-size: var(--text-xs); }
+.lg { --_h: 52px; --_px: var(--space-6); font-size: var(--text-md); }
+.icon { --_px: 0; width: var(--_h); }
+.block { width: 100%; }
+
+.primary { background: var(--color-accent); color: var(--color-accent-ink); }
+.primary:hover:not(:disabled) { background: var(--color-accent-hover); }
+.primary:active:not(:disabled) { background: var(--color-accent-press); }
+
+.secondary { background: var(--color-surface-2); color: var(--color-text); border-color: var(--color-line); }
+.secondary:hover:not(:disabled) { background: var(--color-surface-3); border-color: var(--color-line-strong); }
+
+.ghost { color: var(--color-text); }
+.ghost:hover:not(:disabled) { background: var(--color-surface-2); }
+
+.outline { color: var(--color-text); border-color: var(--color-line-strong); }
+.outline:hover:not(:disabled) { border-color: var(--color-text-muted); background: var(--color-surface); }
+
+.glass {
+  color: rgb(255 255 255); /* glass always sits on imagery, so text stays light in both themes */
+  background: rgb(255 255 255 / 0.12);
+  border-color: rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+.glass:hover:not(:disabled) { background: rgb(255 255 255 / 0.2); }
+
+.danger { background: var(--color-danger-soft); color: var(--color-danger); }
+.danger:hover:not(:disabled) { background: var(--color-danger); color: var(--color-text-inverse); }
+
+.spinner {
+  width: 1em; height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

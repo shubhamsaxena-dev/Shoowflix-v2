@@ -1,0 +1,43 @@
+.placeholder {
+  width: 28px;
+  height: 28px;
+  margin-inline: 3px;
+  border-radius: 50% !important;
+}
+
+.signIn { margin-left: var(--space-1); }
+
+.trigger {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+.trigger:hover,
+.trigger[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--color-accent); }
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 240px;
+}
+.whoText { display: flex; flex-direction: column; min-width: 0; }
+.name {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.email {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

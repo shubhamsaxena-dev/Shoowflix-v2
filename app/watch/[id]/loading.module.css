@@ -1,0 +1,6 @@
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-player);
+  background: black;
+}

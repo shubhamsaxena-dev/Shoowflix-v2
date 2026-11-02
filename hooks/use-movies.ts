@@ -1,229 +1,93 @@
-import { useMemo } from "react";
-import useSWRImmutable from "swr/immutable";
+"use client";
+
+import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
-import type { SWRInfiniteResponse } from "swr/infinite";
-import type { Torrent, YTSListMoviesResponse, YTSMovie } from "@/types/movie";
-import type { MovieFilters } from "@/lib/types";
-import { useSwr } from "./use-swr";
-import queryString from "query-string";
+import { fetcher, toQuery } from "@/lib/swr";
+import { PAGE_SIZE } from "@/components/discovery/catalog";
+import type { MovieFilters, YTSMovie } from "@/types/movie";
 
-// ---------------- Fetcher ----------------
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-  return response.json();
-};
-
-// ---------------- Query Helpers ----------------
-export const getQueryParams = (
-  baseUrl: string,
-  params?: { [key: string]: string | number }
-) => {
-  if (!params) return baseUrl;
-  return `${baseUrl}?${queryString.stringify(params)}`;
-};
-
-function buildQueryString(
-  filters: MovieFilters | null = {},
-  page: number = 1
-): string {
-  const params = new URLSearchParams();
-  params.append("page", page.toString());
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== "" && value !== 0)
-        params.append(key, value.toString());
-    });
-  }
-  return params.toString();
+/** Shape of `GET /api/movies` (mirrors lib/yts.listMovies). */
+export interface MoviesPage {
+  movie_count: number;
+  limit: number;
+  page_number: number;
+  movies: YTSMovie[];
 }
 
-// ---------------- Infinite SWR Key ----------------
-const getInfiniteKey =
-  (filters: MovieFilters | null) =>
-  (pageIndex: number, previousPageData: YTSListMoviesResponse | null) => {
-    if (!filters) return null; // no request
-    if (pageIndex === 0) return `api/movies?${buildQueryString(filters, 1)}`;
-    if (!previousPageData?.data?.movies?.length) return null; // reached end
-    return `api/movies?${buildQueryString(filters, pageIndex + 1)}`;
-  };
+export function moviesKey(filters: MovieFilters, page = 1): string {
+  return `/api/movies${toQuery({ limit: PAGE_SIZE, ...filters, page })}`;
+}
 
-// ---------------- Infinite Movies Hook ----------------
-export function useMoviesInfinite(filters: MovieFilters = {}) {
-  const getKey = (
-    pageIndex: number,
-    previousPageData: YTSListMoviesResponse | null
-  ) => {
-    // Stop if previous page had no movies
-    if (
-      previousPageData &&
-      (!previousPageData.data?.movies ||
-        previousPageData.data.movies.length === 0)
-    ) {
-      return null;
-    }
+/**
+ * Paged catalog for infinite scroll.
+ * Pass the server-rendered first page as `fallbackFirstPage` so the initial render
+ * is the ISR/SSR HTML and SWR does not refetch page 1 on mount.
+ */
+export function useMoviesInfinite(filters: MovieFilters, fallbackFirstPage?: MoviesPage) {
+  const limit = filters.limit ?? PAGE_SIZE;
 
-    const params = new URLSearchParams({
-      page: (pageIndex + 1).toString(),
-      limit: "20",
-      sort_by: filters.sort_by || "date_added",
-      order_by: "desc",
-    });
+  const swr = useSWRInfinite<MoviesPage>(
+    (index, previous) => {
+      if (previous && (previous.movies.length < limit || previous.page_number * limit >= previous.movie_count)) {
+        return null; // reached the end
+      }
+      return moviesKey({ ...filters, limit }, index + 1);
+    },
+    fetcher,
+    {
+      fallbackData: fallbackFirstPage ? [fallbackFirstPage] : undefined,
+      revalidateOnMount: !fallbackFirstPage,
+      revalidateFirstPage: false,
+      revalidateOnFocus: false,
+      persistSize: false,
+    },
+  );
 
-    if (filters.genre) params.append("genre", filters.genre);
-    if (filters.quality) params.append("quality", filters.quality);
-    if (filters.minimum_rating)
-      params.append("minimum_rating", filters.minimum_rating.toString());
-    if (filters.query_term) params.append("query_term", filters.query_term);
-
-    return `/api/movies?${params.toString()}`;
-  };
-
-  const swr = useSWRInfinite<YTSListMoviesResponse>(getKey, fetcher, {
-    revalidateFirstPage: false,
-    revalidateOnFocus: false,
-  });
-
-  const movies =
-    swr.data?.flatMap((page) => page?.data?.movies || []).filter(Boolean) || [];
-  const isEmpty = swr.data?.[0]?.data?.movies?.length === 0;
-  const isLoadingInitial = !swr.data && !swr.error;
-  const isLoadingMore = swr.isValidating && swr.data && swr.size > 0;
-  const canLoadMore =
-    swr.data &&
-    swr.data.length > 0 &&
-    swr.data[swr.data.length - 1]?.data?.movies?.length === 20;
+  const pages = swr.data ?? [];
+  const movies = dedupe(pages.flatMap((p) => p.movies ?? []));
+  const total = pages[0]?.movie_count ?? 0;
+  const last = pages[pages.length - 1];
+  const isEnd = !!last && (last.movies.length < limit || last.page_number * limit >= last.movie_count);
+  const isLoadingMore = swr.isLoading || (swr.size > 0 && typeof swr.data?.[swr.size - 1] === "undefined");
 
   return {
     movies,
-    error: swr.error,
-    isLoading: isLoadingInitial,
+    total,
+    isEnd,
+    isEmpty: !!last && total === 0,
+    isLoading: swr.isLoading,
     isLoadingMore,
-    canLoadMore: canLoadMore && !isLoadingMore,
-    loadMore: () => swr.setSize(swr.size + 1),
-    isEmpty,
-    mutate: swr.mutate,
+    error: swr.error as Error | undefined,
+    loadMore: () => swr.setSize((s) => s + 1),
+    retry: () => swr.mutate(),
   };
 }
 
-// ---------------- Regular Movies Hook ----------------
-export function useMovies(filters: MovieFilters | null = {}) {
-  const key = useMemo(
-    () => getQueryParams("/movies", filters as any),
-    [filters]
-  );
+/**
+ * Single-page search for type-ahead UIs. Debounce the query in the caller;
+ * `keepPreviousData` keeps the last results on screen while the next query loads.
+ */
+export function useMovieSearch(query: string, opts: { limit?: number; minLength?: number } = {}) {
+  const { limit = 8, minLength = 2 } = opts;
+  const q = query.trim();
+  const key = q.length >= minLength ? moviesKey({ query_term: q, limit, sort_by: "download_count" }) : null;
 
-  const { data, error, mutate, isLoading } = useSwr({ key });
+  const { data, error, isLoading, isValidating } = useSWR<MoviesPage>(key, fetcher, {
+    keepPreviousData: true,
+    revalidateOnFocus: false,
+    dedupingInterval: 60_000,
+  });
 
   return {
-    data,
-    error,
+    movies: key ? (data?.movies ?? []) : [],
+    total: key ? (data?.movie_count ?? 0) : 0,
     isLoading,
-    mutate,
-    movies: data?.data?.movies || [],
+    isValidating,
+    error: error as Error | undefined,
   };
 }
 
-// ---------------- Movie Details ----------------
-export function useMovieDetails(movieId: number) {
-  const key = useMemo(
-    () => `/movies/${movieId}?with_images=true&with_cast=true`,
-    [movieId]
-  );
-  const execute = Number.isFinite(movieId) && movieId > 0;
-  const { data, error, mutate, isLoading } = useSwr({ key, execute });
-
-  return {
-    data,
-    error,
-    isLoading,
-    mutate,
-    movie: data?.data?.movie,
-  };
-}
-
-// ---------------- Movie Suggestions ----------------
-export function useMovieSuggestions(movieId: number) {
-  const key = useMemo(() => `/movies/${movieId}/suggestions`, [movieId]);
-  const { data, error, mutate, isLoading } = useSwr({ key });
-
-  return {
-    data,
-    error,
-    isLoading,
-    mutate,
-    movies: data?.data?.movies || [],
-  };
-}
-
-// ---------------- Predefined Hooks ----------------
-export function useTrendingMovies() {
-  return useMovies({ sort_by: "download_count", order_by: "desc", limit: 20 });
-}
-export function useTrendingMoviesInfinite() {
-  return useMoviesInfinite({
-    sort_by: "download_count",
-    order_by: "desc",
-    limit: 20,
-  });
-}
-export function useHighRatedMovies() {
-  return useMovies({
-    minimum_rating: 8,
-    sort_by: "rating",
-    order_by: "desc",
-    limit: 20,
-  });
-}
-export function useHighRatedMoviesInfinite() {
-  return useMoviesInfinite({
-    minimum_rating: 8,
-    sort_by: "rating",
-    order_by: "desc",
-    limit: 20,
-  });
-}
-export function useRecentMovies() {
-  return useMovies({ sort_by: "year", order_by: "desc", limit: 20 });
-}
-export function useRecentMoviesInfinite() {
-  return useMoviesInfinite({
-    sort_by: "year",
-    order_by: "desc",
-    limit: 20,
-  });
-}
-export function useMoviesByGenre(genre: string) {
-  return useMovies({ genre, sort_by: "rating", order_by: "desc", limit: 20 });
-}
-export function useMoviesByGenreInfinite(
-  genre: string,
-  params: MovieFilters = {}
-) {
-  return useMoviesInfinite({
-    genre,
-    ...params,
-    limit: 20,
-  });
-}
-export function useSearchMoviesInfinite(
-  query: string,
-  filters: MovieFilters = {}
-) {
-  return useMoviesInfinite({ query_term: query, ...filters, limit: 20 });
-}
-
-// ---------------- Magnet Link ----------------
-export async function generateMagnetLink(
-  movie: YTSMovie,
-  torrent: Torrent
-): Promise<string> {
-  const response = await fetch("/api/magnet", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ hash: torrent.hash, title: movie.title }),
-  });
-  if (!response.ok) throw new Error("Failed to generate magnet link");
-  const data = await response.json();
-  return data.magnetLink;
+function dedupe(movies: YTSMovie[]): YTSMovie[] {
+  const seen = new Set<number>();
+  return movies.filter((m) => (seen.has(m.id) ? false : (seen.add(m.id), true)));
 }

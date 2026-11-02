@@ -1,32 +1,24 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
-    "target": "es5",
-    "strict": true,
-    "lib": ["dom", "dom.iterable", "es6"],
-    "jsx": "preserve",
-    "esModuleInterop": true,
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
     "skipLibCheck": true,
-    "allowJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "baseUrl": ".",
-    "types": ["node"],
+    "jsx": "react-jsx",
+    "incremental": true,
+    "noUncheckedIndexedAccess": false,
+    "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./*"],
-      "@assets/*": ["./attached_assets/*"]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  }
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

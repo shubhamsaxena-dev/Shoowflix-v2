@@ -1,0 +1,30 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.trigger:hover { background: var(--color-surface-2); }
+.icon { width: 18px; height: 18px; flex-shrink: 0; }
+.label, .keys { display: none; }
+
+@media (min-width: 1024px) {
+  .trigger {
+    justify-content: flex-start;
+    width: 240px;
+    height: 38px;
+    padding-inline: var(--space-3) var(--space-2);
+    border: 1px solid var(--color-line-strong);
+    background: color-mix(in oklab, var(--color-surface) 70%, transparent);
+    color: var(--color-text-muted);
+  }
+  .trigger:hover { color: var(--color-text); border-color: var(--color-text-subtle); background: var(--color-surface); }
+  .icon { width: 16px; height: 16px; }
+  .label { display: inline; flex: 1; text-align: left; font-size: var(--text-sm); }
+  .keys { display: inline-flex; gap: 3px; }
+}

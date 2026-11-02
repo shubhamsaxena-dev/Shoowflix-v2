@@ -7,3 +7,7 @@ vite.config.ts.*
 .env
 .next
 .env.local
+# local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
