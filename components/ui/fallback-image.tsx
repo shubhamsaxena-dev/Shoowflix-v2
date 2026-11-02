@@ -19,7 +19,7 @@ type Props = ImageProps & {
  * next/image with a designed fallback and a load-in fade.
  * Handles images that finished (or failed) before hydration, where React never sees onLoad/onError.
  */
-export function FallbackImage({ fallback = null, fade = true, className, onLoad, onError, src, ...rest }: Props) {
+export function FallbackImage({ fallback = null, fade = true, className, onLoad, onError, src, alt, ...rest }: Props) {
   const key = typeof src === "string" ? src : "static";
   const [state, setState] = useState<{ key: string; status: "loading" | "loaded" | "failed" }>({
     key,
@@ -41,6 +41,7 @@ export function FallbackImage({ fallback = null, fade = true, className, onLoad,
     <Image
       ref={ref}
       src={src}
+      alt={alt}
       className={cx(fade && styles.fade, className)}
       data-loaded={status === "loaded" || undefined}
       onLoad={(e) => {
