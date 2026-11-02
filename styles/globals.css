@@ -25,6 +25,10 @@ html {
 
 body {
   min-height: 100dvh;
+  /* Column layout so <main> fills the space and the footer stays at the bottom of short or
+     still-loading pages (disclaimer, empty My List). */
+  display: flex;
+  flex-direction: column;
   font-optical-sizing: auto;
   /* Safety net: full-bleed sections must never cause sideways page scroll on phones. */
   overflow-x: clip;
@@ -167,4 +171,9 @@ p {
 
 .skip-link:focus {
   top: var(--space-3);
+}
+
+#main {
+  flex: 1 0 auto;
+  min-width: 0;
 }

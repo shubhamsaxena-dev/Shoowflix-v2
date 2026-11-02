@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
+    // Images load straight from their hosts (see lib/image-loader.ts); Vercel's optimizer
+    // returns 402 once the plan's source-image quota is used up.
+    loader: "custom",
+    loaderFile: "./lib/image-loader.ts",
     // YTS poster/backdrop hosts. Add hosts here rather than allowing "**".
     remotePatterns: [
       { protocol: "https", hostname: "yts.mx" },

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { preload } from "swr";
-import { ArrowLeft, Cast, Info, Keyboard, ListVideo, Maximize, Minimize, X } from "lucide-react";
+import { ArrowLeft, Cast, ExternalLink, Info, Keyboard, ListVideo, Maximize, Minimize, X } from "lucide-react";
 import { cx, streamScore, watchHref } from "@/lib/movie-utils";
 import type { Torrent } from "@/types/movie";
 import { fetcher } from "@/lib/swr";
@@ -18,6 +18,7 @@ import type { StageMovie, StageSource, StreamErrorKind, StreamStage } from "./ty
 import { formatClock, sourceLabel } from "./format";
 import { LoadingReel } from "./loading-reel";
 import { StreamError } from "./stream-error";
+import { webtorPageUrl } from "./webtor-sdk";
 import { QualityMenu } from "./quality-menu";
 import { SidePanel } from "./side-panel";
 import { InfoPanel } from "./info-panel";
@@ -501,6 +502,18 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
               {isFullscreen ? <Minimize size={18} aria-hidden /> : <Maximize size={18} aria-hidden />}
             </button>
           ) : null}
+          {/* Way out when the embed breaks: mobile browsers block third-party cookies, so Webtor's
+              iframe can fail its own CSRF check. On webtor.io itself the cookie is first-party. */}
+          <a
+            href={webtorPageUrl(source.hash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.tool}
+            title="Open this stream on webtor.io (use this if the player shows a CSRF or security error)"
+          >
+            <ExternalLink size={18} aria-hidden />
+            <span className={styles.toolLabel}>Open in Webtor</span>
+          </a>
           <button type="button" className={styles.tool} popoverTarget="cast-help" title="Watch on a TV">
             <Cast size={18} aria-hidden />
             <span className={styles.toolLabel}>Cast</span>

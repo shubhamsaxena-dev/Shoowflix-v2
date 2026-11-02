@@ -1,24 +1,21 @@
 /* Shoowflix service worker — hand-written, no build step.
  *
  *  /_next/static/*, fonts, /brand icons ...... cache-first (content-hashed / immutable)
- *  Posters & backdrops (YTS hosts,
- *    and /_next/image of them) ........ stale-while-revalidate, capped
+ *  Posters & backdrops ................ not intercepted: YTS sends no CORS headers, so the
+ *    worker could only cache opaque responses, which Safari pads to megabytes each and which
+ *    filled the quota on iOS. YTS's 30-day Cache-Control and the HTTP cache do the job.
  *  /api/*, /watch/*, auth, RSC ........ network-only (never cached)
  *  Page navigations ................... network, with a tiny offline page on failure
  *
  * Bump VERSION to invalidate every cache on the next activation.
  */
-const VERSION = "v2.2.0";
+const VERSION = "v2.3.0";
 
 /* Never run on localhost: dev-server chunk URLs aren't content-hashed, so cache-first
  * would pin stale CSS/JS across edits. A worker left behind by a local production run
  * clears its caches and unregisters itself on the next activation. */
 const IS_LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(self.location.hostname);
 const STATIC_CACHE = `shoowflix-static-${VERSION}`;
-const IMAGE_CACHE = `shoowflix-images-${VERSION}`;
-const IMAGE_LIMIT = 160;
-
-const IMAGE_HOSTS = /(^|\.)yts\.(gg|mx|lt|am|ag|rs)$/i;
 // /_vercel: Analytics and Speed Insights scripts and beacons must never be cached.
 const NETWORK_ONLY = [/^\/_vercel\//, /^\/api\//, /^\/watch(\/|$)/, /^\/signin/, /^\/signup/, /^\/register/, /^\/auth\//];
 
@@ -47,18 +44,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-function isImageRequest(url) {
-  if (IMAGE_HOSTS.test(url.hostname)) return true;
-  if (url.origin === self.location.origin && url.pathname === "/_next/image") {
-    try {
-      return IMAGE_HOSTS.test(new URL(url.searchParams.get("url") || "", self.location.origin).hostname);
-    } catch {
-      return false;
-    }
-  }
-  return false;
-}
-
 function isStaticAsset(url) {
   if (url.origin !== self.location.origin) return false;
   return (
@@ -68,12 +53,6 @@ function isStaticAsset(url) {
   );
 }
 
-async function trimCache(name, max) {
-  const cache = await caches.open(name);
-  const keys = await cache.keys();
-  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
-}
-
 async function cacheFirst(request) {
   const cache = await caches.open(STATIC_CACHE);
   const hit = await cache.match(request);
@@ -81,27 +60,6 @@ async function cacheFirst(request) {
   const res = await fetch(request);
   if (res.ok) cache.put(request, res.clone());
   return res;
-}
-
-async function staleWhileRevalidate(event) {
-  const { request } = event;
-  const cache = await caches.open(IMAGE_CACHE);
-  const hit = await cache.match(request);
-  const refresh = fetch(request)
-    .then(async (res) => {
-      // Opaque (no-cors) responses are fine to cache for <img>; skip errors.
-      if (res.ok || res.type === "opaque") {
-        await cache.put(request, res.clone());
-        await trimCache(IMAGE_CACHE, IMAGE_LIMIT);
-      }
-      return res;
-    })
-    .catch(() => undefined);
-  if (hit) {
-    event.waitUntil(refresh);
-    return hit;
-  }
-  return (await refresh) || Response.error();
 }
 
 async function navigate(event) {
@@ -128,8 +86,6 @@ self.addEventListener("fetch", (event) => {
 
   if (isStaticAsset(url)) {
     event.respondWith(cacheFirst(request));
-  } else if (request.destination === "image" && isImageRequest(url)) {
-    event.respondWith(staleWhileRevalidate(event));
   } else if (request.mode === "navigate" && url.origin === self.location.origin) {
     event.respondWith(navigate(event));
   }
