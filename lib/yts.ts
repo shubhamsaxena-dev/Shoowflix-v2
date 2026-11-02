@@ -13,7 +13,11 @@ import type {
  * so pages built with these are statically generated and revalidated (ISR).
  */
 
-const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT ?? "https://yts.lt/api/v2";
+const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT ?? "https://yts.gg/api/v2";
+
+/** YTS mirrors occasionally hang; never let one request stall a render/build worker. */
+const TIMEOUT_MS = 10_000;
+const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
 
 export const REVALIDATE = {
   list: 60 * 30, // 30 min — catalog rails
@@ -35,21 +39,38 @@ function toParams(filters: MovieFilters): URLSearchParams {
   return params;
 }
 
-async function ytsFetch<T>(path: string, init: { revalidate: number; tags: string[] }): Promise<T> {
-  const res = await fetch(`${API_ROOT}${path}`, {
-    next: { revalidate: init.revalidate, tags: init.tags },
-    headers: { accept: "application/json" },
-  });
-  if (!res.ok) throw new Error(`YTS ${path} failed: ${res.status}`);
-  return (await res.json()) as T;
+async function ytsFetch<T>(path: string, init: { revalidate: number; tags: string[] }, attempt = 0): Promise<T> {
+  try {
+    const res = await fetch(`${API_ROOT}${path}`, {
+      next: { revalidate: init.revalidate, tags: init.tags },
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error(`YTS ${path} failed: ${res.status}`);
+    return (await res.json()) as T;
+  } catch (error) {
+    if (attempt < 1) return ytsFetch<T>(path, init, attempt + 1);
+    throw error;
+  }
 }
 
-export async function listMovies(filters: MovieFilters = {}): Promise<YTSListMoviesResponse["data"]> {
+export async function listMovies(
+  filters: MovieFilters = {},
+): Promise<{ movie_count: number; limit: number; page_number: number; movies: YTSMovie[] }> {
   const params = toParams({ limit: 20, page: 1, sort_by: "date_added", order_by: "desc", ...filters });
-  const json = await ytsFetch<YTSListMoviesResponse>(`/list_movies.json?${params}`, {
-    revalidate: REVALIDATE.list,
-    tags: [TAGS.movies],
-  });
+  let json: YTSListMoviesResponse;
+  try {
+    json = await ytsFetch<YTSListMoviesResponse>(`/list_movies.json?${params}`, {
+      revalidate: REVALIDATE.list,
+      tags: [TAGS.movies],
+    });
+  } catch (error) {
+    // At runtime, throw so ISR keeps serving the last good page.
+    // At build time, degrade to an empty page instead of failing the deploy; ISR fills it in on the next revalidate.
+    if (!IS_BUILD) throw error;
+    console.warn(`[yts] build-time fetch failed, rendering empty list: ${(error as Error).message}`);
+    return { movie_count: 0, limit: Number(filters.limit ?? 20), page_number: Number(filters.page ?? 1), movies: [] };
+  }
   return {
     movie_count: json.data?.movie_count ?? 0,
     limit: json.data?.limit ?? 20,

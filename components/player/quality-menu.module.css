@@ -1,0 +1,104 @@
+.root {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 2.5rem;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--stage-line-strong);
+  color: var(--stage-text);
+  background: color-mix(in oklab, var(--stage-ink) 50%, transparent);
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  border-color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+}
+
+.current {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 2;
+  width: min(22rem, calc(100vw - 2 * var(--space-4)));
+  max-height: min(24rem, 70dvh);
+  overflow-y: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--stage-line-strong);
+  background: var(--stage-panel);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+}
+
+.heading {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--stage-text-subtle);
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1rem 1fr auto;
+  grid-template-areas:
+    "check label size"
+    "check label seeds";
+  align-items: center;
+  column-gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  color: var(--stage-text-muted);
+}
+.item:hover,
+.item:focus-visible {
+  background: var(--stage-hover);
+  color: var(--stage-text);
+  outline-offset: -2px;
+}
+.selected {
+  color: var(--stage-text);
+}
+
+.check {
+  grid-area: check;
+  color: var(--color-accent);
+}
+
+.label {
+  grid-area: label;
+  display: grid;
+  font-size: var(--text-sm);
+}
+
+.rec {
+  font-size: var(--text-2xs);
+  color: var(--color-accent);
+}
+
+.size,
+.seeds {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  text-align: right;
+}
+.size {
+  grid-area: size;
+}
+.seeds {
+  grid-area: seeds;
+  color: var(--color-signal);
+}

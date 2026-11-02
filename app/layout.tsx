@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/shell/site-header";
 import { SiteFooter } from "@/components/shell/site-footer";
 import { MobileTabBar } from "@/components/shell/mobile-tab-bar";
 import { WebVitals } from "@/components/perf/web-vitals";
+import { SwRegister } from "@/components/perf/sw-register";
 import { SITE_NAME, SITE_URL } from "@/lib/movie-utils";
 import "@/styles/globals.css";
 
@@ -29,7 +30,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true, "max-image-preview": "large" },
@@ -89,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MobileTabBar />
         </Providers>
         <WebVitals />
+        <SwRegister />
         <Analytics />
         <SpeedInsights />
       </body>

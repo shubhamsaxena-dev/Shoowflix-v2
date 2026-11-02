@@ -1,0 +1,87 @@
+.wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  overflow-y: auto;
+  background: color-mix(in oklab, var(--stage-ink) 90%, transparent);
+  color: var(--stage-text);
+}
+
+.card {
+  width: min(100%, 34rem);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--color-danger);
+}
+
+.title {
+  font-size: var(--text-3xl);
+}
+
+.body {
+  color: var(--stage-text-muted);
+  max-width: 60ch;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--stage-text-subtle);
+}
+.meta span {
+  color: var(--color-signal);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.altSeeds {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-signal);
+}
+
+.vpn {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--stage-line);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--color-signal) 6%, transparent);
+  font-size: var(--text-sm);
+  color: var(--stage-text-muted);
+}
+.vpn strong {
+  color: var(--stage-text);
+  font-weight: var(--weight-medium);
+}
+.vpnIcon {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-signal);
+}
+
+@media (max-width: 640px) {
+  .title {
+    font-size: var(--text-2xl);
+  }
+  .body {
+    font-size: var(--text-sm);
+  }
+}

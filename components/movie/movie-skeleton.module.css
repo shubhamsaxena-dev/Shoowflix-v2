@@ -1,0 +1,18 @@
+.poster {
+  display: block;
+  width: 100%;
+  box-shadow: none;
+}
+
+.line {
+  display: block;
+  height: 0.9em;
+  border-radius: var(--radius-xs);
+}
+
+.titleLine {
+  display: block;
+  width: min(280px, 60vw);
+  height: var(--text-3xl);
+  border-radius: var(--radius-sm);
+}

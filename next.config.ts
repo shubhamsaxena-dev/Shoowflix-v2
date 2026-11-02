@@ -15,8 +15,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.yts.lt" },
       { protocol: "https", hostname: "yts.am" },
       { protocol: "https", hostname: "*.yts.am" },
+      { protocol: "https", hostname: "yts.gg" },
+      { protocol: "https", hostname: "*.yts.gg" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
+    qualities: [60, 70, 75],
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 480, 640, 828, 1080, 1280, 1600, 1920],
     imageSizes: [96, 160, 230, 300],
@@ -47,7 +51,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/home", destination: "/", permanent: true },
-      { source: "/genre", destination: "/browse", permanent: true },
       { source: "/auth/signin", destination: "/signin", permanent: true },
     ];
   },

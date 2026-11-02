@@ -1,0 +1,59 @@
+.nav { display: none; }
+
+@media (min-width: 768px) {
+  .nav { display: block; }
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 36px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+}
+.link:hover { color: var(--color-text); }
+.link[aria-expanded="true"] { color: var(--color-text); background: var(--color-surface-2); }
+
+/* Current page: a small amber pilot light under the label */
+.link[aria-current="page"],
+.active { color: var(--color-text); }
+.link[aria-current="page"]::after,
+.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent);
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.link[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+.genreMenu { width: min(480px, calc(100vw - 16px)); }
+.genreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+}
+.genreItem { text-transform: capitalize; min-height: 36px; }

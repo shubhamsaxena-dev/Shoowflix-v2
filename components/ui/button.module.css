@@ -43,7 +43,7 @@
 .outline:hover:not(:disabled) { border-color: var(--color-text-muted); background: var(--color-surface); }
 
 .glass {
-  color: #fff;
+  color: rgb(255 255 255); /* glass always sits on imagery, so text stays light in both themes */
   background: rgb(255 255 255 / 0.12);
   border-color: rgb(255 255 255 / 0.16);
   backdrop-filter: blur(12px) saturate(140%);
@@ -52,7 +52,7 @@
 .glass:hover:not(:disabled) { background: rgb(255 255 255 / 0.2); }
 
 .danger { background: var(--color-danger-soft); color: var(--color-danger); }
-.danger:hover:not(:disabled) { background: var(--color-danger); color: #fff; }
+.danger:hover:not(:disabled) { background: var(--color-danger); color: var(--color-text-inverse); }
 
 .spinner {
   width: 1em; height: 1em;

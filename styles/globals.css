@@ -25,6 +25,8 @@ html {
 
 body {
   min-height: 100dvh;
+  /* Safety net: full-bleed sections must never cause sideways page scroll on phones. */
+  overflow-x: clip;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);

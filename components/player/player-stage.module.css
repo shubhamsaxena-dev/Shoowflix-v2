@@ -1,0 +1,318 @@
+/*
+ * The stage is always dark, whatever the site theme: a projection room.
+ * Local stage tokens derive from the design tokens + CSS keywords (no raw hex).
+ */
+.stage {
+  --stage-ink: black;
+  --stage-text: color-mix(in oklab, white 92%, var(--color-accent) 8%);
+  --stage-text-muted: color-mix(in oklab, var(--stage-text) 66%, var(--stage-ink));
+  --stage-text-subtle: color-mix(in oklab, var(--stage-text) 44%, var(--stage-ink));
+  --stage-line: color-mix(in oklab, var(--stage-text) 10%, transparent);
+  --stage-line-strong: color-mix(in oklab, var(--stage-text) 20%, transparent);
+  --stage-hover: color-mix(in oklab, var(--stage-text) 8%, transparent);
+  --stage-panel: color-mix(in oklab, var(--stage-ink) 78%, transparent);
+  --stage-bar: 4.25rem;
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-player);
+  display: grid;
+  grid-template-rows: var(--stage-bar) minmax(0, 1fr) auto;
+  background: var(--stage-ink);
+  color: var(--stage-text);
+  color-scheme: dark;
+  overflow: hidden;
+  isolation: isolate;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Ambient glow: the film's own backdrop, blurred far out behind the picture. */
+.ambient {
+  position: absolute;
+  inset: -12%;
+  z-index: -1;
+  opacity: 0.32;
+  filter: blur(72px) saturate(1.4);
+  transform: translateZ(0);
+  pointer-events: none;
+  transition: opacity 1.2s var(--ease-out);
+}
+.ambient img {
+  object-fit: cover;
+}
+.stage[data-stage="playing"] .ambient {
+  opacity: 0.2;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-inline: var(--gutter);
+  min-width: 0;
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+
+.back,
+.tool,
+.keys {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 2.5rem;
+  min-width: 2.5rem;
+  border-radius: var(--radius-pill);
+  color: var(--stage-text-muted);
+  transition: color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+.tool,
+.keys {
+  padding-inline: var(--space-3);
+}
+.back {
+  flex: none;
+  border: 1px solid var(--stage-line-strong);
+}
+.back:hover,
+.tool:hover,
+.keys:hover {
+  color: var(--stage-text);
+  background: var(--stage-hover);
+}
+.tool[aria-pressed="true"] {
+  color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+}
+
+.toolLabel {
+  font-size: var(--text-sm);
+}
+
+.heading {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.title {
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  display: flex;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--stage-text-subtle);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+}
+
+.hotzone {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--stage-bar);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---------- Picture ---------- */
+.theater {
+  grid-row: 2;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: var(--space-4);
+  container-type: size;
+}
+
+.frame {
+  position: relative;
+  width: min(100cqw, 100cqh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--stage-ink);
+  box-shadow:
+    0 0 0 1px var(--stage-line),
+    0 40px 120px -40px color-mix(in oklab, var(--color-accent) 22%, transparent);
+  transition: border-radius var(--duration-slow) var(--ease-out);
+}
+
+.resume {
+  position: absolute;
+  left: var(--space-4);
+  top: var(--space-4);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--stage-panel);
+  border: 1px solid var(--stage-line-strong);
+  backdrop-filter: blur(12px);
+  font-size: var(--text-sm);
+  animation: drop var(--duration-slow) var(--ease-out);
+}
+.resume button {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent-ink);
+  background: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Bottom bar ---------- */
+.bottombar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 3.25rem;
+  padding: var(--space-2) var(--gutter);
+  font-size: var(--text-xs);
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--stage-text-muted);
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.stage[data-stage="playing"] .dot {
+  background: var(--color-signal);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-signal) 25%, transparent);
+}
+.stage[data-stage="error"] .dot {
+  background: var(--color-danger);
+}
+
+.stats {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-signal);
+}
+.size {
+  color: var(--stage-text-subtle);
+}
+.time {
+  color: var(--stage-text);
+}
+
+/* ---------- Theater mode: chrome steps back after 3s idle ---------- */
+.idle {
+  cursor: none;
+}
+.idle .topbar {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+.idle .bottombar {
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+}
+.idle .hotzone {
+  pointer-events: auto;
+}
+.idle .frame {
+  border-radius: 0;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 720px) {
+  .stage {
+    --stage-bar: 3.5rem;
+  }
+  .toolLabel {
+    display: none;
+  }
+  .topbar {
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+  }
+  .title {
+    font-size: var(--text-lg);
+  }
+  .theater {
+    padding-inline: 0;
+  }
+  .frame {
+    border-radius: 0;
+  }
+  .bottombar {
+    padding-inline: var(--space-3);
+    gap: var(--space-2);
+  }
+  .stats {
+    justify-content: flex-end;
+  }
+  .size {
+    display: none;
+  }
+}
+
+/* Landscape phones: give the picture every pixel. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .stage {
+    grid-template-rows: 0 minmax(0, 1fr) 0;
+  }
+  .topbar,
+  .bottombar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background: color-mix(in oklab, var(--stage-ink) 70%, transparent);
+  }
+  .topbar {
+    top: 0;
+    height: 3.25rem;
+  }
+  .bottombar {
+    bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient {
+    transition: none;
+  }
+}
