@@ -13,7 +13,6 @@ import { fetcher } from "@/lib/swr";
 import { useContinueWatching } from "@/hooks/use-continue-watching";
 import { usePlayerFullscreen, usePlayerIdle } from "@/hooks/use-player-chrome";
 import { usePlayerShortcuts } from "@/hooks/use-player-shortcuts";
-import { usePlayerCast } from "@/hooks/use-player-cast";
 import type { PlayerSignal, WebtorController } from "./webtor-player";
 import type { StageMovie, StageSource, StreamErrorKind, StreamStage } from "./types";
 import { formatClock, sourceLabel } from "./format";
@@ -157,11 +156,9 @@ export interface PlayerStageProps {
   sources: StageSource[];
   initialHash: string;
   recommendedHash?: string;
-  /** Signed /cast/{id}?t=… link (minted on the server); the current quality is appended. */
-  castBase?: string;
 }
 
-export function PlayerStage({ movie, sources, initialHash, recommendedHash, castBase }: PlayerStageProps) {
+export function PlayerStage({ movie, sources, initialHash, recommendedHash }: PlayerStageProps) {
   const router = useRouter();
   const stageRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<WebtorController | null>(null);
@@ -169,25 +166,6 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash, cast
   const [hash, setHash] = useState(initialHash);
   const source = sources.find((s) => s.hash === hash) ?? sources[0]!;
   const [state, dispatch] = useReducer(reducer, 0, () => initState(0));
-
-  /* ---------- casting (Presentation API) ---------- */
-  const castUrl = castBase ? `${castBase}&q=${encodeURIComponent(source.quality)}` : null;
-  const cast = usePlayerCast({
-    castUrl,
-    onCastStart: () => controllerRef.current?.pause(),
-    onCastEnd: () => controllerRef.current?.play(),
-  });
-  const showCastHelp = useCallback(() => {
-    (document.getElementById("cast-help") as (HTMLElement & { showPopover?: () => void }) | null)?.showPopover?.();
-  }, []);
-  const onCastClick = useCallback(async () => {
-    if (cast.state === "casting") return cast.stop();
-    // Chrome's picker is open (its media panel) but nothing was chosen: explain instead of re-requesting.
-    if (cast.state === "connecting") return showCastHelp();
-    const result = await cast.start();
-    // No Presentation API (Firefox/Safari) or no devices found: explain the other ways to cast.
-    if (result === "unsupported" || result === "no-devices") showCastHelp();
-  }, [cast, showCastHelp]);
 
   const [panel, setPanel] = useState<Panel>(null);
   const [qualityOpen, setQualityOpen] = useState(false);
@@ -523,17 +501,9 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash, cast
               {isFullscreen ? <Minimize size={18} aria-hidden /> : <Maximize size={18} aria-hidden />}
             </button>
           ) : null}
-          <button
-            type="button"
-            className={styles.tool}
-            aria-pressed={cast.state === "casting"}
-            onClick={onCastClick}
-            title={cast.state === "casting" ? "Stop casting" : "Cast to a TV"}
-          >
+          <button type="button" className={styles.tool} popoverTarget="cast-help" title="Watch on a TV">
             <Cast size={18} aria-hidden />
-            <span className={styles.toolLabel}>
-              {cast.state === "casting" ? "Stop casting" : cast.state === "connecting" ? "Choose a TV…" : "Cast"}
-            </span>
+            <span className={styles.toolLabel}>Cast</span>
           </button>
           {/* Never auto-hides: the video is a cross-origin frame, so mouse moves over it can't wake the chrome. */}
           <Link href={movie.href} className={cx(styles.tool, styles.close)} title="Close player (Esc)">
@@ -543,27 +513,17 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash, cast
         </div>
       </header>
 
-      {cast.state === "casting" ? (
-        <div className={styles.castBanner} role="status">
-          <Cast size={18} aria-hidden />
-          <span>Casting to your TV. Playback here is paused.</span>
-          <button type="button" className={styles.tool} onClick={cast.stop}>
-            Stop casting
-          </button>
-        </div>
-      ) : null}
-
       <div id="cast-help" popover="auto" className={styles.castHelp}>
         <h2 className={styles.castTitle}>Watch on your TV</h2>
-        {cast.deviceError ? <p className={styles.castNote}>{cast.deviceError}</p> : null}
         <ol className={styles.castSteps}>
           <li>
-            Press <strong>Cast</strong>. Chrome opens its media panel (the music-note icon in the toolbar); pick your
-            TV under this tab.
+            Start the film, then press the <strong>Cast icon in the video&rsquo;s control bar</strong>. Your TV plays
+            the stream directly, so this computer can sleep.
           </li>
           <li>
-            TV not listed? On a Mac, turn on <strong>System Settings → Privacy &amp; Security → Local Network →
-            Google Chrome</strong> and restart Chrome. The TV and this computer must be on the same Wi-Fi.
+            No Cast icon? Chrome hasn&rsquo;t found your TV. On a Mac, turn on{" "}
+            <strong>System Settings → Privacy &amp; Security → Local Network → Google Chrome</strong> and restart
+            Chrome. The TV and this computer must be on the same Wi-Fi.
           </li>
           <li>
             Still nothing? Use Chrome&rsquo;s <strong>⋮ menu → Cast… → Cast tab</strong> to mirror this player; press F

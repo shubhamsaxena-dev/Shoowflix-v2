@@ -126,30 +126,6 @@
   opacity: 1;
 }
 
-/* ---------- Casting ---------- */
-.castBanner {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--stage-bar) + var(--space-4));
-  transform: translateX(-50%);
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  border-radius: var(--radius-pill);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--stage-line-strong);
-  color: var(--stage-text);
-  font-size: var(--text-sm);
-  box-shadow: var(--shadow-md);
-  white-space: nowrap;
-}
-.castBanner svg {
-  color: var(--color-signal);
-  flex: none;
-}
-
 /* ---------- Cast help (native popover) ---------- */
 .castHelp {
   /* The global reset zeroes margins; popovers centre via inset: 0 + margin: auto. */

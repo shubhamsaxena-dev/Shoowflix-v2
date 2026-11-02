@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { castPath, createCastToken } from "@/lib/cast-token";
 import { preconnect, prefetchDNS, preload } from "react-dom";
 import { getMovie } from "@/lib/yts";
 import { backdropSrc, buildMagnet, movieHref, pickStreamTorrent, posterSrc, sortTorrents } from "@/lib/movie-utils";
@@ -93,7 +92,6 @@ export default async function WatchPage({ params, searchParams }: { params: Para
       sources={sources}
       initialHash={picked.hash}
       recommendedHash={recommended?.hash}
-      castBase={castPath(movie.id, await createCastToken(movie.id))}
     />
   );
 }

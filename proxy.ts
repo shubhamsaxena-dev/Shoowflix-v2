@@ -22,8 +22,6 @@ const OPEN_PATHS = [
   /^\/manifest\.webmanifest$/,
   /^\/opengraph-image/,
   /^\/sw\.js$/,
-  // Chromecast receiver: opened in a cookie-less session; the page verifies a signed link instead.
-  /^\/cast\/\d+$/,
 ];
 
 /** Pages that need a signed-in user: the account area and the player. */
