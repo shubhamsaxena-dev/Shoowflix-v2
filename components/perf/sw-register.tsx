@@ -9,6 +9,8 @@ import { useEffect } from "react";
 export function SwRegister() {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
+    // Local production runs share the localhost origin with `next dev`; a worker there would pin dev assets.
+    if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;
 
     let idleId: number | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
