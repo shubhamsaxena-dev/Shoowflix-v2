@@ -18,6 +18,7 @@ import type { Cast, Torrent, YTSMovie } from "@/types/movie";
 import { CopyMagnet } from "./copy-magnet";
 import { ShareButton } from "./share-button";
 import styles from "./detail.module.css";
+import { WatchButton } from "@/components/account/watch-button";
 
 /* ------------------------------------------------------------------ */
 /* Header: backdrop (LCP) + poster + title + slate + actions           */
@@ -101,11 +102,11 @@ export function MovieHeader({ movie }: { movie: YTSMovie }) {
 
           <div className={styles.ctas}>
             {best ? (
-              <ButtonLink href={watchHref(movie.id)} size="lg" prefetch={false}>
+              <WatchButton movieId={movie.id} size="lg">
                 <Play aria-hidden fill="currentColor" />
                 Play
                 <span className={styles.ctaQuality}>{best.quality}</span>
-              </ButtonLink>
+              </WatchButton>
             ) : null}
             <WatchlistButton movieId={movie.id} variant="full" size="lg" title={movie.title} />
             <ShareButton title={movie.title} path={movieHref(movie)} text={movie.summary?.slice(0, 140)} />
@@ -261,11 +262,11 @@ function PrintRow({ torrent: t, movie }: { torrent: Torrent; movie: YTSMovie }) 
         </div>
       </dl>
       <div className={styles.printActions}>
-        <ButtonLink href={watchHref(movie.id, t.quality)} size="sm" prefetch={false}>
+        <WatchButton movieId={movie.id} quality={t.quality} size="sm">
           <Play aria-hidden fill="currentColor" />
           Stream
           <span className="visually-hidden"> in {t.quality}</span>
-        </ButtonLink>
+        </WatchButton>
         <CopyMagnet hash={t.hash} title={movie.title} quality={t.quality} />
       </div>
     </li>

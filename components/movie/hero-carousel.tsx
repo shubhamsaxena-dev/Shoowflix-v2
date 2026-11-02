@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { WatchlistButton } from "@/components/account/watchlist-button";
 import { cx, watchHref } from "@/lib/movie-utils";
 import styles from "./hero.module.css";
+import { WatchButton } from "@/components/account/watch-button";
 
 export interface HeroSlide {
   id: number;
@@ -136,10 +137,10 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           {slide.summary && <p className={styles.synopsis}>{slide.summary}</p>}
 
           <div className={styles.ctas}>
-            <ButtonLink href={watchHref(slide.id)} size="lg" prefetch={false}>
+            <WatchButton movieId={slide.id} size="lg">
               <Play aria-hidden fill="currentColor" />
               Play
-            </ButtonLink>
+            </WatchButton>
             <ButtonLink href={slide.href} variant="glass" size="lg">
               <Info aria-hidden />
               Details
