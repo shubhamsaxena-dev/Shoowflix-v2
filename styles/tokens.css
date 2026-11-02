@@ -96,9 +96,8 @@
 
   --gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
   --container-max: 1520px;
-  /* Side inset for full-bleed horizontal rails so the first card lines up with .container content.
-   * Uses % (resolved where it is used), not 100vw, so the scrollbar never shifts it. */
-  --rail-inset: max(var(--gutter), calc((100% - var(--container-max)) / 2 + var(--gutter)));
+  /* Width of .container's content box. Rails use it so cards stay inside the page column. */
+  --content-width: calc(min(100%, var(--container-max)) - 2 * var(--gutter));
   --header-height: 64px;
   --tabbar-height: 64px;
 

@@ -1,0 +1,177 @@
+.section {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-3xl);
+}
+
+.all {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-line-strong);
+  padding-bottom: 2px;
+  transition: color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.all:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+/* A genre card: name and one-line note top-left, a hand of three posters
+ * fanned out of the bottom-right corner. */
+.card {
+  position: relative;
+  display: block;
+  height: 168px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  transition: border-color var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .card {
+    height: 196px;
+  }
+}
+a.card:hover,
+a.card:focus-visible {
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-2);
+}
+
+.text {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: var(--space-1);
+  max-width: 62%;
+  padding: var(--space-4);
+}
+@media (min-width: 640px) {
+  .text {
+    padding: var(--space-5);
+  }
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .name {
+    font-size: 2.25rem;
+  }
+}
+a.card:hover .name,
+a.card:focus-visible .name {
+  color: var(--color-accent);
+}
+
+.note {
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  color: var(--color-text-muted);
+}
+@media (max-width: 639px) {
+  .note {
+    display: none;
+  }
+}
+
+/* ---------- Poster fan ---------- */
+.fan {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  height: 100%;
+  z-index: 1;
+}
+
+.poster {
+  --w: 72px;
+  position: absolute;
+  bottom: -18%;
+  width: var(--w);
+  aspect-ratio: var(--poster-ratio);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-3);
+  box-shadow: var(--shadow-md);
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+@media (min-width: 640px) {
+  .poster {
+    --w: 96px;
+  }
+}
+.poster img {
+  object-fit: cover;
+}
+
+/* Back to front: left card tilts out, right card sits on top. */
+.poster[data-i="0"] {
+  right: 46%;
+  transform: rotate(-12deg);
+  z-index: 1;
+}
+.poster[data-i="1"] {
+  right: 24%;
+  transform: rotate(-3deg) translateY(-6%);
+  z-index: 2;
+}
+.poster[data-i="2"] {
+  right: 4%;
+  transform: rotate(7deg);
+  z-index: 3;
+}
+
+/* Hovering the card spreads the hand. */
+a.card:hover .poster[data-i="0"],
+a.card:focus-visible .poster[data-i="0"] {
+  transform: rotate(-18deg) translate(-10%, -6%);
+}
+a.card:hover .poster[data-i="1"],
+a.card:focus-visible .poster[data-i="1"] {
+  transform: rotate(-4deg) translateY(-14%);
+}
+a.card:hover .poster[data-i="2"],
+a.card:focus-visible .poster[data-i="2"] {
+  transform: rotate(12deg) translate(8%, -4%);
+}
+
+/* ---------- Other genres ---------- */
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 32px;
+}

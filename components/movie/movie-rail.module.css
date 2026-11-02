@@ -84,7 +84,7 @@
   cursor: default;
 }
 
-/* Track bleeds to the viewport edge but its first card aligns with the container. */
+/* Track is bounded to the page column: cards start and clip at the container content edges. */
 .track {
   display: grid;
   grid-auto-flow: column;
@@ -93,8 +93,14 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--rail-inset);
-  padding-inline: var(--rail-inset);
+  /* 6px ring room inside the scroller so focus outlines aren't clipped; cards still align to the content edge. */
+  --ring-room: 6px;
+  width: calc(var(--content-width) + 2 * var(--ring-room));
+  margin-inline: auto;
+  padding-inline: var(--ring-room);
+  scroll-padding-inline: var(--ring-room);
+  padding-top: var(--ring-room);
+  margin-top: calc(-1 * var(--ring-room));
   padding-bottom: var(--space-2);
   scrollbar-width: none;
   outline: none;

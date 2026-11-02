@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { Hero } from "@/components/movie/hero";
 import { MovieRail } from "@/components/movie/movie-rail";
 import { RailSkeleton } from "@/components/movie/movie-skeleton";
-import { GenreTiles } from "@/components/discovery/genre-tiles";
+import { GenreShowcase, GenreShowcaseSkeleton } from "@/components/discovery/genre-showcase";
 import { listMovies, RAILS, type RailKey } from "@/lib/yts";
 import { cx, SITE_NAME } from "@/lib/movie-utils";
 import type { YTSMovie } from "@/types/movie";
@@ -71,7 +71,9 @@ export default async function HomePage() {
       </Suspense>
 
       <div className={cx("container", "cv-auto", styles.homeSection)}>
-        <GenreTiles />
+        <Suspense fallback={<GenreShowcaseSkeleton />}>
+          <GenreShowcase />
+        </Suspense>
       </div>
 
       <div className="cv-auto">
