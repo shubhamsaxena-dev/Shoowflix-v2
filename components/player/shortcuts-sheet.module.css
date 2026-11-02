@@ -70,7 +70,7 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--stage-line-strong);
   border-bottom-width: 2px;
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   color: var(--stage-text);
 }

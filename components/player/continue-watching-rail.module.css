@@ -85,6 +85,7 @@
 
 .title {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-lg);
   line-height: var(--leading-snug);
   overflow: hidden;
@@ -95,7 +96,6 @@
 .meta {
   display: flex;
   gap: var(--space-3);
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   color: var(--color-text-muted);

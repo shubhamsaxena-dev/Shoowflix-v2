@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -393,7 +393,7 @@ export function PlayerStage({ movie, sources, initialHash, recommendedHash }: Pl
     >
       {movie.backdrop ? (
         <div className={styles.ambient} aria-hidden>
-          <Image src={movie.backdrop} alt="" fill sizes="480px" quality={40} />
+          <FallbackImage src={movie.backdrop} alt="" fill sizes="480px" quality={40} />
         </div>
       ) : null}
 

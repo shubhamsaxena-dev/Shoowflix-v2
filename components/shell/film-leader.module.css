@@ -51,6 +51,7 @@
 .numeral {
   position: relative;
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: calc(var(--_s) * 0.52);
   line-height: 1;
   color: var(--color-text);

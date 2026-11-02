@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
@@ -163,7 +163,7 @@ export function CommandSearch({ open, onOpenChange }: { open: boolean; onOpenCha
                   >
                     <span className={styles.thumb}>
                       {m.small_cover_image || m.medium_cover_image ? (
-                        <Image
+                        <FallbackImage
                           src={m.medium_cover_image || m.small_cover_image}
                           alt=""
                           fill

@@ -107,7 +107,7 @@
 .sub {
   display: flex;
   gap: var(--space-3);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-2xs);
   color: var(--stage-text-subtle);
 }
@@ -175,7 +175,6 @@
   font-weight: var(--weight-semibold);
 }
 .mono {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -217,7 +216,6 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-5);
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   color: var(--color-signal);
 }

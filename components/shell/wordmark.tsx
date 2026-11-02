@@ -2,8 +2,8 @@ import { cx } from "@/lib/movie-utils";
 import styles from "./wordmark.module.css";
 
 /**
- * Typographic wordmark: Instrument Serif italic, the double "o" lit in marquee amber
- * like a pair of projector reels. Server component; purely presentational.
+ * Typographic wordmark in Big Shoulders black, the double "o" lit like a pair of
+ * projector reels. Server component; purely presentational.
  */
 export function Wordmark({ size = "md", className }: { size?: "sm" | "md" | "lg"; className?: string }) {
   return (

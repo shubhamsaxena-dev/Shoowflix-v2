@@ -25,7 +25,6 @@
 .identity { min-width: 0; }
 .name {
   font-size: var(--text-4xl);
-  font-style: italic;
 }
 .meta {
   display: flex;
@@ -61,6 +60,7 @@
 
 .statValue {
   font-family: var(--font-display);
+  font-weight: var(--weight-display);
   font-size: var(--text-4xl);
   line-height: 1;
   color: var(--color-text);
@@ -98,6 +98,7 @@
   .section { grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-10); }
 }
 
+.sectionHead { min-width: 0; }
 .sectionTitle { font-size: var(--text-2xl); }
 .sectionText { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
 

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
@@ -33,7 +33,8 @@ export function MovieHeader({ movie }: { movie: YTSMovie }) {
     <header className={styles.header} data-header-overlay="">
       <div className={styles.backdrop} aria-hidden>
         {backdrop && (
-          <Image
+          <FallbackImage
+            fade={false}
             src={backdrop}
             alt=""
             fill
@@ -50,7 +51,12 @@ export function MovieHeader({ movie }: { movie: YTSMovie }) {
 
       <div className={cx("container", styles.headerInner)}>
         <div className={styles.poster}>
-          <Image
+          <FallbackImage
+            fallback={
+              <span className={styles.noPoster} aria-hidden>
+                {movie.title}
+              </span>
+            }
             src={posterSrc(movie, "lg")}
             alt={`${movie.title} poster`}
             fill
@@ -158,7 +164,15 @@ export function CastList({ cast }: { cast?: Cast[] }) {
           <li key={`${c.imdb_code}-${c.character_name}`} className={styles.castItem}>
             <span className={styles.avatar}>
               {c.url_small_image ? (
-                <Image src={c.url_small_image} alt="" fill sizes="56px" quality={70} loading="lazy" />
+                <FallbackImage
+                  src={c.url_small_image}
+                  alt=""
+                  fill
+                  sizes="56px"
+                  quality={70}
+                  loading="lazy"
+                  fallback={<span aria-hidden>{initials(c.name)}</span>}
+                />
               ) : (
                 <span aria-hidden>{initials(c.name)}</span>
               )}

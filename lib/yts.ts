@@ -15,6 +15,29 @@ import type {
 
 const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT ?? "https://yts.gg/api/v2";
 
+/**
+ * YTS serves images from yts.gg/assets/*, which 301s to img.yts.gg. Point straight at the
+ * image host to skip a redirect hop on every poster.
+ */
+const IMAGE_FIELDS = [
+  "background_image",
+  "background_image_original",
+  "small_cover_image",
+  "medium_cover_image",
+  "large_cover_image",
+] as const;
+
+function directImage(url: string | undefined): string {
+  return url ? url.replace(/^https?:\/\/(?:www\.)?yts\.[a-z]+\/assets\//, (m) => m.replace(/\/\/(?:www\.)?yts\./, "//img.yts.")) : "";
+}
+
+export function normalizeMovie(movie: YTSMovie): YTSMovie {
+  const out = { ...movie };
+  for (const field of IMAGE_FIELDS) out[field] = directImage(movie[field]);
+  if (movie.cast) out.cast = movie.cast.map((c) => ({ ...c, url_small_image: directImage(c.url_small_image) || undefined }));
+  return out;
+}
+
 /** YTS mirrors occasionally hang; never let one request stall a render/build worker. */
 const TIMEOUT_MS = 10_000;
 const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
@@ -75,7 +98,7 @@ export async function listMovies(
     movie_count: json.data?.movie_count ?? 0,
     limit: json.data?.limit ?? 20,
     page_number: json.data?.page_number ?? 1,
-    movies: json.data?.movies ?? [],
+    movies: (json.data?.movies ?? []).map(normalizeMovie),
   };
 }
 
@@ -87,7 +110,7 @@ export async function getMovie(id: number): Promise<YTSMovie | null> {
       { revalidate: REVALIDATE.detail, tags: [TAGS.movie(id)] },
     );
     const movie = json.data?.movie;
-    return movie && movie.id ? movie : null;
+    return movie && movie.id ? normalizeMovie(movie) : null;
   } catch {
     return null;
   }
@@ -100,7 +123,7 @@ export async function getSuggestions(id: number): Promise<YTSMovie[]> {
       tags: [TAGS.movie(id)],
     });
     const movies = json.data?.movies ?? [];
-    if (movies.length) return movies;
+    if (movies.length) return movies.map(normalizeMovie);
   } catch {
     /* fall through to fallback */
   }

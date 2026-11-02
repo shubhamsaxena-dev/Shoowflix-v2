@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import type { ReactNode } from "react";
 import { listMovies } from "@/lib/yts";
 import type { YTSMovie } from "@/types/movie";
@@ -38,7 +38,7 @@ export async function AuthShell({ caption, sub, children }: { caption: ReactNode
                 {[...frames, ...frames].map((m, i) => (
                   <div key={i} className={styles.frame}>
                     {m ? (
-                      <Image
+                      <FallbackImage
                         src={m.medium_cover_image}
                         alt=""
                         fill

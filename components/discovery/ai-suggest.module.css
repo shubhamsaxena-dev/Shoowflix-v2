@@ -33,7 +33,6 @@
 
 .title {
   font-size: var(--text-4xl);
-  font-style: italic;
 }
 
 .lede {
@@ -102,10 +101,10 @@
 }
 
 .reason {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: var(--text-xl);
-  line-height: var(--leading-snug);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-lg);
+  line-height: 1.55;
   max-width: 60ch;
 }
 

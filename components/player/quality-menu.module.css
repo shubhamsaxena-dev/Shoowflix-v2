@@ -21,7 +21,7 @@
 }
 
 .current {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
@@ -90,7 +90,6 @@
 
 .size,
 .seeds {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   text-align: right;

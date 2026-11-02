@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Archivo, Big_Shoulders } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
@@ -11,13 +11,15 @@ import { SwRegister } from "@/components/perf/sw-register";
 import { SITE_NAME, SITE_URL } from "@/lib/movie-utils";
 import "@/styles/globals.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
-const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
-const instrumentSerif = Instrument_Serif({
+const archivo = Archivo({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-instrument-serif",
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+const bigShoulders = Big_Shoulders({
+  subsets: ["latin"],
+  variable: "--font-big-shoulders",
   display: "swap",
 });
 
@@ -48,8 +50,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b0c0f" },
-    { media: "(prefers-color-scheme: light)", color: "#f6f2ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#12152b" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f3f9" },
   ],
 };
 
@@ -68,14 +70,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+      className={`${archivo.variable} ${bigShoulders.variable}`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Resource hints: poster CDN is on the critical path for LCP */}
         {apiOrigin && <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />}
-        <link rel="dns-prefetch" href="https://img.yts.mx" />
+        <link rel="preconnect" href="https://img.yts.gg" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
       </head>
       <body>

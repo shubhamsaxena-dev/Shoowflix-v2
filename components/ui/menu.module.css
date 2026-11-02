@@ -48,7 +48,7 @@
 .item:focus .icon, .item:hover .icon { color: var(--color-text); }
 
 .text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hint { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--color-text-subtle); }
+.hint { font-variant-numeric: tabular-nums; font-size: var(--text-2xs); color: var(--color-text-subtle); }
 
 .danger, .danger .icon { color: var(--color-danger); }
 .danger:hover, .danger:focus { background: var(--color-danger-soft); }

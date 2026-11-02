@@ -16,7 +16,15 @@
 .count {
   margin-bottom: var(--space-5);
   font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  min-height: calc(1em * var(--leading-normal));
   color: var(--color-text-muted);
+}
+.countSkeleton {
+  display: inline-block;
+  width: 4.5rem;
+  height: 0.9em;
+  vertical-align: middle;
 }
 
 .grid {
@@ -30,8 +38,3 @@
 @media (min-width: 1024px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
 }
-
-.skeletonCard { display: flex; flex-direction: column; gap: var(--space-2); }
-.skeletonPoster { aspect-ratio: var(--poster-ratio); width: 100%; }
-.skeletonLine { height: 14px; width: 75%; }
-.skeletonLineShort { height: 12px; width: 40%; }

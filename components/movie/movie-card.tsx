@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { WatchlistButton } from "@/components/account/watchlist-button";
@@ -38,21 +38,21 @@ export function MovieCard({
       <div className={styles.frame}>
         <Link href={href} className={styles.link} prefetch={false}>
           <div className={styles.poster}>
-            {movie.medium_cover_image || movie.large_cover_image ? (
-              <Image
-                src={posterSrc(movie, "lg")}
-                alt=""
-                fill
-                sizes={sizes}
-                quality={70}
-                loading={priority ? "eager" : "lazy"}
-                className={styles.img}
-              />
-            ) : (
-              <span className={styles.noPoster} aria-hidden>
-                {movie.title}
-              </span>
-            )}
+            <FallbackImage
+              src={posterSrc(movie, "lg")}
+              alt=""
+              fill
+              sizes={sizes}
+              quality={70}
+              loading={priority ? "eager" : "lazy"}
+              className={styles.img}
+              fallback={
+                <span className={styles.noPoster} aria-hidden>
+                  <span className={styles.noPosterTitle}>{movie.title}</span>
+                  {movie.year ? <span className={styles.noPosterYear}>{movie.year}</span> : null}
+                </span>
+              }
+            />
             <div className={styles.reveal} aria-hidden>
               <dl className={styles.slate}>
                 {movie.year ? (

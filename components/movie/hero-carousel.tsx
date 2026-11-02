@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import { useEffect, useState } from "react";
 import { Info, Play } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
@@ -74,7 +74,8 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         {slides.map((s, i) =>
           primed.has(i) ? (
             <div key={s.id} className={cx(styles.backdrop, i === current && styles.active)}>
-              <Image
+              <FallbackImage
+                fade={i !== 0}
                 src={s.backdrop}
                 alt=""
                 fill

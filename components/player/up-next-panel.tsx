@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import useSWR from "swr";
 import { Star } from "lucide-react";
@@ -43,7 +43,7 @@ export function UpNextPanel({ movieId }: { movieId: number }) {
         <li key={m.id}>
           <Link href={watchHref(m.id)} className={styles.item} prefetch={false}>
             <span className={styles.poster}>
-              <Image src={posterSrc(m)} alt="" fill sizes="64px" quality={60} />
+              <FallbackImage src={posterSrc(m)} alt="" fill sizes="64px" quality={60} />
             </span>
             <span className={styles.text}>
               <span className={styles.title}>{m.title}</span>

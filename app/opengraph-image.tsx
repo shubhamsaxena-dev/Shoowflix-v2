@@ -6,11 +6,11 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 // ImageResponse can't read CSS variables; these mirror the "Projection" tokens.
-const INK = "#0b0c0f";
-const PAPER = "#f3efe6";
-const MUTED = "#a3a1a8";
-const AMBER = "#ffb238";
-const TEAL = "#5eead4";
+const INK = "#12152b";
+const PAPER = "#eef0fb";
+const MUTED = "#a5abcb";
+const AMBER = "#b7c4ff";
+const TEAL = "#7fe3c8";
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -25,7 +25,7 @@ export default function OpengraphImage() {
           padding: "72px 80px",
           background: `radial-gradient(90% 120% at 100% 0%, rgba(255,178,56,0.28) 0%, rgba(255,178,56,0) 55%), ${INK}`,
           color: PAPER,
-          fontFamily: "serif",
+          fontFamily: "sans-serif", fontWeight: 800,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 26, color: AMBER }}>

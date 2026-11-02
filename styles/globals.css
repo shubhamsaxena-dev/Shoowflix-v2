@@ -25,6 +25,7 @@ html {
 
 body {
   min-height: 100dvh;
+  font-optical-sizing: auto;
   /* Safety net: full-bleed sections must never cause sideways page scroll on phones. */
   overflow-x: clip;
   background: var(--color-bg);
@@ -81,7 +82,7 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: var(--weight-regular);
+  font-weight: var(--weight-display);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   text-wrap: balance;
@@ -135,16 +136,15 @@ ol[role="list"] {
 }
 
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   color: var(--color-text-muted);
 }
 
+/* Metadata figures: same family, aligned digits, slightly narrower. */
 .mono {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-stretch: 92%;
 }
 
 /* Skip off-screen rendering work for long below-the-fold sections */

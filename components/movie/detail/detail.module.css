@@ -55,6 +55,21 @@
 .poster img {
   object-fit: cover;
 }
+.noPoster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-5);
+  background:
+    radial-gradient(120% 80% at 100% 0%, var(--color-accent-soft), transparent 60%),
+    var(--color-surface-2);
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+}
 
 .headline {
   display: grid;
@@ -70,7 +85,7 @@
 }
 
 .kicker {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   color: var(--color-accent);
 }
@@ -87,7 +102,6 @@
   gap: var(--space-3) 0;
   padding-block: var(--space-3);
   border-block: 1px solid var(--color-line-strong);
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 .slate div {
@@ -139,7 +153,7 @@ a.genre:hover {
   margin-top: var(--space-2);
 }
 .ctaQuality {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-2xs);
   font-weight: var(--weight-medium);
   padding: 2px 6px;
@@ -187,9 +201,10 @@ a.genre:hover {
   line-height: 1.7;
 }
 .synopsisLead {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  line-height: 1.45;
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-lg);
+  line-height: 1.55;
   color: var(--color-text);
 }
 
@@ -215,7 +230,7 @@ a.genre:hover {
   border-radius: 50%;
   overflow: hidden;
   background: var(--color-surface-2);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
@@ -264,7 +279,7 @@ a.genre:hover {
   display: grid;
   place-items: center;
   width: 100%;
-  color: #f3efe6;
+  color: var(--stage-paper);
 }
 .trailerThumb {
   position: absolute;
@@ -302,7 +317,7 @@ a.genre:hover {
   position: absolute;
   left: var(--space-5);
   bottom: var(--space-4);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
 }
 
@@ -346,13 +361,13 @@ a.genre:hover {
   gap: 2px;
 }
 .printRes {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xl);
   font-weight: var(--weight-medium);
   letter-spacing: -0.02em;
 }
 .printType {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-2xs);
   color: var(--color-text-subtle);
 }
@@ -361,7 +376,6 @@ a.genre:hover {
   grid-area: stats;
   display: flex;
   gap: var(--space-4);
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -420,7 +434,7 @@ a.genre:hover {
   grid-template-columns: repeat(3, auto);
   justify-content: start;
   gap: var(--space-6);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-sm);
 }
 .facts div {

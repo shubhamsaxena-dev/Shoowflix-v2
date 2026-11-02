@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FallbackImage } from "@/components/ui/fallback-image";
 import Link from "next/link";
 import { Play, X } from "lucide-react";
 import { watchHref } from "@/lib/movie-utils";
@@ -32,7 +32,7 @@ export function ContinueWatchingRail() {
             <li key={item.movieId} className={styles.card}>
               <Link href={watchHref(item.movieId, item.quality)} className={styles.link} prefetch={false}>
                 <span className={styles.media}>
-                  {image ? <Image src={image} alt="" fill sizes="(max-width: 640px) 70vw, 320px" quality={60} /> : null}
+                  {image ? <FallbackImage src={image} alt="" fill sizes="(max-width: 640px) 70vw, 320px" quality={60} /> : null}
                   <span className={styles.play} aria-hidden>
                     <Play size={18} />
                   </span>
