@@ -13,7 +13,6 @@ A film discovery and streaming web app built on the Next.js App Router. Browse t
 - **Streaming:** custom player around Webtor with quality switching, resume, Continue Watching, keyboard shortcuts, and automatic recovery when a stream stalls.
 - **Accounts:** sign in with Google or email and password, My List, profile, and Continue Watching synced across devices.
 - **Access:** browsing is public; streaming needs a signed-in account and acceptance of the terms.
-- **Themes:** dark and light, remembered per device.
 - **AI picks:** describe a mood and get suggestions (uses OpenAI when configured).
 
 ## Tech stack

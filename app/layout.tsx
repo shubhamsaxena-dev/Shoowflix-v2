@@ -51,14 +51,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#12152b" },
-    { media: "(prefers-color-scheme: light)", color: "#f2f3f9" },
-  ],
+  themeColor: "#12152b",
 };
-
-/** Runs before paint so the stored theme never flashes. Kept tiny and inline on purpose. */
-const themeScript = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const apiOrigin = (() => {
@@ -76,7 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Resource hints: poster CDN is on the critical path for LCP */}
         {apiOrigin && <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />}
         <link rel="preconnect" href="https://img.yts.gg" />

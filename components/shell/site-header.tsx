@@ -3,7 +3,6 @@ import { HeaderFrame } from "./header-frame";
 import { Wordmark } from "./wordmark";
 import { PrimaryNav } from "./primary-nav";
 import { SearchTrigger } from "./search-trigger";
-import { ThemeToggle } from "./theme-toggle";
 import { UserNav } from "./user-nav";
 import styles from "./site-header.module.css";
 
@@ -27,7 +26,6 @@ export function SiteHeader() {
         <PrimaryNav />
         <div className={styles.actions}>
           <SearchTrigger />
-          <ThemeToggle />
           <UserNav />
         </div>
       </div>

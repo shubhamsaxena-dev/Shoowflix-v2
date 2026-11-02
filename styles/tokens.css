@@ -138,45 +138,6 @@
   color-scheme: dark;
 }
 
-/* ---------- Light theme ("Matinee") ---------- */
-:root[data-theme="light"] {
-  --color-bg: #f2f3f9;
-  --color-bg-elevated: #f8f9fd;
-  --color-surface: #ffffff;
-  --color-surface-2: #e8eaf4;
-  --color-surface-3: #dadeee;
-  --color-overlay: rgb(21 25 54 / 0.45);
-  --color-scrim: linear-gradient(180deg, rgb(242 243 249 / 0) 0%, rgb(242 243 249 / 0.7) 55%, #f2f3f9 100%);
-
-  --color-line: rgb(21 25 54 / 0.09);
-  --color-line-strong: rgb(21 25 54 / 0.18);
-
-  --color-text: #151936;
-  --color-text-muted: #4f5578;
-  --color-text-subtle: #7d83a3;
-  --color-text-inverse: #eef0fb;
-
-  --color-accent: #3b48c4;
-  --color-accent-hover: #2f3baa;
-  --color-accent-press: #273290;
-  --color-accent-ink: #ffffff;
-  --color-accent-soft: rgb(59 72 196 / 0.1);
-
-  --color-signal: #0b8a6c;
-  --color-signal-soft: rgb(11 138 108 / 0.12);
-
-  --color-danger: #c42d3c;
-  --color-danger-soft: rgb(196 45 60 / 0.1);
-  --color-rating: #a8740a;
-  --color-focus: #3b48c4;
-
-  --shadow-sm: 0 1px 2px rgb(21 25 54 / 0.08);
-  --shadow-md: 0 10px 28px -10px rgb(21 25 54 / 0.2);
-  --shadow-lg: 0 28px 70px -18px rgb(21 25 54 / 0.28);
-
-  color-scheme: light;
-}
-
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast: 0ms;

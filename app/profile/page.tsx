@@ -8,7 +8,6 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { NameForm } from "./name-form";
-import { ThemeSetting } from "./theme-setting";
 import styles from "./profile.module.css";
 
 export const metadata: Metadata = {
@@ -103,17 +102,6 @@ export default async function ProfilePage() {
           </div>
         </section>
 
-        <section className={styles.section} aria-labelledby="appearance-heading">
-          <div className={styles.sectionHead}>
-            <h2 id="appearance-heading" className={styles.sectionTitle}>
-              Appearance
-            </h2>
-            <p className={styles.sectionText}>Saved on this device.</p>
-          </div>
-          <div className={styles.sectionBody}>
-            <ThemeSetting />
-          </div>
-        </section>
 
         <section className={styles.section} aria-labelledby="session-heading">
           <div className={styles.sectionHead}>

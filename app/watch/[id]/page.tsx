@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { preconnect, prefetchDNS, preload } from "react-dom";
 import { getMovie } from "@/lib/yts";
 import { backdropSrc, buildMagnet, movieHref, pickStreamTorrent, posterSrc, sortTorrents } from "@/lib/movie-utils";
-import { PlayerStage } from "@/components/player/player-stage";
+import { WatchPlayer } from "@/components/player/embed-gate";
 import { NoStream } from "@/components/player/no-stream";
 import type { StageMovie, StageSource } from "@/components/player/types";
 import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
@@ -86,7 +86,7 @@ export default async function WatchPage({ params, searchParams }: { params: Para
   }));
 
   return (
-    <PlayerStage
+    <WatchPlayer
       key={movie.id}
       movie={stageMovie}
       sources={sources}

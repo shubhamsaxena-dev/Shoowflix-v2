@@ -15,7 +15,7 @@ No Tailwind, no Radix, no shadcn. Old Pages Router code is readable via `git sho
 | Owner | Paths |
 |---|---|
 | Foundation (done) | `app/layout.tsx`, `app/providers.tsx`, `styles/*`, `lib/yts.ts`, `lib/auth.ts`, `lib/prisma.ts`, `lib/swr.ts`, `lib/movie-utils.ts`, `types/*`, `prisma/schema.prisma`, `next.config.ts`, `tsconfig.json`, `package.json` |
-| **Agent A — Design system, shell, accounts** | `components/ui/**`, `components/shell/**`, `components/account/**`, `app/(auth)/**`, `app/profile/**`, `app/my-list/**`, `app/not-found.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/loading.tsx`, `proxy.ts`, `hooks/use-watchlist.ts`, `hooks/use-theme.ts`, `hooks/use-media-query.ts` |
+| **Agent A — Design system, shell, accounts** | `components/ui/**`, `components/shell/**`, `components/account/**`, `app/(auth)/**`, `app/profile/**`, `app/my-list/**`, `app/not-found.tsx`, `app/error.tsx`, `app/global-error.tsx`, `app/loading.tsx`, `proxy.ts`, `hooks/use-watchlist.ts`, `hooks/use-media-query.ts` |
 | **Agent B — Discovery & content (SSG/ISR)** | `app/page.tsx`, `app/browse/**`, `app/genre/**`, `app/search/**`, `app/movie/**`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, `components/movie/**`, `components/discovery/**`, `hooks/use-movies.ts`, `hooks/use-in-view.ts` |
 | **Agent C — Player, API, performance** | `app/watch/**`, `app/api/**` (except `auth/[...nextauth]` which exists), `components/player/**`, `components/perf/**`, `hooks/use-continue-watching.ts`, `hooks/use-player*.ts`, `app/manifest.ts`, `public/sw.js`, `lib/server/**` |
 
