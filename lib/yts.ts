@@ -39,6 +39,16 @@ export function normalizeMovie(movie: YTSMovie): YTSMovie {
   return out;
 }
 
+/**
+ * Public pages and APIs never carry torrent data (hashes, .torrent URLs). Lists, rails,
+ * search and suggestions don't need it, and anything handed to a client component ends up
+ * in the page's RSC payload. Only getMovie() keeps torrents, for the server-rendered quality
+ * list and the gated /watch page.
+ */
+export function withoutTorrents(movie: YTSMovie): YTSMovie {
+  return { ...movie, torrents: [] };
+}
+
 /** YTS mirrors occasionally hang; never let one request stall a render/build worker. */
 const TIMEOUT_MS = 10_000;
 const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
@@ -99,7 +109,7 @@ export async function listMovies(
     movie_count: json.data?.movie_count ?? 0,
     limit: json.data?.limit ?? 20,
     page_number: json.data?.page_number ?? 1,
-    movies: (json.data?.movies ?? []).map(normalizeMovie),
+    movies: (json.data?.movies ?? []).map((m) => withoutTorrents(normalizeMovie(m))),
   };
 }
 
@@ -124,7 +134,7 @@ export async function getSuggestions(id: number): Promise<YTSMovie[]> {
       tags: [TAGS.movie(id)],
     });
     const movies = json.data?.movies ?? [];
-    if (movies.length) return movies.map(normalizeMovie);
+    if (movies.length) return movies.map((m) => withoutTorrents(normalizeMovie(m)));
   } catch {
     /* fall through to fallback */
   }

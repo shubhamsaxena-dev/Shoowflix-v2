@@ -46,16 +46,26 @@ function toCard(row: {
   };
 }
 
-export async function saveSnapshot(movie: YTSMovie): Promise<void> {
-  const data = toRow(movie);
-  await prisma.movieSnapshot.upsert({
-    where: { movieId: movie.id },
-    update: data,
-    create: { movieId: movie.id, ...data },
-  });
+/** Store a card snapshot. Best effort: returns false instead of throwing. */
+export async function saveSnapshot(movie: YTSMovie): Promise<boolean> {
+  try {
+    const data = toRow(movie);
+    await prisma.movieSnapshot.upsert({
+      where: { movieId: movie.id },
+      update: data,
+      create: { movieId: movie.id, ...data },
+    });
+    return true;
+  } catch (error) {
+    console.error("[movie-snapshot] save failed", movie.id, error);
+    return false;
+  }
 }
 
-/** Best effort: fetch (from the fetch cache when warm) and store. Never throws. */
+/**
+ * Fetch one film (served from the fetch cache when warm) and try to store its snapshot.
+ * The card is returned even if storing fails, so the page still renders. Never throws.
+ */
 export async function snapshotById(movieId: number): Promise<CardMovie | null> {
   try {
     const movie = await getMovie(movieId);
@@ -63,8 +73,18 @@ export async function snapshotById(movieId: number): Promise<CardMovie | null> {
     await saveSnapshot(movie);
     return toCard({ movieId: movie.id, ...toRow(movie) });
   } catch (error) {
-    console.error("[movie-snapshot]", movieId, error);
+    console.error("[movie-snapshot] fetch failed", movieId, error);
     return null;
+  }
+}
+
+/** Stored snapshots for `ids`; an empty list if the store can't be read (then everything falls back to YTS). */
+async function readSnapshots(ids: number[]) {
+  try {
+    return await prisma.movieSnapshot.findMany({ where: { movieId: { in: ids } } });
+  } catch (error) {
+    console.error("[movie-snapshot] read failed, falling back to YTS", error);
+    return [];
   }
 }
 
@@ -82,10 +102,14 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
   return out;
 }
 
-/** Cards for `ids`, in the same order. Missing snapshots are backfilled a few at a time. */
+/**
+ * Cards for `ids`, in the same order. Snapshots come from one query; any film without one
+ * (saved before snapshots existed, or the store is unavailable) is fetched from YTS at most
+ * 4 at a time and stored for next time.
+ */
 export async function getCards(ids: number[]): Promise<CardMovie[]> {
   if (!ids.length) return [];
-  const rows = await prisma.movieSnapshot.findMany({ where: { movieId: { in: ids } } });
+  const rows = await readSnapshots(ids);
   const byId = new Map<number, CardMovie>(rows.map((r) => [r.movieId, toCard(r)]));
 
   const missing = ids.filter((id) => !byId.has(id));

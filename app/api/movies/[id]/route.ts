@@ -1,4 +1,4 @@
-import { getMovie } from "@/lib/yts";
+import { getMovie, withoutTorrents } from "@/lib/yts";
 import { CACHE, json, badRequest, notFound } from "@/lib/server/http";
 import { movieIdSchema } from "@/lib/server/schemas";
 
@@ -8,5 +8,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const movie = await getMovie(parsed.data);
   if (!movie) return notFound("Movie");
-  return json({ movie }, { cache: CACHE.public });
+  // Public endpoint: torrent hashes and .torrent URLs only exist behind the /watch gates.
+  return json({ movie: withoutTorrents(movie) }, { cache: CACHE.public });
 }

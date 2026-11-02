@@ -5,7 +5,7 @@ import { safeReturnTo } from "@/lib/disclaimer";
 import styles from "./disclaimer.module.css";
 
 export const metadata: Metadata = {
-  title: "Before you start",
+  title: "Before you watch",
   robots: { index: false, follow: false },
 };
 
@@ -31,18 +31,21 @@ export default async function DisclaimerPage({ searchParams }: { searchParams: S
               Shoowflix needs your agreement
             </h1>
             <div className={styles.body}>
-              <p>You can only browse and stream on Shoowflix after accepting the terms. Nothing has been saved.</p>
+              <p>You can keep browsing, but streaming on Shoowflix needs you to accept the terms. Nothing has been saved.</p>
             </div>
             <div className={styles.actions}>
               <Link href={`/disclaimer?returnTo=${encodeURIComponent(returnTo)}`} className={buttonClass({ size: "lg" })}>
                 Review the terms
+              </Link>
+              <Link href="/" className={buttonClass({ variant: "ghost", size: "lg" })}>
+                Keep browsing
               </Link>
             </div>
           </>
         ) : (
           <>
             <h1 id="disclaimer-title" className={styles.title}>
-              Before you start
+              Before you watch
             </h1>
             <div className={styles.body}>
               <p>
@@ -57,8 +60,8 @@ export default async function DisclaimerPage({ searchParams }: { searchParams: S
                 <li>Nothing here is endorsed by, or affiliated with, any studio or streaming service.</li>
               </ul>
               <p className={styles.confirm}>
-                By continuing you confirm you&rsquo;ve read this, understand it&rsquo;s an educational project, and accept
-                these terms. We&rsquo;ll remember your choice on this device for 24 hours.
+                Streaming starts after you agree. By continuing you confirm you&rsquo;ve read this, understand it&rsquo;s an
+                educational project, and accept these terms. We&rsquo;ll remember your choice on this device for 24 hours.
               </p>
             </div>
             <form method="post" action="/api/disclaimer" className={styles.actions}>

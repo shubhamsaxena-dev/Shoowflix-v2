@@ -3,52 +3,40 @@ import { getToken } from "next-auth/jwt";
 import { DISCLAIMER_COOKIE, isAcceptanceValid } from "@/lib/disclaimer";
 
 /**
- * Next 16 proxy (formerly middleware). Runs on the server before every matched request.
+ * Next 16 proxy (formerly middleware). Runs only on the routes in `config.matcher`.
  *
- * 1. Disclaimer gate — nothing on the site is served until the visitor has accepted the terms.
- *    Acceptance is a signed HttpOnly cookie set by POST /api/disclaimer, so it can't be skipped
- *    by removing a modal, disabling JavaScript, calling the API directly, or hand-writing a cookie.
- * 2. Signed-in only — account pages and watching films. Signed-out visitors go to /signin with a
- *    callbackUrl back to where they were.
+ * Browsing is public and indexable: film pages, lists and the public APIs carry no torrent
+ * data (see withoutTorrents in lib/yts.ts). Streaming is what the terms are about, so:
+ *
+ * 1. /watch/* needs the disclaimer: a signed, HttpOnly, versioned cookie set by
+ *    POST /api/disclaimer. It can't be skipped by removing UI, disabling JS or writing
+ *    a cookie by hand. Magnets and hashes only exist on this route.
+ * 2. /watch/*, /profile and /my-list need a signed-in user (the pages check auth() too).
  */
 
-/** Reachable without accepting: the gate itself, auth callbacks, and files crawlers/OS fetch. */
-const OPEN_PATHS = [
-  /^\/disclaimer$/,
-  /^\/api\/disclaimer$/,
-  /^\/api\/auth\//,
-  /^\/robots\.txt$/,
-  /^\/sitemap\.xml$/,
-  /^\/manifest\.webmanifest$/,
-  /^\/opengraph-image/,
-  /^\/sw\.js$/,
-];
-
-/** Pages that need a signed-in user: the account area and the player. */
-const SIGNED_IN_PATHS = /^\/(profile|my-list|watch)(\/|$)/;
+const NEEDS_TERMS = /^\/watch(\/|$)/;
+const NEEDS_SIGN_IN = /^\/(watch|profile|my-list)(\/|$)/;
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+  const back = pathname + search;
 
-  if (!OPEN_PATHS.some((re) => re.test(pathname))) {
+  if (NEEDS_TERMS.test(pathname)) {
     const accepted = await isAcceptanceValid(request.cookies.get(DISCLAIMER_COOKIE)?.value);
     if (!accepted) {
-      if (pathname.startsWith("/api/")) {
-        return NextResponse.json({ message: "Accept the Shoowflix terms at /disclaimer first." }, { status: 403 });
-      }
       const url = request.nextUrl.clone();
       url.pathname = "/disclaimer";
-      url.search = `?returnTo=${encodeURIComponent(pathname + search)}`;
+      url.search = `?returnTo=${encodeURIComponent(back)}`;
       return NextResponse.redirect(url);
     }
   }
 
-  if (SIGNED_IN_PATHS.test(pathname)) {
+  if (NEEDS_SIGN_IN.test(pathname)) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token) {
       const url = request.nextUrl.clone();
       url.pathname = "/signin";
-      url.search = `?callbackUrl=${encodeURIComponent(pathname + search)}`;
+      url.search = `?callbackUrl=${encodeURIComponent(back)}`;
       return NextResponse.redirect(url);
     }
   }
@@ -57,6 +45,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next internals and static files in /public (images, icons, fonts).
-  matcher: ["/((?!_next/|brand/|favicon\\.ico|.*\\.(?:png|jpg|jpeg|webp|avif|svg|ico|woff2?)$).*)"],
+  matcher: ["/watch/:path*", "/profile/:path*", "/my-list/:path*"],
 };

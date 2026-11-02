@@ -15,7 +15,6 @@ import {
   watchHref,
 } from "@/lib/movie-utils";
 import type { Cast, Torrent, YTSMovie } from "@/types/movie";
-import { CopyMagnet } from "./copy-magnet";
 import { ShareButton } from "./share-button";
 import styles from "./detail.module.css";
 import { WatchButton } from "@/components/account/watch-button";
@@ -221,8 +220,9 @@ export function StreamPicker({ movie }: { movie: YTSMovie }) {
       </div>
       {torrents.length ? (
         <ul role="list" className={styles.prints}>
-          {torrents.map((t) => (
-            <PrintRow key={t.hash} torrent={t} movie={movie} />
+          {torrents.map((t, i) => (
+            // Not keyed by hash: React keys are serialized into the RSC payload, and hashes stay behind /watch.
+            <PrintRow key={`${t.quality}-${t.type}-${i}`} torrent={t} movie={movie} />
           ))}
         </ul>
       ) : (
@@ -267,7 +267,6 @@ function PrintRow({ torrent: t, movie }: { torrent: Torrent; movie: YTSMovie }) 
           Stream
           <span className="visually-hidden"> in {t.quality}</span>
         </WatchButton>
-        <CopyMagnet hash={t.hash} title={movie.title} quality={t.quality} />
       </div>
     </li>
   );
