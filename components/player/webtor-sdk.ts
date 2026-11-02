@@ -141,3 +141,8 @@ export function loadWebtorSdk(timeoutMs = 20_000): Promise<WebtorSdk> {
 
   return sdkPromise;
 }
+
+/** The stream's own page on webtor.io, where its cookies are first-party (see the player's "Open in Webtor"). */
+export function webtorPageUrl(hash: string): string {
+  return `https://webtor.io/${hash.toLowerCase()}`;
+}

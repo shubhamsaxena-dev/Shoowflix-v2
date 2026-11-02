@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { CircleAlert, RotateCcw, ShieldCheck } from "lucide-react";
+import { CircleAlert, ExternalLink, RotateCcw, ShieldCheck } from "lucide-react";
+import { webtorPageUrl } from "./webtor-sdk";
 import { Button, buttonClass } from "@/components/ui/button";
 import type { StageSource, StreamErrorKind } from "./types";
 import { sourceLabel } from "./format";
@@ -64,6 +65,14 @@ export function StreamError({
               <span className={styles.altSeeds}>{alternative.seeds} seeds</span>
             </Button>
           ) : null}
+          <a
+            href={webtorPageUrl(current.hash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClass({ variant: "ghost" })}
+          >
+            <ExternalLink size={16} aria-hidden /> Open in Webtor
+          </a>
           <Link href={backHref} className={buttonClass({ variant: "ghost" })}>
             Back to the film
           </Link>
