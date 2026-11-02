@@ -7,7 +7,7 @@ import { backdropSrc, buildMagnet, movieHref, pickStreamTorrent, posterSrc, sort
 import { WatchPlayer } from "@/components/player/embed-gate";
 import { NoStream } from "@/components/player/no-stream";
 import type { StageMovie, StageSource } from "@/components/player/types";
-import { WEBTOR_ORIGIN, WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
+import { WEBTOR_SDK_INTEGRITY, WEBTOR_SDK_URL } from "@/components/player/webtor-sdk";
 
 type Params = Promise<{ id: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -33,8 +33,8 @@ export default async function WatchPage({ params, searchParams }: { params: Para
   // The SDK download starts while the HTML is still streaming, not after hydration + the player chunk.
   preload(WEBTOR_SDK_URL, { as: "script", crossOrigin: "anonymous", integrity: WEBTOR_SDK_INTEGRITY, fetchPriority: "high" });
   preconnect("https://cdn.jsdelivr.net", { crossOrigin: "anonymous" });
-  preconnect(WEBTOR_ORIGIN);
-  prefetchDNS(WEBTOR_ORIGIN);
+  preconnect("https://webtor.io");
+  prefetchDNS("https://webtor.io");
 
   const [{ id: rawId }, query, session] = await Promise.all([params, searchParams, auth()]);
   // Watching is for signed-in members. proxy.ts redirects first; this keeps the page safe on its own.
