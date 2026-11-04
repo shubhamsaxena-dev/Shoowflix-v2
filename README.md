@@ -38,6 +38,7 @@ cd shoowflix
 npm install                  # also runs `prisma generate`
 cp .env.example .env.local   # then fill in the values
 npm run db:push              # create collections and indexes
+npm run db:otp-index         # expire old password reset codes automatically
 npm run dev                  # http://localhost:3000
 ```
 
@@ -51,8 +52,9 @@ All variables live in `.env.local`. See [`.env.example`](.env.example) for the t
 | `NEXTAUTH_URL` | Yes | Base URL of the site |
 | `NEXTAUTH_SECRET` | Yes | Signs sessions and the terms cookie. Generate with `openssl rand -base64 32` |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | For Google sign-in | Google OAuth credentials |
-| `NEXT_PUBLIC_API_ROOT` | Yes | YTS API root, for example `https://yts.gg/api/v2` |
+| `NEXT_PUBLIC_API_ROOT` | No | YTS API root, or a comma-separated list of mirrors tried in order. Defaults to `movies-api.accel.li` (official), then `yts.gg`, `yts.mx`, `yts.lt` |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Public URL for canonical links, sitemap and Open Graph |
+| `RESEND_API_KEY`, `EMAIL_FROM` | For password reset | Resend key (send-only is enough) and a sender on a domain verified in Resend. Without a key in development, reset codes are printed to the server console |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | No | Enables model-based AI picks |
 
 ## Scripts
@@ -65,6 +67,7 @@ All variables live in `.env.local`. See [`.env.example`](.env.example) for the t
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript check |
 | `npm run db:push` | Sync the Prisma schema to MongoDB (reads `.env.local`) |
+| `npm run db:otp-index` | Create the TTL index that deletes expired password reset codes (Prisma can't declare it). Safe to re-run |
 | `npm run db:studio` | Open Prisma Studio (reads `.env.local`) |
 
 ## Project structure
@@ -124,7 +127,7 @@ More detail on the original architecture and component contracts is in [`docs/AR
 
 1. Set the environment variables in your host (on Vercel: Project Settings → Environment Variables). Use a new `NEXTAUTH_SECRET` for production.
 2. Add `{your-domain}/api/auth/callback/google` as an authorised redirect URI in Google Cloud.
-3. Run `npm run db:push` against the production database once, and again after schema changes.
+3. Run `npm run db:push` against the production database once, and again after schema changes. Run `npm run db:otp-index` once too.
 4. Deploy. The build pre-renders the home, genre and top film pages; if YTS is unreachable during the build, those pages render empty and fill in on their next revalidation.
 
 ## Credits

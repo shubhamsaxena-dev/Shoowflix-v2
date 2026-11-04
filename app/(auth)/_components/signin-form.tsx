@@ -101,7 +101,18 @@ export function SignInForm({ callbackUrl, initialError }: { callbackUrl: string;
             }}
           />
         </Field>
-        <Field label="Password" error={errors.password}>
+        <Field
+          label="Password"
+          error={errors.password}
+          labelAside={
+            <Link
+              href={email.trim() ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : "/forgot-password"}
+              className={styles.forgot}
+            >
+              Forgot password?
+            </Link>
+          }
+        >
           <PasswordInput
             name="password"
             autoComplete="current-password"

@@ -55,14 +55,6 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const apiOrigin = (() => {
-    try {
-      return new URL(process.env.NEXT_PUBLIC_API_ROOT ?? "").origin;
-    } catch {
-      return null;
-    }
-  })();
-
   return (
     <html
       lang="en"
@@ -71,11 +63,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         {/* Resource hints: poster CDN is on the critical path for LCP */}
-        {apiOrigin && <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />}
         <link rel="preconnect" href="https://img.yts.gg" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
       </head>
-      <body>
+      {/* Extensions (ColorZilla, Grammarly…) inject attributes on <body> before hydration. */}
+      <body suppressHydrationWarning>
         <a href="#main" className="skip-link">
           Skip to content
         </a>

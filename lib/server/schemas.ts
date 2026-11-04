@@ -40,10 +40,26 @@ export const watchProgressSchema = z.object({
   updatedAt: z.string().optional(),
 });
 
+const emailField = z.email("Enter a valid email address.").max(254).transform((e) => e.toLowerCase());
+const passwordField = z.string().min(8, "Password must be at least 8 characters.").max(128);
+
 export const registerSchema = z.object({
   name: z.string().trim().min(1, "Enter your name.").max(80),
-  email: z.email("Enter a valid email address.").max(254).transform((e) => e.toLowerCase()),
-  password: z.string().min(8, "Password must be at least 8 characters.").max(128),
+  email: emailField,
+  password: passwordField,
+});
+
+export const forgotPasswordSchema = z.object({ email: z.string().trim().pipe(emailField) });
+
+export const verifyOtpSchema = z.object({
+  email: z.string().trim().pipe(emailField),
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code from the email."),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().trim().pipe(emailField),
+  token: z.string().min(20).max(100),
+  password: passwordField,
 });
 
 export const aiSuggestSchema = z.object({

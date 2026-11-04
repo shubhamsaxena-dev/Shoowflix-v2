@@ -203,3 +203,81 @@
 @media (prefers-reduced-motion: reduce) {
   .reel { animation: none; }
 }
+
+/* Password reset */
+.formSpaced { margin-top: var(--space-8); }
+
+.notice {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  overflow-wrap: anywhere;
+}
+.notice svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; color: var(--color-success); }
+
+.textButton {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+}
+.textButton:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+.textButton:disabled { color: var(--color-text-subtle); cursor: default; }
+
+.forgot {
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+}
+.forgot:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.pin {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.pinBox {
+  width: 100%;
+  min-width: 0;
+  height: 56px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-surface, transparent);
+  color: var(--color-text);
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  caret-color: var(--color-accent);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.pinBox:focus-visible,
+.pinBox:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+.pinInvalid { border-color: var(--color-danger); }
+.pinBox:disabled { opacity: 0.6; }
+
+.pinMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+.pinError { color: var(--color-danger); }
+
+.steps {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
