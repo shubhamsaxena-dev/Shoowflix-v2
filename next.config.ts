@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.yts.am" },
       { protocol: "https", hostname: "yts.gg" },
       { protocol: "https", hostname: "*.yts.gg" },
+      { protocol: "https", hostname: "*.accel.li" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "i.ytimg.com" },
     ],

@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import type {
   YTSListMoviesResponse,
   YTSMovie,
@@ -9,11 +10,28 @@ import type {
 /**
  * Server-side YTS data layer.
  * Used by Server Components (SSG/ISR) and by Route Handlers (/api/*).
- * Every call goes through Next's fetch cache with time-based revalidation + tags,
+ * Every call goes through Next's data cache with time-based revalidation + tags (see ytsFetch),
  * so pages built with these are statically generated and revalidated (ISR).
  */
 
-const API_ROOT = process.env.NEXT_PUBLIC_API_ROOT ?? "https://yts.gg/api/v2";
+/**
+ * YTS mirrors, tried in order until one answers. NEXT_PUBLIC_API_ROOT takes a comma-separated
+ * list; mirrors come and go (and some ISPs reset connections to some of them), so keep a few.
+ */
+const DEFAULT_API_ROOTS = [
+  "https://movies-api.accel.li/api/v2", // official base URL; yts.gg "may be retired"
+  "https://yts.gg/api/v2",
+  "https://yts.mx/api/v2",
+  "https://yts.lt/api/v2",
+];
+const API_ROOTS = (process.env.NEXT_PUBLIC_API_ROOT ?? "")
+  .split(",")
+  .map((root) => root.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+const ROOTS = API_ROOTS.length ? API_ROOTS : DEFAULT_API_ROOTS;
+
+/** Index of the last mirror that answered, so a dead mirror isn't retried first on every call. */
+let preferredRoot = 0;
 
 /**
  * YTS serves images from yts.gg/assets/*, which 301s to img.yts.gg. Point straight at the
@@ -70,22 +88,85 @@ function toParams(filters: MovieFilters): URLSearchParams {
     if (value === undefined || value === null || value === "" || value === 0) continue;
     params.set(key, String(value));
   }
+  params.sort(); // same query, same cache key, whatever order the filters were written in
   return params;
 }
 
-async function ytsFetch<T>(path: string, init: { revalidate: number; tags: string[] }, attempt = 0): Promise<T> {
+/**
+ * Caching and politeness. The YTS API asks clients to cache responses and keep request rates
+ * reasonable, so every call goes through three layers:
+ *
+ * 1. Data cache (unstable_cache), keyed by API path, not by mirror: a response from any mirror
+ *    serves everyone, and switching mirrors doesn't cold-start the cache. Stale entries are
+ *    served while a background refresh runs; if that refresh fails on every mirror, Next keeps
+ *    the stale entry, so an outage shows the last good data instead of empty pages.
+ * 2. In-flight dedup: identical concurrent misses share one upstream request.
+ * 3. Concurrency cap: at most MAX_CONCURRENT upstream requests at once per server instance
+ *    (the sitemap and genre showcase would otherwise fire 20+ in parallel).
+ */
+const MAX_CONCURRENT = 4;
+let active = 0;
+const waiting: Array<() => void> = [];
+
+async function withSlot<T>(task: () => Promise<T>): Promise<T> {
+  if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
+  active++;
   try {
-    const res = await fetch(`${API_ROOT}${path}`, {
-      next: { revalidate: init.revalidate, tags: init.tags },
-      headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!res.ok) throw new Error(`YTS ${path} failed: ${res.status}`);
-    return (await res.json()) as T;
-  } catch (error) {
-    if (attempt < 1) return ytsFetch<T>(path, init, attempt + 1);
-    throw error;
+    return await task();
+  } finally {
+    active--;
+    waiting.shift()?.();
   }
+}
+
+const inFlight = new Map<string, Promise<unknown>>();
+
+function ytsFetch<T extends { status?: string }>(
+  path: string,
+  init: { revalidate: number; tags: string[] },
+): Promise<T> {
+  const cached = unstable_cache(
+    () => {
+      let pending = inFlight.get(path) as Promise<T> | undefined;
+      if (!pending) {
+        pending = withSlot(() => fetchFromMirrors<T>(path)).finally(() => inFlight.delete(path));
+        inFlight.set(path, pending);
+      }
+      return pending;
+    },
+    ["yts", path],
+    { revalidate: init.revalidate, tags: init.tags },
+  );
+  return cached();
+}
+
+async function fetchFromMirrors<T extends { status?: string }>(path: string): Promise<T> {
+  // Start at the last good mirror, then walk the rest. A lone mirror gets one retry.
+  const order = ROOTS.map((_, i) => (preferredRoot + i) % ROOTS.length);
+  if (order.length === 1) order.push(order[0]);
+
+  let lastError: unknown;
+  for (const index of order) {
+    const root = ROOTS[index];
+    try {
+      // Cached one level up by unstable_cache, so skip the per-URL fetch cache here.
+      const res = await fetch(`${root}${path}`, {
+        cache: "no-store",
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = (await res.json()) as T;
+      // Lookalike mirrors serve a different schema; only a real YTS "ok" counts.
+      if (json?.status !== "ok") throw new Error(`unexpected response (status: ${json?.status ?? "none"})`);
+      preferredRoot = index;
+      return json;
+    } catch (error) {
+      lastError = error;
+      if (ROOTS.length > 1) console.warn(`[yts] ${new URL(root).host}${path.split("?")[0]} failed: ${(error as Error).message}`);
+    }
+  }
+  throw new Error(`YTS ${path} failed on every mirror: ${(lastError as Error)?.message}`);
 }
 
 export async function listMovies(

@@ -51,7 +51,7 @@ All variables live in `.env.local`. See [`.env.example`](.env.example) for the t
 | `NEXTAUTH_URL` | Yes | Base URL of the site |
 | `NEXTAUTH_SECRET` | Yes | Signs sessions and the terms cookie. Generate with `openssl rand -base64 32` |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | For Google sign-in | Google OAuth credentials |
-| `NEXT_PUBLIC_API_ROOT` | Yes | YTS API root, for example `https://yts.gg/api/v2` |
+| `NEXT_PUBLIC_API_ROOT` | No | YTS API root, or a comma-separated list of mirrors tried in order. Defaults to `movies-api.accel.li` (official), then `yts.gg`, `yts.mx`, `yts.lt` |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Public URL for canonical links, sitemap and Open Graph |
 | `OPENAI_API_KEY`, `OPENAI_MODEL` | No | Enables model-based AI picks |
 

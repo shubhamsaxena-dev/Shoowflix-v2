@@ -27,7 +27,8 @@ async function loadRail(key: RailKey): Promise<YTSMovie[]> {
   try {
     const { movies } = await listMovies({ ...RAILS[key].filters, limit: 20 });
     return movies ?? [];
-  } catch {
+  } catch (error) {
+    console.warn(`[home] rail "${key}" failed, hiding it: ${(error as Error).message}`);
     return [];
   }
 }
