@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
     "db:push": "node --env-file=.env.local node_modules/prisma/build/index.js db push",
-    "db:studio": "node --env-file=.env.local node_modules/prisma/build/index.js studio"
+    "db:studio": "node --env-file=.env.local node_modules/prisma/build/index.js studio",
+    "db:otp-index": "node --env-file=.env.local scripts/create-otp-ttl-index.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

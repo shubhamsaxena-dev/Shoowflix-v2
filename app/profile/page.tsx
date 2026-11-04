@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, KeyRound } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { NameForm } from "./name-form";
 import styles from "./profile.module.css";
@@ -102,6 +103,27 @@ export default async function ProfilePage() {
           </div>
         </section>
 
+
+        {user.email ? (
+          <section className={styles.section} aria-labelledby="password-heading">
+            <div className={styles.sectionHead}>
+              <h2 id="password-heading" className={styles.sectionTitle}>
+                Password
+              </h2>
+              <p className={styles.sectionText}>
+                {user.password
+                  ? "Change your password. We’ll email a code to confirm it’s you."
+                  : "You sign in with Google. Set a password to sign in with your email too."}
+              </p>
+            </div>
+            <div className={styles.sectionBody}>
+              <ButtonLink href="/forgot-password" variant="secondary">
+                <KeyRound aria-hidden />
+                {user.password ? "Reset password" : "Set a password"}
+              </ButtonLink>
+            </div>
+          </section>
+        ) : null}
 
         <section className={styles.section} aria-labelledby="session-heading">
           <div className={styles.sectionHead}>
