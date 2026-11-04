@@ -29,6 +29,11 @@ export function rateLimit(key: string, { limit, windowMs }: { limit: number; win
   };
 }
 
+/** Forget a key's usage, e.g. when the request it counted failed on our side. */
+export function clearRateLimit(key: string) {
+  buckets.delete(key);
+}
+
 /** Returns a 429 response when the caller is over the limit, otherwise null. */
 export function limitRequest(req: Request, scope: string, opts: { limit: number; windowMs: number }) {
   const result = rateLimit(`${scope}:${clientIp(req)}`, opts);

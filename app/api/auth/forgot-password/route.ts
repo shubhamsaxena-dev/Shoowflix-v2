@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { EmailQuotaError, sendPasswordResetCode } from "@/lib/server/email";
 import { CACHE, json, jsonError, parseBody, serverError } from "@/lib/server/http";
 import { generateOtp, hashOtp, OTP } from "@/lib/server/otp";
-import { limitRequest, rateLimit } from "@/lib/server/rate-limit";
+import { clearRateLimit, limitRequest, rateLimit } from "@/lib/server/rate-limit";
 import { forgotPasswordSchema } from "@/lib/server/schemas";
 
 const WINDOW_MS = 15 * 60_000;
@@ -30,7 +30,8 @@ export async function POST(req: Request) {
   const sent = json({ ok: true }, { cache: CACHE.private });
 
   // Per-email cooldown (one code every 30 s), matching the form's resend timer.
-  const cooldown = rateLimit(`forgot-password:cooldown:${email}`, { limit: 1, windowMs: RESEND_COOLDOWN_MS });
+  const cooldownKey = `forgot-password:cooldown:${email}`;
+  const cooldown = rateLimit(cooldownKey, { limit: 1, windowMs: RESEND_COOLDOWN_MS });
   if (!cooldown.ok) return tooMany("Wait a few seconds before requesting another code.", cooldown.retryAfter);
 
   try {
@@ -67,6 +68,8 @@ export async function POST(req: Request) {
     await sendPasswordResetCode(email, code);
     return sent;
   } catch (error) {
+    // No code went out, so don't make the user wait 30 s to try again.
+    clearRateLimit(cooldownKey);
     if (error instanceof EmailQuotaError) {
       console.error("[email] Resend daily quota reached");
       return jsonError(503, "We can't send codes right now. Try again later.");
