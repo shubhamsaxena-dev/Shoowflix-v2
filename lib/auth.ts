@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { generateUserName } from "@/lib/server/username";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -61,6 +62,7 @@ export const authOptions: NextAuthOptions = {
         const created = await prisma.user.create({
           data: {
             email: user.email,
+            userName: generateUserName(user.email),
             name: user.name,
             image: user.image,
             accounts: {

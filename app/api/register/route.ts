@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { CACHE, json, jsonError, parseBody, serverError } from "@/lib/server/http";
 import { limitRequest } from "@/lib/server/rate-limit";
 import { registerSchema } from "@/lib/server/schemas";
+import { generateUserName } from "@/lib/server/username";
 
 const DUPLICATE = "An account with this email already exists. Sign in instead.";
 
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     if (existing) return jsonError(409, DUPLICATE);
 
     const hashed = await bcrypt.hash(password, 12);
-    await prisma.user.create({ data: { name, email, password: hashed } });
+    await prisma.user.create({ data: { name, email, userName: generateUserName(email), password: hashed } });
     return json({ ok: true }, { status: 201, cache: CACHE.private });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
