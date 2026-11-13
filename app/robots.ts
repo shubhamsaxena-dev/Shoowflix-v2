@@ -3,7 +3,7 @@ import { SITE_URL } from "@/lib/movie-utils";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/profile", "/my-list", "/watch"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/profile", "/my-list", "/watch", "/search", "/browse?"] }],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
   };

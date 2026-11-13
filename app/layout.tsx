@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Big_Shoulders } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
 import { SiteHeader } from "@/components/shell/site-header";
 import { SiteFooter } from "@/components/shell/site-footer";
 import { MobileTabBar } from "@/components/shell/mobile-tab-bar";
-import { WebVitals } from "@/components/perf/web-vitals";
 import { SwRegister } from "@/components/perf/sw-register";
 import { PlayerWarmup } from "@/components/perf/player-warmup";
 import { SITE_NAME, SITE_URL } from "@/lib/movie-utils";
@@ -78,10 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MobileTabBar />
           <PlayerWarmup />
         </Providers>
-        <WebVitals />
         <SwRegister />
         <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

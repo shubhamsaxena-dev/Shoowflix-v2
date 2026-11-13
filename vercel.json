@@ -2,11 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "npx next build",
   "devCommand": "npx next dev",
-  "installCommand": "npm install",
-    "crons": [
-    {
-      "path": "/api/sitemap-index",
-      "schedule": "0 2 * * *"
-    }
-  ]
+  "installCommand": "npm install"
 }

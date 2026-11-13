@@ -10,7 +10,7 @@ import { cx, SITE_NAME } from "@/lib/movie-utils";
 import type { YTSMovie } from "@/types/movie";
 import styles from "@/components/discovery/discovery.module.css";
 
-export const revalidate = 1800;
+export const revalidate = 21600; // 6 h
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },

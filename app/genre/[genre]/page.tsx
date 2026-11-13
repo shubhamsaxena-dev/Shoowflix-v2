@@ -9,7 +9,7 @@ import { MovieGrid } from "@/components/movie/movie-grid";
 import { listMovies } from "@/lib/yts";
 import { GENRES } from "@/types/movie";
 
-export const revalidate = 3600;
+export const revalidate = 21600; // 6 h
 export const dynamicParams = false;
 
 export function generateStaticParams() {
