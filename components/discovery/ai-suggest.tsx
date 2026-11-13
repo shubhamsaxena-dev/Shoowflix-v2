@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import useSWRMutation from "swr/mutation";
 import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { MovieGrid } from "@/components/movie/movie-grid";
 import { GridSkeleton } from "@/components/movie/movie-skeleton";
-import { sendJSON } from "@/lib/swr";
+import { FetchError, sendJSON } from "@/lib/swr";
 import type { YTSMovie } from "@/types/movie";
 import styles from "./ai-suggest.module.css";
 
@@ -22,8 +23,9 @@ const EXAMPLES = [
   "Heist movies with a great ensemble",
 ];
 
-/** "Ask the projectionist": free-text prompt → POST /api/ai/suggest. */
+/** "Ask the projectionist": free-text prompt → POST /api/ai/suggest. Signed-in, one a day. */
 export function AiSuggest() {
+  const { status } = useSession();
   const [prompt, setPrompt] = useState("");
   const { trigger, data, error, isMutating, reset } = useSWRMutation(
     "/api/ai/suggest",
@@ -44,6 +46,8 @@ export function AiSuggest() {
   };
 
   const movies = data?.movies ?? [];
+  const errorStatus = error instanceof FetchError ? error.status : 0;
+  const signedOut = status === "unauthenticated" || errorStatus === 401;
 
   return (
     <section className={styles.section} aria-labelledby="ai-title">
@@ -53,71 +57,97 @@ export function AiSuggest() {
         </h2>
         <p className={styles.lede}>
           Describe a mood, a decade, an actor or a film you loved. You&apos;ll get a short programme picked from the
-          catalogue.
+          catalogue. One question a day for members.
         </p>
       </div>
 
-      <form
-        className={styles.form}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void ask(prompt);
-        }}
-      >
-        <label htmlFor="ai-prompt" className="visually-hidden">
-          What are you in the mood for?
-        </label>
-        <input
-          id="ai-prompt"
-          className={styles.input}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Something tense, under two hours, set at sea…"
-          maxLength={280}
-          autoComplete="off"
-          enterKeyHint="go"
-        />
-        <Button type="submit" size="lg" loading={isMutating} disabled={!prompt.trim()}>
-          <Sparkles aria-hidden />
-          Find films
-        </Button>
-      </form>
+      {signedOut ? (
+        <div className={styles.results}>
+          <p className={styles.message}>Sign in to ask the projectionist. Members get one question a day.</p>
+          <ButtonLink href="/signin?callbackUrl=%2F" size="lg" prefetch={false}>
+            Sign in
+          </ButtonLink>
+        </div>
+      ) : (
+        <>
+          <form
+            className={styles.form}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void ask(prompt);
+            }}
+          >
+            <label htmlFor="ai-prompt" className="visually-hidden">
+              What are you in the mood for?
+            </label>
+            <input
+              id="ai-prompt"
+              className={styles.input}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Something tense, under two hours, set at sea…"
+              maxLength={280}
+              autoComplete="off"
+              enterKeyHint="go"
+            />
+            <Button
+              type="submit"
+              size="lg"
+              loading={isMutating}
+              disabled={!prompt.trim() || status !== "authenticated"}
+            >
+              <Sparkles aria-hidden />
+              Find films
+            </Button>
+          </form>
 
-      <div className={styles.examples} role="group" aria-label="Example requests">
-        {EXAMPLES.map((ex) => (
-          <button key={ex} type="button" className={styles.example} onClick={() => void ask(ex)}>
-            {ex}
-          </button>
-        ))}
-      </div>
+          <div className={styles.examples} role="group" aria-label="Example requests">
+            {EXAMPLES.map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                className={styles.example}
+                disabled={status !== "authenticated"}
+                onClick={() => void ask(ex)}
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
 
-      <div className={styles.results} aria-live="polite" aria-busy={isMutating || undefined}>
-        {isMutating ? (
-          <GridSkeleton count={6} />
-        ) : error ? (
-          <p className={styles.message}>
-            The projectionist couldn&apos;t answer that one. Try rephrasing, or{" "}
-            <button type="button" className={styles.inlineLink} onClick={() => void ask(asked)}>
-              ask again
-            </button>
-            .
-          </p>
-        ) : data ? (
-          movies.length ? (
-            <>
-              <div className={styles.resultHead}>
-                <p className={styles.reason}>{data.reason || `Picked for “${asked}”.`}</p>
-                <Button variant="ghost" size="sm" onClick={() => reset()}>
-                  Clear
-                </Button>
-              </div>
-              <MovieGrid movies={movies.slice(0, 12)} />
-            </>
-          ) : (
-            <p className={styles.message}>Nothing in the catalogue matched “{asked}”. Try broader words or a genre.</p>
-          )
-        ) : null}
-      </div>
+          <div className={styles.results} aria-live="polite" aria-busy={isMutating || undefined}>
+            {isMutating ? (
+              <GridSkeleton count={6} />
+            ) : errorStatus === 429 ? (
+              <p className={styles.message}>{error.message}</p>
+            ) : error ? (
+              <p className={styles.message}>
+                The projectionist couldn&apos;t answer that one. Try rephrasing, or{" "}
+                <button type="button" className={styles.inlineLink} onClick={() => void ask(asked)}>
+                  ask again
+                </button>
+                .
+              </p>
+            ) : data ? (
+              movies.length ? (
+                <>
+                  <div className={styles.resultHead}>
+                    <p className={styles.reason}>{data.reason || `Picked for “${asked}”.`}</p>
+                    <Button variant="ghost" size="sm" onClick={() => reset()}>
+                      Clear
+                    </Button>
+                  </div>
+                  <MovieGrid movies={movies.slice(0, 12)} />
+                </>
+              ) : (
+                <p className={styles.message}>
+                  Nothing in the catalogue matched “{asked}”. Try broader words or a genre.
+                </p>
+              )
+            ) : null}
+          </div>
+        </>
+      )}
     </section>
   );
 }

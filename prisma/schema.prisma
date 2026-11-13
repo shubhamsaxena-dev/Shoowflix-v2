@@ -178,3 +178,16 @@ model PasswordResetRequest {
   @@index([email, createdAt])
   @@map("password_reset_requests")
 }
+
+/// One row per user per UTC day they asked "Ask the projectionist" (limit: 1 a day).
+/// The unique index makes the check-and-spend atomic. Rows delete themselves after 48 h via a
+/// TTL index on created_at (scripts/create-otp-ttl-index.mjs).
+model AiSuggestUsage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @map("user_id")
+  day       String   // YYYY-MM-DD, UTC
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, day])
+  @@map("ai_suggest_usage")
+}
