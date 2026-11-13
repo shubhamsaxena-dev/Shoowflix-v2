@@ -12,11 +12,12 @@ import {
   Synopsis,
 } from "@/components/movie/detail/movie-detail";
 import detailStyles from "@/components/movie/detail/detail.module.css";
-import { getMovie, getSuggestions, listMovies, RAILS } from "@/lib/yts";
+import { fetchMovie, getSuggestions } from "@/lib/yts";
 import { backdropSrc, cx, movieHref, posterSrc, SITE_NAME, SITE_URL, slugify } from "@/lib/movie-utils";
 import type { YTSMovie } from "@/types/movie";
 
-export const revalidate = 21600;
+// Film details rarely change; every regeneration is an ISR write, so keep pages for 30 days.
+export const revalidate = 2592000;
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ id: string; slug?: string[] }> };
@@ -25,19 +26,12 @@ type Props = { params: Promise<{ id: string; slug?: string[] }> };
 const loadMovie = cache(async (rawId: string) => {
   const id = Number.parseInt(rawId, 10);
   if (!Number.isFinite(id) || id <= 0 || String(id) !== rawId) return null;
-  return getMovie(id);
+  return fetchMovie(id);
 });
 
+/** Nothing at build time: pages are rendered (and cached) the first time someone opens them. */
 export async function generateStaticParams() {
-  try {
-    const [a, b] = await Promise.all([
-      listMovies({ ...RAILS.trending.filters, limit: 20, page: 1 }),
-      listMovies({ ...RAILS.trending.filters, limit: 20, page: 2 }),
-    ]);
-    return [...(a.movies ?? []), ...(b.movies ?? [])].map((m) => ({ id: String(m.id), slug: [slugify(m.title)] }));
-  } catch {
-    return []; // build must not fail if YTS is down; pages render on demand instead
-  }
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

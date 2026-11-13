@@ -1,5 +1,4 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
 import type {
   YTSListMoviesResponse,
   YTSMovie,
@@ -10,8 +9,9 @@ import type {
 /**
  * Server-side YTS data layer.
  * Used by Server Components (SSG/ISR) and by Route Handlers (/api/*).
- * Every call goes through Next's data cache with time-based revalidation + tags (see ytsFetch),
- * so pages built with these are statically generated and revalidated (ISR).
+ * Responses are cached in memory per server instance (see ytsFetch), not in Next's data cache:
+ * on Vercel every data-cache entry is billed as an ISR write, and the pages that use this data
+ * are already ISR-cached themselves.
  */
 
 /**
@@ -71,15 +71,11 @@ export function withoutTorrents(movie: YTSMovie): YTSMovie {
 const TIMEOUT_MS = 10_000;
 const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
 
+/** In-memory freshness, in seconds. Pages set their own (much longer) ISR revalidate. */
 export const REVALIDATE = {
-  list: 60 * 30, // 30 min — catalog rails
-  detail: 60 * 60 * 6, // 6 h — a movie's details rarely change
+  list: 60 * 60, // 1 h — catalog rails, browse pages, search
+  detail: 60 * 60 * 12, // 12 h — a movie's details rarely change
   suggestions: 60 * 60 * 12,
-} as const;
-
-export const TAGS = {
-  movies: "movies",
-  movie: (id: number | string) => `movie:${id}`,
 } as const;
 
 function toParams(filters: MovieFilters): URLSearchParams {
@@ -96,10 +92,10 @@ function toParams(filters: MovieFilters): URLSearchParams {
  * Caching and politeness. The YTS API asks clients to cache responses and keep request rates
  * reasonable, so every call goes through three layers:
  *
- * 1. Data cache (unstable_cache), keyed by API path, not by mirror: a response from any mirror
- *    serves everyone, and switching mirrors doesn't cold-start the cache. Stale entries are
- *    served while a background refresh runs; if that refresh fails on every mirror, Next keeps
- *    the stale entry, so an outage shows the last good data instead of empty pages.
+ * 1. In-memory cache, keyed by API path (not by mirror), bounded to MAX_ENTRIES. Deliberately
+ *    not Next's data cache: on Vercel each data-cache write counts as an ISR write, and ISR
+ *    pages already persist what they render. If a refresh fails on every mirror, the stale
+ *    entry is served, so an outage shows the last good data instead of empty pages.
  * 2. In-flight dedup: identical concurrent misses share one upstream request.
  * 3. Concurrency cap: at most MAX_CONCURRENT upstream requests at once per server instance
  *    (the sitemap and genre showcase would otherwise fire 20+ in parallel).
@@ -119,25 +115,37 @@ async function withSlot<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 
+const MAX_ENTRIES = 200;
+const memory = new Map<string, { value: unknown; expires: number }>();
 const inFlight = new Map<string, Promise<unknown>>();
 
-function ytsFetch<T extends { status?: string }>(
-  path: string,
-  init: { revalidate: number; tags: string[] },
-): Promise<T> {
-  const cached = unstable_cache(
-    () => {
-      let pending = inFlight.get(path) as Promise<T> | undefined;
-      if (!pending) {
-        pending = withSlot(() => fetchFromMirrors<T>(path)).finally(() => inFlight.delete(path));
-        inFlight.set(path, pending);
-      }
-      return pending;
-    },
-    ["yts", path],
-    { revalidate: init.revalidate, tags: init.tags },
-  );
-  return cached();
+function remember(path: string, value: unknown, ttlSeconds: number) {
+  memory.delete(path); // re-insert so Map order tracks recency
+  memory.set(path, { value, expires: Date.now() + ttlSeconds * 1000 });
+  if (memory.size > MAX_ENTRIES) memory.delete(memory.keys().next().value!);
+}
+
+function ytsFetch<T extends { status?: string }>(path: string, ttlSeconds: number): Promise<T> {
+  const hit = memory.get(path);
+  if (hit && hit.expires > Date.now()) return Promise.resolve(hit.value as T);
+
+  let pending = inFlight.get(path) as Promise<T> | undefined;
+  if (!pending) {
+    pending = withSlot(() => fetchFromMirrors<T>(path))
+      .then(
+        (value) => {
+          remember(path, value, ttlSeconds);
+          return value;
+        },
+        (error) => {
+          if (hit) return hit.value as T; // stale beats nothing
+          throw error;
+        },
+      )
+      .finally(() => inFlight.delete(path));
+    inFlight.set(path, pending);
+  }
+  return pending;
 }
 
 async function fetchFromMirrors<T extends { status?: string }>(path: string): Promise<T> {
@@ -149,9 +157,9 @@ async function fetchFromMirrors<T extends { status?: string }>(path: string): Pr
   for (const index of order) {
     const root = ROOTS[index];
     try {
-      // Cached one level up by unstable_cache, so skip the per-URL fetch cache here.
+      // No `cache` option on purpose: at runtime Next then skips its data cache (no ISR write)
+      // without marking the page dynamic, which `cache: "no-store"` would do.
       const res = await fetch(`${root}${path}`, {
-        cache: "no-store",
         headers: { accept: "application/json" },
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
@@ -175,10 +183,7 @@ export async function listMovies(
   const params = toParams({ limit: 20, page: 1, sort_by: "date_added", order_by: "desc", ...filters });
   let json: YTSListMoviesResponse;
   try {
-    json = await ytsFetch<YTSListMoviesResponse>(`/list_movies.json?${params}`, {
-      revalidate: REVALIDATE.list,
-      tags: [TAGS.movies],
-    });
+    json = await ytsFetch<YTSListMoviesResponse>(`/list_movies.json?${params}`, REVALIDATE.list);
   } catch (error) {
     // At runtime, throw so ISR keeps serving the last good page.
     // At build time, degrade to an empty page instead of failing the deploy; ISR fills it in on the next revalidate.
@@ -194,26 +199,28 @@ export async function listMovies(
   };
 }
 
-export async function getMovie(id: number): Promise<YTSMovie | null> {
+/**
+ * Movie details. Returns null when the film doesn't exist; throws when every mirror fails, so an
+ * ISR revalidation during an outage keeps the old page instead of caching a 404 for weeks.
+ */
+export async function fetchMovie(id: number): Promise<YTSMovie | null> {
   if (!Number.isFinite(id) || id <= 0) return null;
-  try {
-    const json = await ytsFetch<YTSMovieDetailsResponse>(
-      `/movie_details.json?movie_id=${id}&with_images=true&with_cast=true`,
-      { revalidate: REVALIDATE.detail, tags: [TAGS.movie(id)] },
-    );
-    const movie = json.data?.movie;
-    return movie && movie.id ? normalizeMovie(movie) : null;
-  } catch {
-    return null;
-  }
+  const json = await ytsFetch<YTSMovieDetailsResponse>(
+    `/movie_details.json?movie_id=${id}&with_images=true&with_cast=true`,
+    REVALIDATE.detail,
+  );
+  const movie = json.data?.movie;
+  return movie && movie.id ? normalizeMovie(movie) : null;
+}
+
+/** Like fetchMovie, but an upstream failure also returns null. */
+export async function getMovie(id: number): Promise<YTSMovie | null> {
+  return fetchMovie(id).catch(() => null);
 }
 
 export async function getSuggestions(id: number): Promise<YTSMovie[]> {
   try {
-    const json = await ytsFetch<YTSListMoviesResponse>(`/movie_suggestions.json?movie_id=${id}`, {
-      revalidate: REVALIDATE.suggestions,
-      tags: [TAGS.movie(id)],
-    });
+    const json = await ytsFetch<YTSListMoviesResponse>(`/movie_suggestions.json?movie_id=${id}`, REVALIDATE.suggestions);
     const movies = json.data?.movies ?? [];
     if (movies.length) return movies.map((m) => withoutTorrents(normalizeMovie(m)));
   } catch {

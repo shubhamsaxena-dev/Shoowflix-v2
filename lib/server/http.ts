@@ -4,8 +4,8 @@ import type { z } from "zod";
 
 /** Cache-Control presets for Route Handlers. */
 export const CACHE = {
-  /** Public catalog data — CDN caches 10 min, serves stale for a day while revalidating. */
-  public: "public, s-maxage=600, stale-while-revalidate=86400",
+  /** Public catalog data — CDN caches 6 h, serves stale for a day while revalidating. */
+  public: "public, s-maxage=21600, stale-while-revalidate=86400",
   /** Per-user data — never cached by browsers or CDNs. */
   private: "private, no-store",
 } as const;

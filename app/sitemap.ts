@@ -5,7 +5,7 @@ import { GENRES, type YTSMovie } from "@/types/movie";
 
 export const revalidate = 86400;
 
-const MOVIE_PAGES = 20; // 20 × 50 = latest ~1000 films
+const MOVIE_PAGES = 6; // 6 × 50 = latest ~300 films (each crawled film page is an ISR write)
 const PER_PAGE = 50; // YTS maximum
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
